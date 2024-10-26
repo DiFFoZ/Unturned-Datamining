@@ -208,12 +208,18 @@ public class BbCodeWidgetConverter
             case EBbCodeTokenType.H3Close:
                 richTextStringBuilder.Append("</size>");
                 break;
+            case EBbCodeTokenType.BulletListOpen:
+            case EBbCodeTokenType.BulletListClose:
+                PushPendingRichText(outputWidgets);
+                break;
             case EBbCodeTokenType.OrderedListOpen:
                 flag = true;
                 num = 0;
+                PushPendingRichText(outputWidgets);
                 break;
             case EBbCodeTokenType.OrderedListClose:
                 flag = false;
+                PushPendingRichText(outputWidgets);
                 break;
             case EBbCodeTokenType.ListItem:
                 if (flag)
@@ -234,10 +240,16 @@ public class BbCodeWidgetConverter
             AdvanceToken();
         }
         while (currentToken.tokenType != EBbCodeTokenType.PreviewYouTubeOpen && currentToken.tokenType != EBbCodeTokenType.ImgOpen && currentToken.tokenType != EBbCodeTokenType.UrlOpen && hasToken);
+        PushPendingRichText(outputWidgets);
+    }
+
+    private void PushPendingRichText(List<BbCodeWidget> outputWidgets)
+    {
         if (richTextStringBuilder.Length > 0)
         {
             string widgetData = richTextStringBuilder.ToString();
             outputWidgets.Add(new BbCodeWidget(EBbCodeWidgetType.RichTextLabel, widgetData));
+            richTextStringBuilder.Clear();
         }
     }
 }

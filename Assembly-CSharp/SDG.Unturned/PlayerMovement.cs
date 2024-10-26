@@ -17,6 +17,12 @@ public class PlayerMovement : PlayerCaller
 
     public static readonly float HEIGHT_PRONE = 0.8f;
 
+    /// <summary>
+    /// Nelson 2024-10-18: Moved to a constant because clients need this value for footsteps and they don't have the
+    /// character controller component.
+    /// </summary>
+    internal const float SKIN_WIDTH = 0.1f;
+
     public Landed onLanded;
 
     public Seated onSeated;
@@ -651,8 +657,7 @@ public class PlayerMovement : PlayerCaller
         materialIsWater = false;
         int bLOCK_COLLISION = RayMasks.BLOCK_COLLISION;
         float num = PlayerStance.RADIUS - 0.001f;
-        float maxDistance = (controller?.skinWidth ?? 0f) + 0.025f;
-        Physics.SphereCast(new Ray(position + new Vector3(0f, num, 0f), Vector3.down), num, out ground, maxDistance, bLOCK_COLLISION, QueryTriggerInteraction.Ignore);
+        Physics.SphereCast(new Ray(position + new Vector3(0f, num, 0f), Vector3.down), num, out ground, 0.125f, bLOCK_COLLISION, QueryTriggerInteraction.Ignore);
         _isGrounded = ground.transform != null;
         if ((base.channel.IsLocalPlayer || Provider.isServer) && controller.enabled && controller.isGrounded)
         {
@@ -1093,10 +1098,10 @@ public class PlayerMovement : PlayerCaller
                 {
                     int bLOCK_COLLISION = RayMasks.BLOCK_COLLISION;
                     float num5 = PlayerStance.RADIUS - 0.001f;
-                    float maxDistance = controller.stepOffset + controller.skinWidth;
+                    float maxDistance = controller.stepOffset + 0.1f;
                     if (Physics.SphereCast(new Ray(base.transform.position + new Vector3(0f, num5, 0f), Vector3.down), num5, out var hitInfo, maxDistance, bLOCK_COLLISION, QueryTriggerInteraction.Ignore))
                     {
-                        float num6 = hitInfo.distance - controller.skinWidth;
+                        float num6 = hitInfo.distance - 0.1f;
                         if (num6 > Mathf.Epsilon)
                         {
                             Vector3 normal = hitInfo.normal;

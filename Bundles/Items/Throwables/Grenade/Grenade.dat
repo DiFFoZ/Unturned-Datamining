@@ -26,7 +26,7 @@ Blueprints 1
 Blueprint_0_Type Tool
 Blueprint_0_Supplies 1
 Blueprint_0_Supply_0_ID this
-Blueprint_0_Supply_0_Amount 1
+Blueprint_0_Supply_0_Amount 2
 Blueprint_0_Product "73" // Explosives
 Blueprint_0_Products 1
 Blueprint_0_Level 2

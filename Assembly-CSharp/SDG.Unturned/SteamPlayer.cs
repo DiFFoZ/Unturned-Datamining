@@ -643,29 +643,22 @@ public class SteamPlayer : SteamConnectedClientBase
                 continue;
             }
             Provider.provider.economyService.getInventoryTargetID(num, out var item_guid, out var vehicle_guid);
-            if (item_guid != default(Guid))
+            ItemAsset itemAsset = Assets.find<ItemAsset>(item_guid);
+            VehicleAsset vehicleAsset = VehicleTool.FindVehicleByGuidAndHandleRedirects(vehicle_guid);
+            if (itemAsset != null)
             {
-                ItemAsset itemAsset = Assets.find<ItemAsset>(item_guid);
-                if (itemAsset != null && !itemSkins.ContainsKey(itemAsset.id))
+                if (!itemSkins.ContainsKey(itemAsset.id))
                 {
                     itemSkins.Add(itemAsset.id, num);
                 }
             }
-            else
+            else if (vehicleAsset != null)
             {
-                if (!(vehicle_guid != default(Guid)))
+                if (!vehicleSkins.ContainsKey(vehicleAsset.id))
                 {
-                    continue;
+                    vehicleSkins.Add(vehicleAsset.id, num);
                 }
-                VehicleAsset vehicleAsset = VehicleTool.FindVehicleByGuidAndHandleRedirects(vehicle_guid);
-                if (vehicleAsset != null)
-                {
-                    if (!vehicleSkins.ContainsKey(vehicleAsset.id))
-                    {
-                        vehicleSkins.Add(vehicleAsset.id, num);
-                    }
-                    vehicleGuidToSkinItemDefId[vehicleAsset.GUID] = num;
-                }
+                vehicleGuidToSkinItemDefId[vehicleAsset.GUID] = num;
             }
         }
         pings = new float[4];

@@ -444,23 +444,12 @@ public class MenuSurvivorsClothingBoxUI
         foreach (SteamItemDetails_t grantedItem in grantedItems)
         {
             Provider.provider.economyService.getInventoryTargetID(grantedItem.m_iDefinition.m_SteamItemDef, out var item_guid, out var vehicle_guid);
-            if (item_guid != default(Guid))
+            ItemAsset itemAsset = Assets.find<ItemAsset>(item_guid);
+            VehicleAsset vehicleAsset = VehicleTool.FindVehicleByGuidAndHandleRedirects(vehicle_guid);
+            if (itemAsset == null && vehicleAsset == null)
             {
-                if (Assets.find<ItemAsset>(item_guid) == null)
-                {
-                    return false;
-                }
-                continue;
+                return false;
             }
-            if (vehicle_guid != default(Guid))
-            {
-                if (VehicleTool.FindVehicleByGuidAndHandleRedirects(vehicle_guid) == null)
-                {
-                    return false;
-                }
-                continue;
-            }
-            return false;
         }
         return true;
     }

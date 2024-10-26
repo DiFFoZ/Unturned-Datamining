@@ -1,7 +1,7 @@
 GUID d98e2980ad3d47518c08b9e1df98f7ef
 Type Vendor
 
-Selling 6
+Selling 7
 
 // Fighter Jet
 Selling_0_Type Vehicle
@@ -43,3 +43,10 @@ Selling_5_ID d5efeb331b40409c9ef6df1f24174dc9
 Selling_5_Spawnpoint Liberator_Jet
 Selling_5_Cost 10000
 Selling_5_PaintColor #475e83
+
+// Skycrane
+Selling_6_Type Vehicle
+Selling_6_ID 2b5916486864477598987efbced60ed1
+Selling_6_Spawnpoint Liberator_Jet
+Selling_6_Cost 10000
+Selling_6_PaintColor #475e83
