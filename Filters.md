@@ -8,6 +8,7 @@
 | 195.140.147.193 | HiddenFromInternetServerList |
 | 85.215.57.110   | HiddenFromInternetServerList |
 | 194.147.90.158  | HiddenFromInternetServerList |
+| 79.174.94.30    | HiddenFromInternetServerList |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -22,6 +23,7 @@
 | (?i)(Takistan 1942)                                                                   | HiddenFromInternetServerList      |
 | (?i)(BEBRO)                                                                           | HiddenFromInternetServerList      |
 | (?i)(Bebrix)                                                                          | HiddenFromInternetServerList      |
+| (?i)(Бебрикс)                                                                         | HiddenFromInternetServerList      |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(IWS WAR RP)                                                                      | HiddenFromInternetServerList      |
 
