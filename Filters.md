@@ -9,6 +9,7 @@
 | 85.215.57.110   | HiddenFromInternetServerList |
 | 194.147.90.158  | HiddenFromInternetServerList |
 | 79.174.94.30    | HiddenFromInternetServerList |
+| 91.197.98.136   | HiddenFromInternetServerList |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -24,6 +25,7 @@
 | (?i)(BEBRO)                                                                           | HiddenFromInternetServerList      |
 | (?i)(Bebrix)                                                                          | HiddenFromInternetServerList      |
 | (?i)(Бебрикс)                                                                         | HiddenFromInternetServerList      |
+| (?i)(Бебrix)                                                                          | HiddenFromInternetServerList      |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(IWS WAR RP)                                                                      | HiddenFromInternetServerList      |
 
