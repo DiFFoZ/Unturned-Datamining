@@ -7,9 +7,10 @@
 | 37.230.210.234  | HiddenFromInternetServerList |
 | 195.140.147.193 | HiddenFromInternetServerList |
 | 85.215.57.110   | HiddenFromInternetServerList |
-| 194.147.90.158  | HiddenFromInternetServerList |
-| 79.174.94.30    | HiddenFromInternetServerList |
-| 91.197.98.136   | HiddenFromInternetServerList |
+| 194.147.90.158  | HiddenFromAllServerLists     |
+| 79.174.94.30    | HiddenFromAllServerLists     |
+| 79.174.84.163   | HiddenFromAllServerLists     |
+| 91.197.98.136   | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -22,10 +23,11 @@
 | (?i)(DWS)                                                                             | HiddenFromInternetServerList      |
 | (?i)(Debalcevo)                                                                       | HiddenFromInternetServerList      |
 | (?i)(Takistan 1942)                                                                   | HiddenFromInternetServerList      |
-| (?i)(BEBRO)                                                                           | HiddenFromInternetServerList      |
-| (?i)(Bebrix)                                                                          | HiddenFromInternetServerList      |
-| (?i)(Бебрикс)                                                                         | HiddenFromInternetServerList      |
-| (?i)(Бебrix)                                                                          | HiddenFromInternetServerList      |
+| (?i)(BEBRO)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Bebrix)                                                                          | HiddenFromAllServerLists          |
+| (?i)(Бебрикс)                                                                         | HiddenFromAllServerLists          |
+| (?i)(Бебrix)                                                                          | HiddenFromAllServerLists          |
+| (?i)(Бебrиx)                                                                          | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(IWS WAR RP)                                                                      | HiddenFromInternetServerList      |
 
@@ -47,8 +49,8 @@
 | 85568392927159806 | HiddenFromInternetServerList |
 | 85568392931810335 | HiddenFromInternetServerList |
 | 85568392931954075 | HiddenFromInternetServerList |
-| 85568392932390889 | HiddenFromInternetServerList |
-| 85568392932384567 | HiddenFromInternetServerList |
+| 85568392932390889 | HiddenFromAllServerLists     |
+| 85568392932384567 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
 | 85568392924792226 | HiddenFromInternetServerList |
