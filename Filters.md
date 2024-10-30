@@ -11,6 +11,7 @@
 | 79.174.94.30    | HiddenFromAllServerLists     |
 | 79.174.84.163   | HiddenFromAllServerLists     |
 | 91.197.98.136   | HiddenFromAllServerLists     |
+| 91.197.96.206   | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -24,10 +25,11 @@
 | (?i)(Debalcevo)                                                                       | HiddenFromInternetServerList      |
 | (?i)(Takistan 1942)                                                                   | HiddenFromInternetServerList      |
 | (?i)(BEBRO)                                                                           | HiddenFromAllServerLists          |
-| (?i)(Bebrix)                                                                          | HiddenFromAllServerLists          |
-| (?i)(Бебрикс)                                                                         | HiddenFromAllServerLists          |
-| (?i)(Бебrix)                                                                          | HiddenFromAllServerLists          |
-| (?i)(Бебrиx)                                                                          | HiddenFromAllServerLists          |
+| (?i)(Bebri)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Бебри)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Бебri)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Бебrи)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(IWS WAR RP)                                                                      | HiddenFromInternetServerList      |
 
