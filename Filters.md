@@ -31,7 +31,6 @@
 | (?i)(Бебrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
-| (?i)(IWS WAR RP)                                                                      | HiddenFromInternetServerList      |
 
 ## Description filters
 | Regex | BanFlags |
@@ -55,4 +54,3 @@
 | 85568392932384567 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
-| 85568392924792226 | HiddenFromInternetServerList |
