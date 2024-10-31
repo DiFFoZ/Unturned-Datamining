@@ -1,13 +1,26 @@
 MainMenuAlert
 {
-	Id 61
+	Id 62
+	Header LIVE: Watch the LiamDoesGame's Trio Elver Tournament
+	Body Watch the LiamDoesGame's Trio Elver Tournament happening right now as teams compete to win trophy skins!
+	Color #00ffff
+	Link https://www.youtube.com/@LiamDoesGame/featured
+	IconURL https://cdn.smartlydressedgames.com/Images/LDGbanner.jpg
 }
 MainMenuWorkshop
 {
 	AllowNews true
 	Featured
 	{
-		Id 16
+		Id 17
+		FileIds
+		[
+			1186318457
+		]
+		Status Updated
+		Type Highlighted
+		LinkText Discussions
+		LinkURL https://steamcommunity.com/sharedfiles/filedetails/discussions/1186318457
 	}
 	Popular
 	{
