@@ -6,6 +6,9 @@ MainMenuAlert
 	Color #00ffff
 	Link https://www.youtube.com/@LiamDoesGame/featured
 	IconURL https://cdn.smartlydressedgames.com/Images/LDGbanner.jpg
+	UseTimeWindow true
+	StartTime 2024-11-02 14:00:00
+	EndTime 2024-11-02 22:00:00
 }
 MainMenuWorkshop
 {
