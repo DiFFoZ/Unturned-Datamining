@@ -170,7 +170,5 @@ LinkFiltering
 }
 ShouldAllowJoiningInternetServersWithoutGslt false
 ShouldServersWithoutMonetizationTagBeVisibleInInternetServerList true
-IsCandyBagAvailable true
-CandyBagRequiredCraftingMaterials 10
 QueryPingWarningOffsetMs 50
 CraftingPromotionId 7

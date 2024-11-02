@@ -12,6 +12,7 @@
 | 79.174.84.163   | HiddenFromAllServerLists     |
 | 91.197.98.136   | HiddenFromAllServerLists     |
 | 91.197.96.206   | HiddenFromAllServerLists     |
+| 89.111.174.198  | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -41,6 +42,7 @@
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------- |
 | (https://r.resimlink.com/GXZ0gP2.jpg)             | ![https://r.resimlink.com/GXZ0gP2.jpg](https://r.resimlink.com/GXZ0gP2.jpg)                         | HiddenFromInternetServerList |
 | (https://gspics.org/images/2022/10/12/0WIOTm.png) | ![https://gspics.org/images/2022/10/12/0WIOTm.png](https://gspics.org/images/2022/10/12/0WIOTm.png) | HiddenFromInternetServerList |
+| (?i)(https://i.imgur.com/xNql2Ov.png)             | ![https://i.imgur.com/xNql2Ov.png](https://i.imgur.com/xNql2Ov.png)                                 | HiddenFromAllServerLists     |
 | (?i)(https://imgur.com/Bzo2gJY.png)               | ![https://imgur.com/Bzo2gJY.png](https://imgur.com/Bzo2gJY.png)                                     | HiddenFromInternetServerList |
 
 ## SteamId filters
