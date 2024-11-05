@@ -13,6 +13,7 @@
 | 91.197.98.136   | HiddenFromAllServerLists     |
 | 91.197.96.206   | HiddenFromAllServerLists     |
 | 89.111.174.198  | HiddenFromAllServerLists     |
+| 194.67.88.169   | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -31,6 +32,7 @@
 | (?i)(Бебri)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Бебrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
+| (?i)(Беbриks)                                                                         | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 
 ## Description filters
@@ -43,6 +45,7 @@
 | (https://r.resimlink.com/GXZ0gP2.jpg)             | ![https://r.resimlink.com/GXZ0gP2.jpg](https://r.resimlink.com/GXZ0gP2.jpg)                         | HiddenFromInternetServerList |
 | (https://gspics.org/images/2022/10/12/0WIOTm.png) | ![https://gspics.org/images/2022/10/12/0WIOTm.png](https://gspics.org/images/2022/10/12/0WIOTm.png) | HiddenFromInternetServerList |
 | (?i)(https://i.imgur.com/xNql2Ov.png)             | ![https://i.imgur.com/xNql2Ov.png](https://i.imgur.com/xNql2Ov.png)                                 | HiddenFromAllServerLists     |
+| (?i)(https://i.imgur.com/7pqS8L7.png)             | ![https://i.imgur.com/7pqS8L7.png](https://i.imgur.com/7pqS8L7.png)                                 | HiddenFromAllServerLists     |
 | (?i)(https://imgur.com/Bzo2gJY.png)               | ![https://imgur.com/Bzo2gJY.png](https://imgur.com/Bzo2gJY.png)                                     | HiddenFromInternetServerList |
 
 ## SteamId filters
@@ -52,7 +55,5 @@
 | 85568392927159806 | HiddenFromInternetServerList |
 | 85568392931810335 | HiddenFromInternetServerList |
 | 85568392931954075 | HiddenFromInternetServerList |
-| 85568392932390889 | HiddenFromAllServerLists     |
-| 85568392932384567 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
