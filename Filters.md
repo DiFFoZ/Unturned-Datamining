@@ -14,6 +14,7 @@
 | 91.197.96.206   | HiddenFromAllServerLists     |
 | 89.111.174.198  | HiddenFromAllServerLists     |
 | 194.67.88.169   | HiddenFromAllServerLists     |
+| 193.227.241.118 | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -55,5 +56,8 @@
 | 85568392927159806 | HiddenFromInternetServerList |
 | 85568392931810335 | HiddenFromInternetServerList |
 | 85568392931954075 | HiddenFromInternetServerList |
+| 85568392932626317 | HiddenFromAllServerLists     |
+| 85568392932626316 | HiddenFromAllServerLists     |
+| 85568392932626319 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
