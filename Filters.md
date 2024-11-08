@@ -15,6 +15,7 @@
 | 89.111.174.198  | HiddenFromAllServerLists     |
 | 194.67.88.169   | HiddenFromAllServerLists     |
 | 193.227.241.118 | HiddenFromAllServerLists     |
+| 46.174.55.176   | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
@@ -35,6 +36,7 @@
 | (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbриks)                                                                         | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
+| (?i)(COBRA)(?!.* )                                                                    | HiddenFromAllServerLists          |
 
 ## Description filters
 | Regex | BanFlags |
