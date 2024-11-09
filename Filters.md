@@ -36,7 +36,6 @@
 | (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbриks)                                                                         | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
-| (?i)(COBRA)(?!.* )                                                                    | HiddenFromAllServerLists          |
 
 ## Description filters
 | Regex | BanFlags |
@@ -63,3 +62,4 @@
 | 85568392932626319 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
+| 85568392931735316 | HiddenFromInternetServerList |
