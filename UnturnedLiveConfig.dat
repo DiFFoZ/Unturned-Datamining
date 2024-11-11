@@ -1,14 +1,6 @@
 MainMenuAlert
 {
 	Id 62
-	Header LIVE: Watch the LiamDoesGame's Trio Elver Tournament
-	Body Watch the LiamDoesGame's Trio Elver Tournament happening right now as teams compete to win trophy skins!
-	Color #00ffff
-	Link https://www.youtube.com/@LiamDoesGame/featured
-	IconURL https://cdn.smartlydressedgames.com/Images/LDGbanner.jpg
-	UseTimeWindow true
-	StartTime 2024-11-02 14:00:00
-	EndTime 2024-11-02 22:00:00
 }
 MainMenuWorkshop
 {
@@ -16,14 +8,6 @@ MainMenuWorkshop
 	Featured
 	{
 		Id 17
-		FileIds
-		[
-			1186318457
-		]
-		Status Updated
-		Type Highlighted
-		LinkText Discussions
-		LinkURL https://steamcommunity.com/sharedfiles/filedetails/discussions/1186318457
 	}
 	Popular
 	{
@@ -51,9 +35,6 @@ ItemStore
 		1851
 		1432
 	]
-	SaleTitle Steam Scream Fest 2024
-	SaleStart 2024-10-28 16:55:00
-	SaleEnd 2024-11-04 17:05:00
 }
 LinkFiltering
 {
