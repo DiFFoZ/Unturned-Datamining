@@ -10,13 +10,13 @@
 | 194.147.90.158  | HiddenFromAllServerLists     |
 | 79.174.94.30    | HiddenFromAllServerLists     |
 | 79.174.84.163   | HiddenFromAllServerLists     |
-| 91.197.98.136   | HiddenFromAllServerLists     |
 | 91.197.96.206   | HiddenFromAllServerLists     |
 | 89.111.174.198  | HiddenFromAllServerLists     |
 | 194.67.88.169   | HiddenFromAllServerLists     |
 | 193.227.241.118 | HiddenFromAllServerLists     |
 | 46.174.55.176   | HiddenFromAllServerLists     |
 | 79.174.93.100   | HiddenFromAllServerLists     |
+| 91.197.96.0/22  | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
 
 ## Name filters
