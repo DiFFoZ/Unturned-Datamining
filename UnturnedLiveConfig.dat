@@ -7,7 +7,23 @@ MainMenuWorkshop
 	AllowNews true
 	Featured
 	{
-		Id 17
+		Id 18
+		FileIds
+		[
+			2483365750
+		]
+		Status Updated
+		Type Curated
+		LinkText Change Notes
+		LinkURL https://steamcommunity.com/sharedfiles/filedetails/changelog/2483365750
+		AssociatedStockpileItems
+		[
+			1193
+			1194
+			1197
+			1253
+			1251
+		]
 	}
 	Popular
 	{
