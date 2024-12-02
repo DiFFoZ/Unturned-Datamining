@@ -35,6 +35,7 @@
 | (?i)(Бебrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbrи)                                                                           | HiddenFromAllServerLists          |
 | (?i)(Беbриks)                                                                         | HiddenFromAllServerLists          |
+| (Бeбpиks)                                                                             | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(KURSK)                                                                           | HiddenFromInternetServerList      |
 | (?i)(ATOWS)                                                                           | HiddenFromInternetServerList      |
@@ -66,6 +67,11 @@
 | 85568392932402735 | HiddenFromAllServerLists     |
 | 85568392932678459 | HiddenFromAllServerLists     |
 | 85568392932678458 | HiddenFromAllServerLists     |
+| 85568392932754656 | HiddenFromAllServerLists     |
+| 85568392932754658 | HiddenFromAllServerLists     |
+| 85568392932754655 | HiddenFromAllServerLists     |
+| 85568392932754657 | HiddenFromAllServerLists     |
+| 85568392932815476 | HiddenFromAllServerLists     |
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
 | 85568392931735316 | HiddenFromInternetServerList |
