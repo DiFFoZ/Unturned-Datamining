@@ -76,6 +76,8 @@ public class MenuPlayServerInfoUI
 
     private static ISleekLabel titleDescriptionLabel;
 
+    private static ISleekLabel titleCurationLabelsLabel;
+
     private static ISleekBox playerCountBox;
 
     private static ISleekScrollView playersScrollBox;
@@ -466,15 +468,17 @@ public class MenuPlayServerInfoUI
 
     private static void reset()
     {
-        titleDescriptionLabel.Text = "";
+        titleDescriptionLabel.Text = string.Empty;
         titleIconImage.Clear();
-        serverDescriptionBox.Text = "";
+        serverDescriptionBox.Text = string.Empty;
+        titleCurationLabelsLabel.Text = string.Empty;
     }
 
     private static void updateServerInfo()
     {
         titleNameLabel.TextColor = (serverInfo.isPro ? new SleekColor(Palette.PRO) : new SleekColor(ESleekTint.FONT));
         titleNameLabel.Text = serverInfo.name;
+        titleCurationLabelsLabel.Text = serverInfo.serverCurationLabels;
         int num = 0;
         serverWorkshopLabel.Text = localization.format("Workshop", localization.format(serverInfo.isWorkshop ? "Yes" : "No"));
         num += 20;
@@ -1136,13 +1140,22 @@ public class MenuPlayServerInfoUI
         titleBox.AddChild(titleNameLabel);
         titleDescriptionLabel = Glazier.Get().CreateLabel();
         titleDescriptionLabel.PositionOffset_X = positionOffset_X;
-        titleDescriptionLabel.PositionOffset_Y = 45f;
+        titleDescriptionLabel.PositionOffset_Y = 35f;
         titleDescriptionLabel.SizeOffset_Y = 34f;
         titleDescriptionLabel.SizeScale_X = 1f;
         titleDescriptionLabel.AllowRichText = true;
         titleDescriptionLabel.TextColor = ESleekTint.RICH_TEXT_DEFAULT;
         titleDescriptionLabel.TextContrastContext = ETextContrastContext.InconspicuousBackdrop;
         titleBox.AddChild(titleDescriptionLabel);
+        titleCurationLabelsLabel = Glazier.Get().CreateLabel();
+        titleCurationLabelsLabel.PositionOffset_X = positionOffset_X;
+        titleCurationLabelsLabel.PositionOffset_Y = 55f;
+        titleCurationLabelsLabel.SizeOffset_Y = 34f;
+        titleCurationLabelsLabel.SizeScale_X = 1f;
+        titleCurationLabelsLabel.AllowRichText = true;
+        titleCurationLabelsLabel.TextColor = ESleekTint.RICH_TEXT_DEFAULT;
+        titleCurationLabelsLabel.TextContrastContext = ETextContrastContext.InconspicuousBackdrop;
+        titleBox.AddChild(titleCurationLabelsLabel);
         playerCountBox = Glazier.Get().CreateBox();
         playerCountBox.SizeScale_X = 1f;
         playerCountBox.SizeOffset_Y = 30f;

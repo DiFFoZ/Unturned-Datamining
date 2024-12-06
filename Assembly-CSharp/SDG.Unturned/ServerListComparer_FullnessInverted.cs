@@ -5,8 +5,8 @@ namespace SDG.Unturned;
 /// </summary>
 public class ServerListComparer_FullnessInverted : ServerListComparer_FullnessDefault
 {
-    public override int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
-        return -base.Compare(lhs, rhs);
+        return -base.CompareDetails(lhs, rhs);
     }
 }

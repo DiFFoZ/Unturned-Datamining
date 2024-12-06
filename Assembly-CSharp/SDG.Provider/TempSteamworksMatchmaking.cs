@@ -58,6 +58,8 @@ public class TempSteamworksMatchmaking
 
     private EPlugins currentPluginsFilter;
 
+    private EServerListCurationDenyMode curationDenyMode;
+
     private List<SteamServerAdvertisement> _serverList = new List<SteamServerAdvertisement>();
 
     private List<MatchMakingKeyValuePair_t> filters;
@@ -194,6 +196,7 @@ public class TempSteamworksMatchmaking
         currentPluginsFilter = inputFilters.plugins;
         currentNameFilter = inputFilters.serverName;
         isCurrentNameFilterSet = !string.IsNullOrEmpty(currentNameFilter);
+        curationDenyMode = ServerListCuration.Get().DenyMode;
         currentNameRegex = null;
         string text = "regex:";
         if (isCurrentNameFilterSet && currentNameFilter.StartsWith(text))
@@ -409,6 +412,8 @@ public class TempSteamworksMatchmaking
         }
         else if (inputFilters.listSource == ESteamServerList.INTERNET)
         {
+            ServerListCuration.Get().RefreshIfDirty();
+            ServerListCuration.Get().MergeRulesIfDirty();
             serverListRequest = SteamMatchmakingServers.RequestInternetServerList(SDG.Unturned.Provider.APP_ID, filters.ToArray(), (uint)filters.Count, serverListResponse);
         }
         else if (inputFilters.listSource == ESteamServerList.FRIENDS)
@@ -450,6 +455,10 @@ public class TempSteamworksMatchmaking
                 }
                 else
                 {
+                    ServerListCurationInput input = new ServerListCurationInput(steamServerAdvertisement);
+                    ServerListCurationOutput output = default(ServerListCurationOutput);
+                    ServerListCuration.Get().EvaluateMergedRules(in input, ref output);
+                    steamServerAdvertisement.serverCurationLabels = output.labels;
                     MenuUI.closeAll();
                     MenuUI.closeAlert();
                     MenuPlayServerInfoUI.open(steamServerAdvertisement, connectionInfo.password, serverQueryContext);
@@ -489,7 +498,6 @@ public class TempSteamworksMatchmaking
         gameserveritem_t serverDetails = SteamMatchmakingServers.GetServerDetails(request, index);
         if (_currentList == ESteamServerList.INTERNET && !serverDetails.m_steamID.BPersistentGameServerAccount())
         {
-            UnturnedLog.info("Ignoring server \"" + serverDetails.GetServerName() + "\" because it is anonymous on the internet list");
             return;
         }
         if (serverDetails.m_nAppID != SDG.Unturned.Provider.APP_ID.m_AppId)
@@ -517,6 +525,24 @@ public class TempSteamworksMatchmaking
             return;
         }
         steamServerAdvertisement.SetServerListHostBanFlags(eHostBanFlags);
+        string serverCurationLabels = null;
+        if (_currentList == ESteamServerList.INTERNET)
+        {
+            ServerListCuration serverListCuration = ServerListCuration.Get();
+            ServerListCurationInput input = new ServerListCurationInput(steamServerAdvertisement);
+            ServerListCurationOutput output = default(ServerListCurationOutput);
+            serverListCuration.EvaluateMergedRules(in input, ref output);
+            if (!output.allowed)
+            {
+                if (curationDenyMode == EServerListCurationDenyMode.Hide)
+                {
+                    return;
+                }
+                steamServerAdvertisement.isDeniedByServerCurationRule = true;
+                steamServerAdvertisement.deniedByRule = output.allowOrDenyRule;
+            }
+        }
+        steamServerAdvertisement.serverCurationLabels = serverCurationLabels;
         if (index == serverListRefreshIndex)
         {
             onMasterServerQueryRefreshed?.Invoke(steamServerAdvertisement);

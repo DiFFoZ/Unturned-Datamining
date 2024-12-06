@@ -1,0 +1,22 @@
+#!/bin/sh
+# Copyright 2022 Collabora Ltd.
+# SPDX-License-Identifier: MIT
+
+set -eu
+
+me="$(readlink -f "$0")"
+here="${me%/*}"
+me="${me##*/}"
+
+echo "$me: Developer script, not for production use" >&2
+
+if ! [ -x "${here}/../SteamLinuxRuntime_soldier/run" ]; then
+    echo "$me: This convenience script assumes SteamLinuxRuntime and" \
+         "SteamLinuxRuntime_soldier are in the same directory" >&2
+    exit 127
+fi
+
+exec "${here}/../SteamLinuxRuntime_soldier/run" -- \
+     "${here}/scout-on-soldier-entry-point-v2" "$@"
+
+# vim:set sw=4 sts=4 et:

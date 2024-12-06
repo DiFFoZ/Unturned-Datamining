@@ -68,12 +68,12 @@ public class SpawnTable
         weight = datDictionary.ParseInt32("Weight", isOverride ? 1 : 0);
         if (legacySpawnId == 0 && legacyAssetId == 0 && targetGuid.IsEmpty())
         {
-            Assets.reportError(assetContext, "contains an entry with neither a LegacyAssetId, LegacySpawnId, or Guid set!");
+            Assets.ReportError(assetContext, "contains an entry with neither a LegacyAssetId, LegacySpawnId, or Guid set!");
             return false;
         }
         if (weight <= 0)
         {
-            Assets.reportError(assetContext, "contains an entry with no weight!");
+            Assets.ReportError(assetContext, "contains an entry with no weight!");
             return false;
         }
         return true;

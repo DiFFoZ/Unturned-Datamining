@@ -1,12 +1,10 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
-public class ServerListComparer_MonetizationDefault : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_MonetizationDefault : ServerListComparer_Base
 {
     private int[] orderMap;
 
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (lhs.monetization == rhs.monetization)
         {

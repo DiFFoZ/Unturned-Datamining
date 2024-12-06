@@ -262,7 +262,7 @@ public class VehicleTool : MonoBehaviour
             if (transform == null)
             {
                 UnityEngine.Object.Destroy(vehicle.gameObject);
-                Assets.reportError(vehicleIconInfo.vehicleAsset, "missing 'Icon2' Transform");
+                Assets.ReportError(vehicleIconInfo.vehicleAsset, "missing 'Icon2' Transform");
             }
             else
             {

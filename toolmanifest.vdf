@@ -1,0 +1,8 @@
+"manifest"
+{
+  "version" "2"
+  "commandline" "/scout-on-soldier-entry-point-v2 --"
+  "compatmanager_layer_name" "scout-in-container"
+  "filter_exclusive_priority" "10"
+  "require_tool_appid" "1391110"
+}

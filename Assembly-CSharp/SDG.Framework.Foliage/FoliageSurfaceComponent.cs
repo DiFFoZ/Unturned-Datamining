@@ -11,6 +11,12 @@ public class FoliageSurfaceComponent : MonoBehaviour, IFoliageSurface
 
     protected bool isRegistered;
 
+    /// <summary>
+    /// Nelson 2024-11-11: Collider may have been destroyed by an unexpected mod script configuration (or perhaps
+    /// simply missing in the first place). Should fix/prevent public issue #4749.
+    /// </summary>
+    public bool IsValidFoliageSurface => surfaceCollider != null;
+
     public FoliageBounds getFoliageSurfaceBounds()
     {
         bool activeSelf = base.gameObject.activeSelf;

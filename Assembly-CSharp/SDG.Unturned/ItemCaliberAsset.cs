@@ -62,6 +62,11 @@ public class ItemCaliberAsset : ItemAsset
     /// </summary>
     public float ballisticDamageMultiplier { get; protected set; }
 
+    /// <summary>
+    /// Multiplier for bullet acceleration due to gravity.
+    /// </summary>
+    public float BallisticGravityMultiplier { get; protected set; }
+
     public bool ShouldOnlyAffectAimWhileProne => _isBipod;
 
     /// <summary>
@@ -122,6 +127,10 @@ public class ItemCaliberAsset : ItemAsset
             {
                 builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_BulletDamageModifier", PlayerDashboardInventoryUI.FormatStatModifier(ballisticDamageMultiplier, higherIsPositive: true, higherIsBeneficial: true)), 10000 + DescSort_HigherIsBeneficial(ballisticDamageMultiplier));
             }
+            if (BallisticGravityMultiplier != 1f)
+            {
+                builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_BulletGravityModifier", PlayerDashboardInventoryUI.FormatStatModifier(BallisticGravityMultiplier, higherIsPositive: true, higherIsBeneficial: false)), 10000 + DescSort_LowerIsBeneficial(BallisticGravityMultiplier));
+            }
             if (CanDamageInvulernableEntities)
             {
                 builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_InvulnerableModifier"), 10000);
@@ -147,6 +156,7 @@ public class ItemCaliberAsset : ItemAsset
         _firerateOffset = data.ParseInt32("Firerate");
         float defaultValue = data.ParseFloat("Damage", 1f);
         ballisticDamageMultiplier = data.ParseFloat("Ballistic_Damage_Multiplier", defaultValue);
+        BallisticGravityMultiplier = data.ParseFloat("Ballistic_Drop", 1f);
         aimingMovementSpeedMultiplier = data.ParseFloat("Aiming_Movement_Speed_Multiplier", 1f);
         _isPaintable = data.ContainsKey("Paintable");
         _isBipod = data.ContainsKey("Bipod");

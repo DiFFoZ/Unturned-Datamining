@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SDG.Provider.Services;
 using SDG.Provider.Services.Community;
@@ -28,6 +29,10 @@ public class SteamworksCommunityService : Service, ICommunityService, IService
         {
             return null;
         }
+        if (pnWidth < 1 || pnHeight < 1 || pnWidth > 2048 || pnHeight > 2048)
+        {
+            return null;
+        }
         byte[] array = new byte[pnWidth * pnHeight * 4];
         if (!SteamUtils.GetImageRGBA(id, array, array.Length))
         {
@@ -55,10 +60,19 @@ public class SteamworksCommunityService : Service, ICommunityService, IService
                 }
             }
         }
-        Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGBA32, mipChain: false);
-        texture2D.hideFlags = HideFlags.HideAndDontSave;
-        texture2D.LoadRawTextureData(array);
-        texture2D.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+        Texture2D texture2D;
+        try
+        {
+            texture2D = new Texture2D(num, num2, TextureFormat.RGBA32, mipChain: false);
+            texture2D.hideFlags = HideFlags.HideAndDontSave;
+            texture2D.LoadRawTextureData(array);
+            texture2D.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+        }
+        catch (Exception e)
+        {
+            texture2D = null;
+            UnturnedLog.exception(e, $"Caught exception creating Steam avatar {pnWidth}x{pnHeight}:");
+        }
         return texture2D;
     }
 

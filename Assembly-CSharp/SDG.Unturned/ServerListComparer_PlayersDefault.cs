@@ -1,13 +1,11 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
 /// <summary>
 /// Sort servers by player count high to low.
 /// </summary>
-public class ServerListComparer_PlayersDefault : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_PlayersDefault : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (lhs.players == rhs.players)
         {

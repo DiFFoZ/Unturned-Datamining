@@ -1,13 +1,11 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
 /// <summary>
 /// Sort servers by ping low to high.
 /// </summary>
-public class ServerListComparer_PingAscending : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_PingAscending : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (lhs.sortingPing == rhs.sortingPing)
         {

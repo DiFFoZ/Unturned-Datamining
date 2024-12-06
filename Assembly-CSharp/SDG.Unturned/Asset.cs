@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SDG.Unturned;
 
-public abstract class Asset
+public abstract class Asset : IAssetErrorContext
 {
     public string name;
 
@@ -80,6 +80,8 @@ public abstract class Asset
     public virtual string FriendlyName => name;
 
     public virtual EAssetType assetCategory => EAssetType.NONE;
+
+    public string AssetErrorPrefix => $"({GetTypeFriendlyName()}) {FriendlyName} [{GUID:N}]";
 
     protected bool OriginAllowsVanillaLegacyId
     {
@@ -184,6 +186,23 @@ public abstract class Asset
         }
     }
 
+    internal virtual void BuildCargoData(CargoBuilder builder)
+    {
+        CargoDeclaration orAddDeclaration = builder.GetOrAddDeclaration("Asset");
+        orAddDeclaration.AppendGuid("GUID", GUID);
+        if (id > 0)
+        {
+            orAddDeclaration.AppendUShort("ID", id);
+        }
+        orAddDeclaration.AppendString("Filename", name);
+        if (originMasterBundle != null)
+        {
+            orAddDeclaration.AppendString("MasterBundle", originMasterBundle.assetBundleNameWithoutExtension);
+        }
+        orAddDeclaration.AppendString("Origin", GetOriginName());
+        orAddDeclaration.AppendString("Type", GetTypeFriendlyName());
+    }
+
     /// <summary>
     /// Perform any initialization required when PopulateAsset won't be called.
     /// </summary>
@@ -212,7 +231,7 @@ public abstract class Asset
                 text = value;
                 if (masterBundleConfig == null || masterBundleConfig.assetBundle == null)
                 {
-                    Assets.reportError(this, "unable to load \"{0}\" without masterbundle", value);
+                    Assets.ReportError(this, "unable to load \"{0}\" without masterbundle", value);
                     return null;
                 }
             }
@@ -223,7 +242,7 @@ public abstract class Asset
                 text = value.Substring(num + 1);
                 if (masterBundleConfig == null || masterBundleConfig.assetBundle == null)
                 {
-                    Assets.reportError(this, "unable to find masterbundle \"" + text2 + "\" when loading asset \"" + text + "\"");
+                    Assets.ReportError(this, "unable to find masterbundle \"" + text2 + "\" when loading asset \"" + text + "\"");
                     return null;
                 }
             }
@@ -231,7 +250,7 @@ public abstract class Asset
             T val = masterBundleConfig.assetBundle.LoadAsset<T>(text3);
             if (val == null)
             {
-                Assets.reportError(this, "failed to load asset \"" + text3 + "\" from \"" + masterBundleConfig.assetBundleName + "\" as " + typeof(T).Name);
+                Assets.ReportError(this, "failed to load asset \"" + text3 + "\" from \"" + masterBundleConfig.assetBundleName + "\" as " + typeof(T).Name);
             }
             return val;
         }
@@ -243,7 +262,7 @@ public abstract class Asset
         T val = fromBundle.load<T>(name);
         if (val == null)
         {
-            Assets.reportError(this, "missing '{0}' {1}", name, typeof(T).Name);
+            Assets.ReportError(this, "missing '{0}' {1}", name, typeof(T).Name);
         }
         else if (typeof(T) == typeof(GameObject))
         {
@@ -256,7 +275,7 @@ public abstract class Asset
     {
         if (animComponent.GetClip(name) == null)
         {
-            Assets.reportError(this, "{0} missing animation clip '{1}'", animComponent.gameObject, name);
+            Assets.ReportError(this, "{0} missing animation clip '{1}'", animComponent.gameObject, name);
         }
     }
 }

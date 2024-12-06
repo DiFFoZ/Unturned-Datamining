@@ -231,7 +231,7 @@ internal static class PhysicMaterialCustomData
             {
                 if (nameInfos.TryGetValue(text, out value2))
                 {
-                    Assets.reportError(value, "physics material name \"" + text + "\" already taken by " + value2.baseAsset.name);
+                    Assets.ReportError(value, "physics material name \"" + text + "\" already taken by " + value2.baseAsset.name);
                     break;
                 }
             }
@@ -241,7 +241,7 @@ internal static class PhysicMaterialCustomData
             }
             if (dictionary.TryGetValue(value.GUID, out value2))
             {
-                Assets.reportError(value, $"guid \"{value.GUID}\" already taken by {value2.baseAsset.name}");
+                Assets.ReportError(value, $"guid \"{value.GUID}\" already taken by {value2.baseAsset.name}");
                 continue;
             }
             value2 = new CombinedPhysicMaterialInfo();
@@ -267,7 +267,7 @@ internal static class PhysicMaterialCustomData
             CombinedPhysicMaterialInfo value3 = nameInfo.Value;
             if (value3.baseAsset.fallbackRef.isValid && !dictionary.TryGetValue(value3.baseAsset.fallbackRef.GUID, out value3.fallback))
             {
-                Assets.reportError(value3.baseAsset, $"unable to find fallback asset {value3.baseAsset.fallbackRef}");
+                Assets.ReportError(value3.baseAsset, $"unable to find fallback asset {value3.baseAsset.fallbackRef}");
             }
         }
         foreach (KeyValuePair<Guid, PhysicsMaterialExtensionAsset> extensionAsset in extensionAssets)
@@ -275,7 +275,7 @@ internal static class PhysicMaterialCustomData
             PhysicsMaterialExtensionAsset value4 = extensionAsset.Value;
             if (!dictionary.TryGetValue(value4.baseRef.GUID, out var value5))
             {
-                Assets.reportError(value4, $"unable to find base asset {value4.baseRef}");
+                Assets.ReportError(value4, $"unable to find base asset {value4.baseRef}");
             }
             else
             {

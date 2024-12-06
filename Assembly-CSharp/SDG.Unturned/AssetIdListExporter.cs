@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using Unturned.SystemEx;
 
 namespace SDG.Unturned;
 
@@ -18,33 +18,22 @@ public static class AssetIdListExporter
         ExportAssetsToCsv(list, Path.Join(text2, "All Assets.csv"));
         ExportAssetsToCsvGroupedByLegacyCategory(text2, list);
         ExportAssetsToCsvGroupedByType(text2, list);
-        char[] invalidPathChars = Path.GetInvalidPathChars();
         foreach (AssetOrigin assetOrigin in Assets.assetOrigins)
         {
-            if (assetOrigin.assets.IsEmpty())
+            if (!assetOrigin.assets.IsEmpty())
             {
-                continue;
-            }
-            StringBuilder stringBuilder = new StringBuilder(assetOrigin.name.Length);
-            string name = assetOrigin.name;
-            foreach (char value in name)
-            {
-                if (Array.IndexOf(invalidPathChars, value) < 0)
+                string text3 = PathEx.ReplaceInvalidFileNameChars(assetOrigin.name, '_');
+                if (string.IsNullOrEmpty(text3))
                 {
-                    stringBuilder.Append(value);
+                    UnturnedLog.error("Unable to export origin " + assetOrigin.name + " Asset IDs because file name would be empty");
+                    continue;
                 }
+                string text4 = Path.Join(text, text3);
+                ReadWrite.createFolder(text4, usePath: false);
+                ExportAssetsToCsv(csvPath: Path.Join(text4, text3 + ".csv"), assets: assetOrigin.assets);
+                ExportAssetsToCsvGroupedByLegacyCategory(text4, assetOrigin.assets);
+                ExportAssetsToCsvGroupedByType(text4, assetOrigin.assets);
             }
-            string text3 = stringBuilder.ToString();
-            if (string.IsNullOrEmpty(text3))
-            {
-                UnturnedLog.error("Unable to export origin " + assetOrigin.name + " Asset IDs because file name would be empty");
-                continue;
-            }
-            string text4 = Path.Join(text, text3);
-            ReadWrite.createFolder(text4, usePath: false);
-            ExportAssetsToCsv(csvPath: Path.Join(text4, text3 + ".csv"), assets: assetOrigin.assets);
-            ExportAssetsToCsvGroupedByLegacyCategory(text4, assetOrigin.assets);
-            ExportAssetsToCsvGroupedByType(text4, assetOrigin.assets);
         }
     }
 

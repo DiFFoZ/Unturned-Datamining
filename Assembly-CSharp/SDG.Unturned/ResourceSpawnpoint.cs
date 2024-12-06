@@ -432,6 +432,7 @@ public class ResourceSpawnpoint
         {
             GameObject gameObject2 = UnityEngine.Object.Instantiate(gameObject, position, angle);
             _model = gameObject2.transform;
+            gameObject2.GetOrAddComponent<TreeRefComponent>().owner = this;
             model.name = asset.name;
             model.localScale = scale;
             if (Dedicator.IsDedicatedServer)

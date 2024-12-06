@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SDG.Unturned;
 
-public class Player : MonoBehaviour, IDialogueTarget
+public class Player : MonoBehaviour, IDialogueTarget, IExplosionDamageable, IEquatable<IExplosionDamageable>
 {
     public delegate void PlayerStatIncremented(Player player, EPlayerStat stat);
 
@@ -128,6 +128,12 @@ public class Player : MonoBehaviour, IDialogueTarget
     /// How many calls to <see cref="M:SDG.Unturned.Player.tryToPerformRateLimitedAction" /> will succeed per second.
     /// </summary>
     public uint maxRateLimitedActionsPerSecond = 10u;
+
+    /// <summary>
+    /// Nelson 2024-11-11: Added to help narrow down if player is destroyed outside of Provider.removePlayer.
+    /// (public issue #4760)
+    /// </summary>
+    internal bool isExpectingDestroy;
 
     private NetId _netId;
 
@@ -250,6 +256,8 @@ public class Player : MonoBehaviour, IDialogueTarget
     /// Cannot perform actions when greater than one.
     /// </summary>
     public float rateLimitedActionsCredits { get; protected set; }
+
+    public bool IsEligibleForExplosionDamage => life.IsAlive;
 
     /// <summary>
     /// Per-player event invoked when admin usage flags change.
@@ -1322,6 +1330,42 @@ public class Player : MonoBehaviour, IDialogueTarget
 
     private void OnDestroy()
     {
+        if (!isExpectingDestroy && Dedicator.IsDedicatedServer)
+        {
+            UnturnedLog.error("FATAL ERROR! Player game object destroyed outside of Provider.removePlayer!");
+            if (channel != null)
+            {
+                if (channel.owner != null)
+                {
+                    UnturnedLog.error("Logging destroyed player info to assist with debugging");
+                    UnturnedLog.error("e.g., to correlate with other recent log lines");
+                    UnturnedLog.error("(it's likely *NOT* their fault)");
+                    bool flag = false;
+                    if ((object)channel.owner.playerID != null)
+                    {
+                        UnturnedLog.error($"Destroyed player ID: {channel.owner.playerID}");
+                        flag = true;
+                    }
+                    if (channel.owner.transportConnection != null)
+                    {
+                        UnturnedLog.error($"Destroyed player connection: {channel.owner.transportConnection}");
+                        flag = true;
+                    }
+                    if (!flag)
+                    {
+                        UnturnedLog.error("Unable to log destroyed player info because player ID and connection are null");
+                    }
+                }
+                else
+                {
+                    UnturnedLog.info("Unable to log destroyed player info because channel's owner is null");
+                }
+            }
+            else
+            {
+                UnturnedLog.info("Unable to log destroyed player info because channel component is null");
+            }
+        }
         if (screenshotFinal != null)
         {
             UnityEngine.Object.DestroyImmediate(screenshotFinal);
@@ -1419,5 +1463,74 @@ public class Player : MonoBehaviour, IDialogueTarget
 
     public void SetIsTalkingWithLocalPlayer(bool isTalkingWithLocalPlayer)
     {
+    }
+
+    public bool Equals(IExplosionDamageable obj)
+    {
+        return this == obj;
+    }
+
+    public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
+    {
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+    }
+
+    public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        if (!damageParameters.shouldAffectPlayers || (explosionParameters.damageType == EExplosionDamageType.ZOMBIE_FIRE && clothing.shirtAsset != null && clothing.shirtAsset.proofFire && clothing.pantsAsset != null && clothing.pantsAsset.proofFire))
+        {
+            return;
+        }
+        Vector3 vector = damageParameters.closestPoint - explosionParameters.point;
+        float magnitude = vector.magnitude;
+        if (magnitude > explosionParameters.damageRadius)
+        {
+            return;
+        }
+        Vector3 vector2 = vector / magnitude;
+        if (damageParameters.LineOfSightTest(explosionParameters.point, vector2, magnitude, out var hit) && hit.transform != null && !hit.transform.IsChildOf(base.transform))
+        {
+            return;
+        }
+        if (damageParameters.canDealPlayerDamage)
+        {
+            if (explosionParameters.playImpactEffect)
+            {
+                EffectAsset effectAsset = DamageTool.FleshDynamicRef.Find();
+                if (effectAsset != null)
+                {
+                    TriggerEffectParameters parameters = new TriggerEffectParameters(effectAsset);
+                    parameters.relevantDistance = EffectManager.SMALL;
+                    parameters.position = base.transform.position + Vector3.up;
+                    EffectManager.triggerEffect(parameters);
+                    parameters.SetDirection(-vector2);
+                    EffectManager.triggerEffect(parameters);
+                }
+            }
+            float num = 1f - MathfEx.Square(magnitude / explosionParameters.damageRadius);
+            if (movement.getVehicle() != null && movement.getVehicle().asset != null)
+            {
+                num *= movement.getVehicle().asset.passengerExplosionArmor;
+            }
+            float playerExplosionArmor = DamageTool.getPlayerExplosionArmor(this);
+            num *= playerExplosionArmor;
+            DamageTool.damage(this, explosionParameters.cause, ELimb.SPINE, explosionParameters.killer, vector2, explosionParameters.playerDamage, num, out var kill, applyGlobalArmorMultiplier: true, trackKill: true);
+            if (kill != 0 && channel.owner.playerID.steamID != explosionParameters.killer)
+            {
+                damageParameters.kills.Add(kill);
+            }
+        }
+        if (explosionParameters.launchSpeed > 0.01f)
+        {
+            Vector3 normalized = (base.transform.position + Vector3.up - explosionParameters.point).normalized;
+            float num2 = 1f - MathfEx.Square(magnitude / explosionParameters.damageRadius);
+            num2 *= Provider.modeConfigData.Gameplay.Explosion_Launch_Speed_Multiplier;
+            movement.pendingLaunchVelocity += normalized * explosionParameters.launchSpeed * num2;
+        }
+    }
+
+    void IExplosionDamageable.ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        ApplyExplosionDamage(in explosionParameters, ref damageParameters);
     }
 }

@@ -54,10 +54,18 @@ public class SleekList<T> : SleekWrapper where T : class
 
     public void NotifyDataChanged()
     {
-        int num = data.Count * itemHeight;
-        if (data.Count > 1)
+        int num;
+        if (data != null)
         {
-            num += (data.Count - 1) * itemPadding;
+            num = data.Count * itemHeight;
+            if (data.Count > 1)
+            {
+                num += (data.Count - 1) * itemPadding;
+            }
+        }
+        else
+        {
+            num = 0;
         }
         scrollView.ContentSizeOffset = new Vector2(0f, num);
         UpdateVisibleRange();
@@ -72,7 +80,7 @@ public class SleekList<T> : SleekWrapper where T : class
 
     public override void OnUpdate()
     {
-        if (data.Count > 0)
+        if (data != null && data.Count > 0)
         {
             int num = CalculateVisibleItemsCount();
             if (oldVisibleItemsCount != num)
@@ -119,7 +127,7 @@ public class SleekList<T> : SleekWrapper where T : class
 
     private void UpdateVisibleRange(float normalizedValue)
     {
-        if (data.Count == 0 || onCreateElement == null)
+        if (data == null || data.Count == 0 || onCreateElement == null)
         {
             scrollView.RemoveAllChildren();
             visibleEntries.Clear();
@@ -165,6 +173,10 @@ public class SleekList<T> : SleekWrapper where T : class
 
     private int CalculateVisibleItemsCount()
     {
+        if (data == null)
+        {
+            return 0;
+        }
         return Mathf.CeilToInt(scrollView.NormalizedViewportHeight * (float)data.Count);
     }
 

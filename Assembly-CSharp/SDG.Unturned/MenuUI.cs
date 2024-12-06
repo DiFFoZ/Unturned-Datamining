@@ -254,6 +254,8 @@ public class MenuUI : MonoBehaviour
         MenuPlayLobbiesUI.close();
         MenuPlayConnectUI.close();
         MenuPlayServersUI.serverListFiltersUI.close();
+        MenuPlayServersUI.serverCurationUI.close();
+        MenuPlayServersUI.serverCurationUI.rulesUI.close();
         MenuPlayServersUI.mapFiltersUI.close();
         MenuPlayUI.serverListUI.close();
         MenuPlayUI.serverBookmarksUI.close();
@@ -382,6 +384,16 @@ public class MenuUI : MonoBehaviour
             {
                 MenuPlayServersUI.serverListFiltersUI.close();
                 MenuPlayUI.serverListUI.open(shouldRefresh: true);
+            }
+            else if (MenuPlayServersUI.serverCurationUI.active)
+            {
+                MenuPlayServersUI.serverCurationUI.close();
+                MenuPlayUI.serverListUI.open(shouldRefresh: true);
+            }
+            else if (MenuPlayServersUI.serverCurationUI.rulesUI.active)
+            {
+                MenuPlayServersUI.serverCurationUI.rulesUI.close();
+                MenuPlayServersUI.serverCurationUI.open();
             }
             else if (MenuPlayConnectUI.active || MenuPlayUI.serverListUI.active || MenuPlaySingleplayerUI.active || MenuPlayLobbiesUI.active || MenuPlayUI.serverBookmarksUI.active || MenuPlayUI.onlineSafetyUI.active)
             {
@@ -542,7 +554,7 @@ public class MenuUI : MonoBehaviour
         MenuSurvivorsClothingBoxUI.update();
         tickInput();
         window.showCursor = true;
-        if (MenuPlayUI.active || MenuPlayConnectUI.active || MenuPlayUI.serverListUI.active || MenuPlayServersUI.serverListFiltersUI.active || MenuPlayServersUI.mapFiltersUI.active || MenuPlayServerInfoUI.active || MenuServerPasswordUI.isActive || MenuPlaySingleplayerUI.active || MenuPlayLobbiesUI.active || MenuPlayConfigUI.active || MenuPlayUI.serverBookmarksUI.active || MenuPlayUI.onlineSafetyUI.active)
+        if (MenuPlayUI.active || MenuPlayConnectUI.active || MenuPlayUI.serverListUI.active || MenuPlayServersUI.serverListFiltersUI.active || MenuPlayServersUI.serverCurationUI.active || MenuPlayServersUI.serverCurationUI.rulesUI.active || MenuPlayServersUI.mapFiltersUI.active || MenuPlayServerInfoUI.active || MenuServerPasswordUI.isActive || MenuPlaySingleplayerUI.active || MenuPlayLobbiesUI.active || MenuPlayConfigUI.active || MenuPlayUI.serverBookmarksUI.active || MenuPlayUI.onlineSafetyUI.active)
         {
             target = play;
         }

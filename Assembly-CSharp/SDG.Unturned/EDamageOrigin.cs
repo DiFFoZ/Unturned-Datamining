@@ -34,5 +34,9 @@ public enum EDamageOrigin
     Kill_Volume,
     Vehicle_Collision_Self_Damage,
     Lightning,
-    VehicleDecay
+    VehicleDecay,
+    /// <summary>
+    /// Explosion instigated by <see cref="T:SDG.Unturned.ExplosionSpawner" />.
+    /// </summary>
+    ExplosionSpawnerComponent
 }

@@ -33,7 +33,7 @@ public class SleekLevel : SleekWrapper
             return;
         }
         MainMenuWorkshopFeaturedLiveConfig featured = LiveConfig.Get().mainMenuWorkshop.featured;
-        if (featured.status != 0 && featured.IsFeatured(level.publishedFileId))
+        if (featured.status != 0 && featured.IsNowFeaturedTimeOrBypassed() && featured.IsFeatured(level.publishedFileId))
         {
             SleekNew sleekNew = new SleekNew(featured.status == EMapStatus.Updated);
             if (icon != null)

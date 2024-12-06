@@ -85,6 +85,8 @@ public class ZombiesConfigData
 
     public bool Can_Target_Vehicles;
 
+    public bool Can_Target_Objects;
+
     public uint Beacon_Max_Rewards;
 
     public uint Beacon_Max_Participants;
@@ -176,6 +178,7 @@ public class ZombiesConfigData
         Can_Target_Barricades = true;
         Can_Target_Structures = true;
         Can_Target_Vehicles = true;
+        Can_Target_Objects = true;
         Beacon_Max_Rewards = 0u;
         Beacon_Max_Participants = 0u;
         Beacon_Rewards_Multiplier = 1f;

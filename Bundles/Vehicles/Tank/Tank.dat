@@ -5,8 +5,9 @@ Rarity Legendary
 Speed_Min -4
 Speed_Max 8
 
-Steer_Min 24
-Steer_Max 48
+CrawlerTrackSteering_Torque 10
+CrawlerTrackSteering_SidewaysFrictionMultiplier 1.0
+CrawlerTrackSteering_MaxSpeedScale 0.3
 
 Brake 24
 
@@ -45,6 +46,9 @@ Turret_0_Pitch_Max 105
 
 Has_Clip_Prefab false
 
+Carjack_Force_Multiplier 2
+Explosion_Force_Multiplier 2
+
 PaintableSections
 [
     {
@@ -76,3 +80,69 @@ DefaultPaintColors
 	"#437c44" // Forest
 	"#495631" // Russia
 ]
+
+WheelConfigurations
+[
+	{
+		WheelColliderPath Tires/Tire_0
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_1
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_2
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_3
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_4
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_5
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_6
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+	{
+		WheelColliderPath Tires/Tire_7
+		SteeringMode CrawlerTrack
+		IsColliderPowered true
+	}
+]
+
+ReverseGearRatio 18
+ForwardGearRatios
+[
+	30
+	22.9
+]
+GearShift_Duration 0.2
+GearShift_Interval 0.5
+GearShift_UpThresholdRPM 4000
+EngineIdleRPM 1000
+EngineMaxRPM 6000
+EngineMaxTorque 1.7
+
+EngineSound_Type EngineRPMSimple
+EngineSound
+{
+	IdlePitch 1.0
+	IdleVolume 0.75
+	MaxPitch 1.8
+	MaxVolume 1.0
+}

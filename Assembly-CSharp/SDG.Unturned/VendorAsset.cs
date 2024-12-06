@@ -7,7 +7,7 @@ public class VendorAsset : Asset
 {
     public string vendorName { get; protected set; }
 
-    public override string FriendlyName => vendorName;
+    public override string FriendlyName => RichTextUtil.replaceColorTags(vendorName);
 
     public string vendorDescription { get; protected set; }
 
@@ -92,7 +92,7 @@ public class VendorAsset : Asset
                 string @string = data.GetString(text2);
                 if (string.IsNullOrEmpty(@string))
                 {
-                    Assets.reportError(this, "missing \"" + text2 + "\" for vehicle");
+                    Assets.ReportError(this, "missing \"" + text2 + "\" for vehicle");
                 }
                 Color32? newPaintColor = null;
                 if (data.TryParseColor32RGB("Selling_" + b2 + "_PaintColor", out var value))

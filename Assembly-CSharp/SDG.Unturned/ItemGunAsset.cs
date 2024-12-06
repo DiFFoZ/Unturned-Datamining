@@ -79,6 +79,8 @@ public class ItemGunAsset : ItemWeaponAsset
 
     public bool isTurret;
 
+    internal EDriverTurretViewmodelMode driverTurretViewmodelMode;
+
     public int bursts;
 
     internal EFiremode firemode;
@@ -460,7 +462,7 @@ public class ItemGunAsset : ItemWeaponAsset
         {
             builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_BarrelAttachment", PlayerDashboardInventoryUI.localization.format("None")), 2000);
         }
-        float f = 50f / (float)Mathf.Max(1, firerate + 1) * 60f;
+        float f = CalculateRoundsPerSecond() * 60f;
         builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_Firerate", Mathf.RoundToInt(f)), 10000);
         builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_Spread", $"{57.29578f * baseSpreadAngleRadians:N1}"), 10000);
         if (spreadAim != 1f)
@@ -559,6 +561,16 @@ public class ItemGunAsset : ItemWeaponAsset
         return BitConverter.GetBytes(id);
     }
 
+    internal ItemMagazineAsset GetDefaultMagazine()
+    {
+        return Assets.find(EAssetType.ITEM, getMagazineID()) as ItemMagazineAsset;
+    }
+
+    internal float CalculateRoundsPerSecond()
+    {
+        return 50f / (float)Mathf.Max(1, firerate + 1);
+    }
+
     public EffectAsset FindMuzzleEffectAsset()
     {
         return Assets.FindEffectAssetByGuidOrLegacyId(muzzleGuid, muzzle);
@@ -655,6 +667,7 @@ public class ItemGunAsset : ItemWeaponAsset
         hasAuto = data.ContainsKey("Auto");
         hasBurst = bursts > 0;
         isTurret = data.ContainsKey("Turret");
+        driverTurretViewmodelMode = data.ParseEnum("DriverTurretViewmodelMode", EDriverTurretViewmodelMode.OffscreenWhileAiming);
         if (hasAuto)
         {
             firemode = EFiremode.AUTO;
@@ -718,7 +731,7 @@ public class ItemGunAsset : ItemWeaponAsset
             float num5 = Mathf.Abs((float)(int)ballisticSteps * ballisticTravel - range);
             if (num5 > 0.1f)
             {
-                Assets.reportError(this, "range and manual ballistic range are mismatched by " + num5 + "m. Recommended to only have one or the other specified!");
+                Assets.ReportError(this, "range and manual ballistic range are mismatched by " + num5 + "m. Recommended to only have one or the other specified!");
             }
         }
         else if (flag)

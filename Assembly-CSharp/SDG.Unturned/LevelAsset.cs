@@ -200,7 +200,7 @@ public class LevelAsset : Asset
                 }
                 else
                 {
-                    Assets.reportError(this, $"unable to find crafting blacklist {craftingBlacklist}");
+                    Assets.ReportError(this, $"unable to find crafting blacklist {craftingBlacklist}");
                 }
             }
         }
@@ -375,7 +375,7 @@ public class LevelAsset : Asset
                     {
                         flag = true;
                         string arg = Palette.hex(color);
-                        Assets.reportError(this, $"skipping TerrainColor entry {l} because it blocks default skin color {arg}");
+                        Assets.ReportError(this, $"skipping TerrainColor entry {l} because it blocks default skin color {arg}");
                         break;
                     }
                 }
@@ -386,7 +386,7 @@ public class LevelAsset : Asset
             }
             else
             {
-                Assets.reportError(this, "unable to parse entry in TerrainColors: " + datNode.DebugDumpToString());
+                Assets.ReportError(this, "unable to parse entry in TerrainColors: " + datNode.DebugDumpToString());
             }
         }
         if (list2.Count > 0)
@@ -395,7 +395,7 @@ public class LevelAsset : Asset
         }
         else
         {
-            Assets.reportError(this, "TerrainColors list is empty");
+            Assets.ReportError(this, "TerrainColors list is empty");
         }
     }
 

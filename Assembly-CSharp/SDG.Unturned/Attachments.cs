@@ -250,7 +250,7 @@ public class Attachments : MonoBehaviour
         {
             _sightModel = UnityEngine.Object.Instantiate(sightAsset.sight).transform;
             sightModel.name = sightAsset.instantiatedAttachmentName;
-            sightModel.transform.parent = sightHook;
+            sightModel.transform.parent = SelectAttachmentParent(sightHook, sightAsset);
             sightModel.transform.localPosition = Vector3.zero;
             sightModel.transform.localRotation = Quaternion.identity;
             sightModel.localScale = Vector3.one;
@@ -306,7 +306,7 @@ public class Attachments : MonoBehaviour
         {
             _tacticalModel = UnityEngine.Object.Instantiate(tacticalAsset.tactical).transform;
             tacticalModel.name = tacticalAsset.instantiatedAttachmentName;
-            tacticalModel.transform.parent = tacticalHook;
+            tacticalModel.transform.parent = SelectAttachmentParent(tacticalHook, tacticalAsset);
             tacticalModel.transform.localPosition = Vector3.zero;
             tacticalModel.transform.localRotation = Quaternion.identity;
             tacticalModel.localScale = Vector3.one;
@@ -362,7 +362,7 @@ public class Attachments : MonoBehaviour
         {
             _gripModel = UnityEngine.Object.Instantiate(gripAsset.grip).transform;
             gripModel.name = gripAsset.instantiatedAttachmentName;
-            gripModel.transform.parent = gripHook;
+            gripModel.transform.parent = SelectAttachmentParent(gripHook, gripAsset);
             gripModel.transform.localPosition = Vector3.zero;
             gripModel.transform.localRotation = Quaternion.identity;
             gripModel.localScale = Vector3.one;
@@ -418,7 +418,7 @@ public class Attachments : MonoBehaviour
         {
             _barrelModel = UnityEngine.Object.Instantiate(barrelAsset.barrel).transform;
             barrelModel.name = barrelAsset.instantiatedAttachmentName;
-            barrelModel.transform.parent = barrelHook;
+            barrelModel.transform.parent = SelectAttachmentParent(barrelHook, barrelAsset);
             barrelModel.transform.localPosition = Vector3.zero;
             barrelModel.transform.localRotation = Quaternion.identity;
             barrelModel.localScale = Vector3.one;
@@ -472,18 +472,9 @@ public class Attachments : MonoBehaviour
         tempMagazineMaterial = null;
         if (magazineAsset != null && magazineHook != null && magazineAsset.magazine != null)
         {
-            Transform transform = null;
-            if (magazineAsset.calibers.Length != 0)
-            {
-                transform = magazineHook.Find("Caliber_" + magazineAsset.calibers[0]);
-            }
-            if (transform == null)
-            {
-                transform = magazineHook;
-            }
             _magazineModel = UnityEngine.Object.Instantiate(magazineAsset.magazine).transform;
             magazineModel.name = magazineAsset.instantiatedAttachmentName;
-            magazineModel.transform.parent = transform;
+            magazineModel.transform.parent = SelectAttachmentParent(magazineHook, magazineAsset);
             magazineModel.transform.localPosition = Vector3.zero;
             magazineModel.transform.localRotation = Quaternion.identity;
             magazineModel.localScale = Vector3.one;
@@ -523,31 +514,31 @@ public class Attachments : MonoBehaviour
         }
         if (tacticalModel != null && tacticalModel.childCount > 0)
         {
-            Transform transform2 = tacticalModel.Find("Model_0");
-            _lightHook = transform2?.Find("Light");
-            _light2Hook = transform2?.Find("Light2");
+            Transform transform = tacticalModel.Find("Model_0");
+            _lightHook = transform?.Find("Light");
+            _light2Hook = transform?.Find("Light2");
             if (viewmodel)
             {
                 if (lightHook != null)
                 {
                     lightHook.tag = "Viewmodel";
                     lightHook.gameObject.layer = 11;
-                    Transform transform3 = lightHook.Find("Light");
-                    if (transform3 != null)
+                    Transform transform2 = lightHook.Find("Light");
+                    if (transform2 != null)
                     {
-                        transform3.tag = "Viewmodel";
-                        transform3.gameObject.layer = 11;
+                        transform2.tag = "Viewmodel";
+                        transform2.gameObject.layer = 11;
                     }
                 }
                 if (light2Hook != null)
                 {
                     light2Hook.tag = "Viewmodel";
                     light2Hook.gameObject.layer = 11;
-                    Transform transform4 = light2Hook.Find("Light");
-                    if (transform4 != null)
+                    Transform transform3 = light2Hook.Find("Light");
+                    if (transform3 != null)
                     {
-                        transform4.tag = "Viewmodel";
-                        transform4.gameObject.layer = 11;
+                        transform3.tag = "Viewmodel";
+                        transform3.gameObject.layer = 11;
                     }
                 }
             }
@@ -564,14 +555,14 @@ public class Attachments : MonoBehaviour
         }
         if (sightModel != null)
         {
-            Transform transform5 = sightModel.Find("Model_0");
-            _aimHook = transform5?.Find("Aim");
+            Transform transform4 = sightModel.Find("Model_0");
+            _aimHook = transform4?.Find("Aim");
             if (aimHook != null)
             {
-                Transform transform6 = aimHook.parent.Find("Reticule");
-                if (transform6 != null)
+                Transform transform5 = aimHook.parent.Find("Reticule");
+                if (transform5 != null)
                 {
-                    Renderer component = transform6.GetComponent<Renderer>();
+                    Renderer component = transform5.GetComponent<Renderer>();
                     if (component != null)
                     {
                         reticuleMaterial = component.material;
@@ -585,7 +576,7 @@ public class Attachments : MonoBehaviour
                     }
                 }
             }
-            _reticuleHook = transform5?.Find("Reticule");
+            _reticuleHook = transform4?.Find("Reticule");
         }
         else
         {
@@ -661,6 +652,29 @@ public class Attachments : MonoBehaviour
             UnityEngine.Object.Destroy(reticuleMaterial);
             reticuleMaterial = null;
         }
+    }
+
+    /// <summary>
+    /// Nelson 2024-11-15: By default, attachments use their corresponding "hook" transform. For example, magazines
+    /// use the "Magazine" transform as their parent. If a child of the hook transform matches a caliber in the
+    /// attachment's caliber list that is used instead.
+    /// </summary>
+    private Transform SelectAttachmentParent(Transform hook, ItemCaliberAsset attachmentAsset)
+    {
+        if (attachmentAsset.calibers != null && attachmentAsset.calibers.Length != 0)
+        {
+            ushort[] calibers = attachmentAsset.calibers;
+            foreach (ushort num in calibers)
+            {
+                string n = $"Caliber_{num}";
+                Transform transform = hook.Find(n);
+                if (transform != null)
+                {
+                    return transform;
+                }
+            }
+        }
+        return hook;
     }
 
     private void OnDestroy()

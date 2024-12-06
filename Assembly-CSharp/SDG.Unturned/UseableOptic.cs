@@ -7,6 +7,19 @@ public class UseableOptic : Useable
 {
     private bool isZoomed;
 
+    public override bool startPrimary()
+    {
+        if (base.channel.IsLocalPlayer && isZoomed)
+        {
+            if (Physics.Raycast(new Ray(base.player.look.aim.position, base.player.look.aim.forward), out var hitInfo, 2048f, RayMasks.DAMAGE_CLIENT))
+            {
+                base.player.quests.sendSetMarker(newIsMarkerPlaced: true, hitInfo.point);
+            }
+            return true;
+        }
+        return false;
+    }
+
     public override bool startSecondary()
     {
         if (base.channel.IsLocalPlayer && !isZoomed && base.player.look.perspective == EPlayerPerspective.FIRST)

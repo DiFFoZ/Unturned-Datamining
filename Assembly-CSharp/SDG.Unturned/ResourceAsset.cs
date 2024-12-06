@@ -153,12 +153,12 @@ public class ResourceAsset : Asset
                 _modelGameObject = bundle.load<GameObject>("Resource_Clip");
                 if (_modelGameObject == null)
                 {
-                    Assets.reportError(this, "missing \"Resource_Clip\" GameObject, loading \"Resource\" GameObject instead");
+                    Assets.ReportError(this, "missing \"Resource_Clip\" GameObject, loading \"Resource\" GameObject instead");
                 }
                 _stumpGameObject = bundle.load<GameObject>("Stump_Clip");
                 if (_stumpGameObject == null)
                 {
-                    Assets.reportError(this, "missing \"Stump_Clip\" GameObject, loading \"Stump\" GameObject instead");
+                    Assets.ReportError(this, "missing \"Stump_Clip\" GameObject, loading \"Stump\" GameObject instead");
                 }
             }
             if (_modelGameObject == null)
@@ -166,7 +166,7 @@ public class ResourceAsset : Asset
                 _modelGameObject = bundle.load<GameObject>("Resource");
                 if (_modelGameObject == null)
                 {
-                    Assets.reportError(this, "missing \"Resource\" GameObject");
+                    Assets.ReportError(this, "missing \"Resource\" GameObject");
                 }
                 else
                 {
@@ -178,7 +178,7 @@ public class ResourceAsset : Asset
                 _stumpGameObject = bundle.load<GameObject>("Stump");
                 if (_stumpGameObject == null)
                 {
-                    Assets.reportError(this, "missing \"Stump\" GameObject");
+                    Assets.ReportError(this, "missing \"Stump\" GameObject");
                 }
                 else
                 {
@@ -195,7 +195,7 @@ public class ResourceAsset : Asset
             }
             if (_modelGameObject == null)
             {
-                Assets.reportError(this, "missing \"Resource\" GameObject");
+                Assets.ReportError(this, "missing \"Resource\" GameObject");
             }
             _stumpGameObject = bundle.load<GameObject>("Stump_Old");
             if (_stumpGameObject == null)
@@ -204,7 +204,7 @@ public class ResourceAsset : Asset
             }
             if (_stumpGameObject == null)
             {
-                Assets.reportError(this, "missing \"Stump\" GameObject");
+                Assets.ReportError(this, "missing \"Stump\" GameObject");
             }
             _skyboxGameObject = bundle.load<GameObject>("Skybox_Old");
             if (_skyboxGameObject == null)
@@ -315,7 +315,7 @@ public class ResourceAsset : Asset
             }
             else
             {
-                Assets.reportError(this, "foragable resource missing \"Forage\" GameObject");
+                Assets.ReportError(this, "foragable resource missing \"Forage\" GameObject");
             }
         }
         forageRewardExperience = data.ParseUInt32("Forage_Reward_Experience", 1u);
@@ -330,7 +330,7 @@ public class ResourceAsset : Asset
             holidayRestriction = (ENPCHoliday)Enum.Parse(typeof(ENPCHoliday), data.GetString("Holiday_Restriction"), ignoreCase: true);
             if (holidayRestriction == ENPCHoliday.NONE)
             {
-                Assets.reportError(this, "has no holiday restriction, so value is ignored");
+                Assets.ReportError(this, "has no holiday restriction, so value is ignored");
             }
         }
         else

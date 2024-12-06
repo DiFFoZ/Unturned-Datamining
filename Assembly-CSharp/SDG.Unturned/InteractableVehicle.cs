@@ -9,7 +9,7 @@ using Unturned.UnityEx;
 
 namespace SDG.Unturned;
 
-public class InteractableVehicle : Interactable
+public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatable<IExplosionDamageable>
 {
     /// <summary>
     /// Temporary array for use with physics queries.
@@ -20,6 +20,8 @@ public class InteractableVehicle : Interactable
     /// Temporary list for gathering materials.
     /// </summary>
     private static List<Material> tempMaterialsList = new List<Material>();
+
+    private static List<Wheel> tempWheels = new List<Wheel>();
 
     private const float EXPLODE = 4f;
 
@@ -79,6 +81,8 @@ public class InteractableVehicle : Interactable
     internal Guid batteryItemGuid;
 
     private float horned;
+
+    internal bool _wasNaturallySpawned;
 
     protected VehicleEventHook eventHook;
 
@@ -294,6 +298,11 @@ public class InteractableVehicle : Interactable
     private List<Material> paintableMaterials;
 
     /// <summary>
+    /// Materials to move UVs in sync with wheels.
+    /// </summary>
+    private List<CrawlerTrackTilingMaterialInstance> crawlerTrackMaterials;
+
+    /// <summary>
     /// Time.time decayTimer was last updated.
     /// </summary>
     internal float decayLastUpdateTime;
@@ -422,6 +431,27 @@ public class InteractableVehicle : Interactable
                 return batteryCharge >= 10000;
             }
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Nelson 2024-11-13: Adding this primarily to indicate whether a vehicle was spawned by the level versus
+    /// placed by a player or bought from a vendor. This way if the number of "naturally"-spawned vehicles is below
+    /// a certain threshold the level can spawn more. (e.g., a server where players have hoarded a bunch of
+    /// vendor-purchased vehicles and no default vehicles are left for new players.)
+    ///
+    /// Only available on the server.
+    /// Defaults to true for old saves to prevent suddenly spawning a bunch more vehicles.
+    /// </summary>
+    public bool WasNaturallySpawned
+    {
+        get
+        {
+            return _wasNaturallySpawned;
+        }
+        set
+        {
+            _wasNaturallySpawned = value;
         }
     }
 
@@ -667,6 +697,8 @@ public class InteractableVehicle : Interactable
 
     /// <summary>
     /// Animated towards replicated steering angle. Used for steering wheel and front steering column.
+    /// Non-simulating wheels (e.g., car driven by remote client) use this as steering angle multiplied by their
+    /// per-wheel <see cref="F:SDG.Unturned.VehicleWheelConfiguration.steeringAngleMultiplier" />.
     /// </summary>
     public float AnimatedSteeringAngle { get; private set; }
 
@@ -701,6 +733,22 @@ public class InteractableVehicle : Interactable
     private bool usesGravity => asset.engine != EEngine.TRAIN;
 
     private bool isKinematic => !usesGravity;
+
+    public bool IsEligibleForExplosionDamage
+    {
+        get
+        {
+            if (isDead)
+            {
+                return false;
+            }
+            if (asset == null || !asset.isVulnerableToExplosions)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 
     public byte tireAliveMask
     {
@@ -878,6 +926,42 @@ public class InteractableVehicle : Interactable
         return null;
     }
 
+    public bool Equals(IExplosionDamageable obj)
+    {
+        return this == obj;
+    }
+
+    public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
+    {
+        return getClosestPointOnHull(explosionCenter);
+    }
+
+    public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        if (!damageParameters.shouldAffectVehicles)
+        {
+            return;
+        }
+        Vector3 vector = damageParameters.closestPoint - explosionParameters.point;
+        float magnitude = vector.magnitude;
+        if (magnitude > explosionParameters.damageRadius)
+        {
+            return;
+        }
+        float num = 1f - magnitude / explosionParameters.damageRadius;
+        Vector3 direction = vector / magnitude;
+        if (damageParameters.LineOfSightTest(explosionParameters.point, direction, magnitude, out var hit) && hit.transform != null)
+        {
+            if (!hit.transform.IsChildOf(base.transform))
+            {
+                return;
+            }
+            num *= asset.childExplosionArmorMultiplier;
+            num *= Provider.modeConfigData.Vehicles.Child_Explosion_Armor_Multiplier;
+        }
+        VehicleManager.damage(this, explosionParameters.vehicleDamage, num, canRepair: false, explosionParameters.killer, explosionParameters.damageOrigin);
+    }
+
     /// <summary>
     /// Primarily for backwards compatibility with plugins. Previously, multiple "updates" could be queued per
     /// vehicle and sent to clients. This list was public, unfortunately, so plugins may rely on submitting vehicle
@@ -886,7 +970,11 @@ public class InteractableVehicle : Interactable
     /// </summary>
     public void MarkForReplicationUpdate()
     {
-        needsReplicationUpdate = true;
+        if (!needsReplicationUpdate)
+        {
+            needsReplicationUpdate = true;
+            VehicleManager.instance.vehiclesNeedingReplicationUpdate.Add(this);
+        }
     }
 
     public void ResetDecayTimer()
@@ -1978,10 +2066,9 @@ public class InteractableVehicle : Interactable
             isEngineOn = (!usesBattery || HasBatteryWithCharge) && !isUnderwater;
         }
         updateEngine();
-        if (seat == 0 && isEnginePowered && !Dedicator.IsDedicatedServer && !isUnderwater && clipAudioSource != null && isEngineOn && asset.ignition != null)
+        if (seat == 0 && isEnginePowered && isEngineOn && !Dedicator.IsDedicatedServer && !isUnderwater)
         {
-            clipAudioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-            clipAudioSource.PlayOneShot(asset.ignition);
+            PlayIgnitionSound();
         }
         this.onPassengersUpdated?.Invoke();
         bool flag = !Dedicator.IsDedicatedServer && steamPlayer != null && Player.player != null && Player.player == steamPlayer.player;
@@ -2159,6 +2246,10 @@ public class InteractableVehicle : Interactable
             isEngineOn = false;
         }
         updateEngine();
+        if (toSeatIndex == 0 && isEnginePowered && isEngineOn && !Dedicator.IsDedicatedServer && !isUnderwater)
+        {
+            PlayIgnitionSound();
+        }
         if (fromSeatIndex == 0)
         {
             inputTargetVelocity = 0f;
@@ -2260,6 +2351,7 @@ public class InteractableVehicle : Interactable
     /// </summary>
     public void forceRemoveAllPlayers()
     {
+        ThreadUtil.assertIsGameThread();
         for (int i = 0; i < passengers.Length; i++)
         {
             Passenger passenger = passengers[i];
@@ -2270,8 +2362,11 @@ public class InteractableVehicle : Interactable
             SteamPlayer player = passenger.player;
             if (player != null)
             {
-                Player player2 = player.player;
-                if (!(player2 == null) && !player2.life.isDead)
+                if (player.player == null)
+                {
+                    UnturnedLog.error($"Encountered client ({player}) without player game object when force-removing passengers from vehicle");
+                }
+                else
                 {
                     VehicleManager.forceRemovePlayer(this, player.playerID.steamID);
                 }
@@ -2653,14 +2748,18 @@ public class InteractableVehicle : Interactable
             InteractableVehicle vehicle = DamageTool.getVehicle(tempCollidersArray[i].transform);
             if (!(vehicle == null) && !(vehicle == this) && vehicle.isEmpty && !vehicle.isHooked && !vehicle.isExploded && vehicle.asset.engine != EEngine.TRAIN)
             {
-                HookInfo hookInfo = new HookInfo();
-                hookInfo.target = vehicle.transform;
-                hookInfo.vehicle = vehicle;
-                hookInfo.deltaPosition = hook.InverseTransformPoint(vehicle.transform.position);
-                hookInfo.deltaRotation = Quaternion.FromToRotation(hook.forward, vehicle.transform.forward);
-                hooked.Add(hookInfo);
-                vehicle.isHooked = true;
-                ignoreCollisionWithVehicle(vehicle, shouldIgnore: true);
+                VehicleBarricadeRegion vehicleBarricadeRegion = BarricadeManager.findRegionFromVehicle(vehicle);
+                if (vehicleBarricadeRegion == null || vehicleBarricadeRegion.drops.Count <= 0)
+                {
+                    HookInfo hookInfo = new HookInfo();
+                    hookInfo.target = vehicle.transform;
+                    hookInfo.vehicle = vehicle;
+                    hookInfo.deltaPosition = hook.InverseTransformPoint(vehicle.transform.position);
+                    hookInfo.deltaRotation = Quaternion.FromToRotation(hook.forward, vehicle.transform.forward);
+                    hooked.Add(hookInfo);
+                    vehicle.isHooked = true;
+                    ignoreCollisionWithVehicle(vehicle, shouldIgnore: true);
+                }
             }
         }
     }
@@ -2755,9 +2854,15 @@ public class InteractableVehicle : Interactable
             num2 = 1f;
         }
         bool flag2 = false;
-        if (asset.steeringLeaningForceMultiplier > 0f)
+        float num3 = asset.steeringLeaningForceMultiplier;
+        if (num3 > 0f)
         {
-            rootRigidbody.AddRelativeTorque(0f, 0f, (float)input_x * (0f - asset.steeringLeaningForceMultiplier) * (float)PlayerInput.SAMPLES);
+            if (asset.steeringLeaningForceShouldScaleWithSpeed)
+            {
+                float replicatedForwardSpeedPercentageOfTargetSpeed = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+                num3 *= Mathf.Pow(replicatedForwardSpeedPercentageOfTargetSpeed, asset.steeringLeaningForceSpeedExponent);
+            }
+            rootRigidbody.AddRelativeTorque(0f, 0f, (float)input_x * (0f - num3) * (float)PlayerInput.SAMPLES);
         }
         if (_wheels != null)
         {
@@ -2780,16 +2885,16 @@ public class InteractableVehicle : Interactable
         {
         case EEngine.CAR:
         {
-            float replicatedForwardSpeedPercentageOfTargetSpeed = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+            float replicatedForwardSpeedPercentageOfTargetSpeed2 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
             if (flag2)
             {
-                rootRigidbody.AddForce(-base.transform.up * replicatedForwardSpeedPercentageOfTargetSpeed * 40f);
+                rootRigidbody.AddForce(-base.transform.up * replicatedForwardSpeedPercentageOfTargetSpeed2 * 40f);
             }
             if (!(buoyancy != null))
             {
                 break;
             }
-            float num3 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed);
+            float num4 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed2);
             bool flag3 = WaterUtility.isPointUnderwater(base.transform.position + new Vector3(0f, -1f, 0f));
             boatTraction = Mathf.Lerp(boatTraction, flag3 ? 1 : 0, 4f * Time.deltaTime);
             if (!MathfEx.IsNearlyZero(boatTraction))
@@ -2810,14 +2915,14 @@ public class InteractableVehicle : Interactable
                 Vector3 forward = base.transform.forward;
                 forward.y = 0f;
                 rootRigidbody.AddForce(forward.normalized * inputEngineVelocity * 2f * boatTraction);
-                rootRigidbody.AddRelativeTorque((float)input_y * -2.5f * boatTraction, (float)input_x * num3 / 8f * boatTraction, (float)input_x * -2.5f * boatTraction);
+                rootRigidbody.AddRelativeTorque((float)input_y * -2.5f * boatTraction, (float)input_x * num4 / 8f * boatTraction, (float)input_x * -2.5f * boatTraction);
             }
             break;
         }
         case EEngine.PLANE:
         {
-            float replicatedForwardSpeedPercentageOfTargetSpeed3 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
-            float num5 = Mathf.Lerp(asset.airSteerMax, asset.airSteerMin, replicatedForwardSpeedPercentageOfTargetSpeed3);
+            float replicatedForwardSpeedPercentageOfTargetSpeed4 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+            float num6 = Mathf.Lerp(asset.airSteerMax, asset.airSteerMin, replicatedForwardSpeedPercentageOfTargetSpeed4);
             if (num > 0f)
             {
                 inputTargetVelocity = Mathf.Lerp(inputTargetVelocity, asset.TargetForwardVelocity * num2, delta);
@@ -2835,7 +2940,7 @@ public class InteractableVehicle : Interactable
             rootRigidbody.AddForce(Mathf.Lerp(0f, 1f, base.transform.InverseTransformDirection(rootRigidbody.velocity).z / asset.TargetForwardVelocity) * asset.lift * -Physics.gravity);
             if (_wheels == null || _wheels.Length == 0 || (!_wheels[0].isGrounded && !_wheels[1].isGrounded))
             {
-                rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * num5, (float)input_x * asset.airTurnResponsiveness * num5 / 4f, Mathf.Clamp(look_x, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * (0f - num5) / 2f);
+                rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * num6, (float)input_x * asset.airTurnResponsiveness * num6 / 4f, Mathf.Clamp(look_x, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * (0f - num6) / 2f);
             }
             if ((_wheels == null || _wheels.Length == 0) && num < 0f)
             {
@@ -2845,8 +2950,8 @@ public class InteractableVehicle : Interactable
         }
         case EEngine.HELICOPTER:
         {
-            float replicatedForwardSpeedPercentageOfTargetSpeed4 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
-            float num6 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed4);
+            float replicatedForwardSpeedPercentageOfTargetSpeed5 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+            float num7 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed5);
             if (num > 0f)
             {
                 inputTargetVelocity = Mathf.Lerp(inputTargetVelocity, asset.TargetForwardVelocity * num2, delta / 4f);
@@ -2861,13 +2966,13 @@ public class InteractableVehicle : Interactable
             }
             inputEngineVelocity = inputTargetVelocity;
             rootRigidbody.AddForce(base.transform.up * inputEngineVelocity * 3f);
-            rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, -2f, 2f) * num6, (float)input_x * num6 / 2f, Mathf.Clamp(look_x, -2f, 2f) * (0f - num6) / 4f);
+            rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, -2f, 2f) * num7, (float)input_x * num7 / 2f, Mathf.Clamp(look_x, -2f, 2f) * (0f - num7) / 4f);
             break;
         }
         case EEngine.BLIMP:
         {
-            float replicatedForwardSpeedPercentageOfTargetSpeed2 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
-            float num4 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed2);
+            float replicatedForwardSpeedPercentageOfTargetSpeed3 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+            float num5 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed3);
             if (num > 0f)
             {
                 inputTargetVelocity = Mathf.Lerp(inputTargetVelocity, asset.TargetForwardVelocity * num2, delta / 4f);
@@ -2886,13 +2991,13 @@ public class InteractableVehicle : Interactable
             {
                 rootRigidbody.AddForce(-Physics.gravity * 0.5f);
             }
-            rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * num4 / 4f, (float)input_x * asset.airTurnResponsiveness * num4 * 2f, Mathf.Clamp(look_x, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * (0f - num4) / 4f);
+            rootRigidbody.AddRelativeTorque(Mathf.Clamp(look_y, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * num5 / 4f, (float)input_x * asset.airTurnResponsiveness * num5 * 2f, Mathf.Clamp(look_x, 0f - asset.airTurnResponsiveness, asset.airTurnResponsiveness) * (0f - num5) / 4f);
             break;
         }
         case EEngine.BOAT:
         {
-            float replicatedForwardSpeedPercentageOfTargetSpeed5 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
-            float num7 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed5);
+            float replicatedForwardSpeedPercentageOfTargetSpeed6 = GetReplicatedForwardSpeedPercentageOfTargetSpeed();
+            float num8 = Mathf.Lerp(asset.steerMax, asset.steerMin, replicatedForwardSpeedPercentageOfTargetSpeed6);
             boatTraction = Mathf.Lerp(boatTraction, WaterUtility.isPointUnderwater(base.transform.position + new Vector3(0f, -1f, 0f)) ? 1 : 0, 4f * Time.deltaTime);
             if (num > 0f)
             {
@@ -2912,7 +3017,7 @@ public class InteractableVehicle : Interactable
             rootRigidbody.AddForce(forward2.normalized * inputEngineVelocity * 4f * boatTraction);
             if (_wheels == null || _wheels.Length == 0 || (!_wheels[0].isGrounded && !_wheels[1].isGrounded))
             {
-                rootRigidbody.AddRelativeTorque(num * -10f * boatTraction, (float)input_x * num7 / 2f * boatTraction, (float)input_x * -5f * boatTraction);
+                rootRigidbody.AddRelativeTorque(num * -10f * boatTraction, (float)input_x * num8 / 2f * boatTraction, (float)input_x * -5f * boatTraction);
             }
             break;
         }
@@ -3055,6 +3160,11 @@ public class InteractableVehicle : Interactable
                 }
             }
         }
+        if (Provider.isServer && !needsReplicationUpdate && updates != null && updates.Count > 0)
+        {
+            updates.Clear();
+            MarkForReplicationUpdate();
+        }
         if (Dedicator.IsDedicatedServer)
         {
             if (isPhysical && !needsReplicationUpdate && (Mathf.Abs(lastUpdatedPos.x - base.transform.position.x) > Provider.UPDATE_DISTANCE || Mathf.Abs(lastUpdatedPos.y - base.transform.position.y) > Provider.UPDATE_DISTANCE || Mathf.Abs(lastUpdatedPos.z - base.transform.position.z) > Provider.UPDATE_DISTANCE))
@@ -3089,6 +3199,10 @@ public class InteractableVehicle : Interactable
                         {
                             wheel.UpdateModel(Time.deltaTime);
                         }
+                    }
+                    if (crawlerTrackMaterials != null && crawlerTrackMaterials.Count > 0)
+                    {
+                        UpdateCrawlerTrackTilingMaterials();
                     }
                 }
                 if (frontModelTransform != null)
@@ -3831,7 +3945,7 @@ public class InteractableVehicle : Interactable
         Transform transform4 = base.transform.Find("Seats");
         if (transform4 == null)
         {
-            Assets.reportError(asset, "missing 'Seats' Transform");
+            Assets.ReportError(asset, "missing 'Seats' Transform");
             transform4 = new GameObject("Seats").transform;
             transform4.parent = base.transform;
         }
@@ -3845,7 +3959,7 @@ public class InteractableVehicle : Interactable
             Transform transform8 = transform4.Find(text);
             if (transform8 == null)
             {
-                Assets.reportError(asset, "missing '{0}' Transform", text);
+                Assets.ReportError(asset, "missing '{0}' Transform", text);
                 transform8 = new GameObject(text).transform;
                 transform8.parent = transform4;
             }
@@ -4004,6 +4118,7 @@ public class InteractableVehicle : Interactable
             tellBatteryCharge(batteryCharge);
             InitializeAdditionalTransparentSections();
             InitializePaintableSections();
+            InitializeCrawlerTrackTilingMaterials();
             updateSkin();
         }
         if (isExploded)
@@ -4359,14 +4474,14 @@ public class InteractableVehicle : Interactable
                     Transform transform = base.transform.Find(vehicleWheelConfiguration.wheelColliderPath);
                     if (transform == null)
                     {
-                        Assets.reportError(asset, "missing wheel collider transform at path \"" + vehicleWheelConfiguration.wheelColliderPath + "\"");
+                        Assets.ReportError(asset, "missing wheel collider transform at path \"" + vehicleWheelConfiguration.wheelColliderPath + "\"");
                     }
                     else
                     {
                         wheelCollider = transform.GetComponent<WheelCollider>();
                         if (wheelCollider == null)
                         {
-                            Assets.reportError(asset, "missing WheelCollider component at path \"" + vehicleWheelConfiguration.wheelColliderPath + "\"");
+                            Assets.ReportError(asset, "missing WheelCollider component at path \"" + vehicleWheelConfiguration.wheelColliderPath + "\"");
                         }
                         else if (asset.wheelColliderMassOverride.HasValue)
                         {
@@ -4380,7 +4495,7 @@ public class InteractableVehicle : Interactable
                     transform2 = base.transform.Find(vehicleWheelConfiguration.modelPath);
                     if (transform2 == null)
                     {
-                        Assets.reportError(asset, "missing wheel model transform at path \"" + vehicleWheelConfiguration.modelPath + "\"");
+                        Assets.ReportError(asset, "missing wheel model transform at path \"" + vehicleWheelConfiguration.modelPath + "\"");
                     }
                 }
                 if (!(wheelCollider == null) || !(transform2 == null))
@@ -4428,19 +4543,19 @@ public class InteractableVehicle : Interactable
             Transform transform = base.transform.Find(text);
             if (transform == null)
             {
-                Assets.reportError(asset, "missing additional transparent section transform \"" + text + "\"");
+                Assets.ReportError(asset, "missing additional transparent section transform \"" + text + "\"");
                 continue;
             }
             Renderer component = transform.GetComponent<Renderer>();
             if (component == null)
             {
-                Assets.reportError(asset, "additional transparent section \"" + text + "\" missing Renderer component");
+                Assets.ReportError(asset, "additional transparent section \"" + text + "\" missing Renderer component");
                 continue;
             }
             Material material = component.material;
             if (material == null)
             {
-                Assets.reportError(asset, "additional transparent section \"" + text + "\" missing material");
+                Assets.ReportError(asset, "additional transparent section \"" + text + "\" missing material");
                 continue;
             }
             materialsToDestroy.Add(material);
@@ -4463,13 +4578,13 @@ public class InteractableVehicle : Interactable
             Transform transform = base.transform.Find(paintableVehicleSection.path);
             if (transform == null)
             {
-                Assets.reportError(asset, "paintable section missing transform \"" + paintableVehicleSection.path + "\"");
+                Assets.ReportError(asset, "paintable section missing transform \"" + paintableVehicleSection.path + "\"");
                 continue;
             }
             Renderer component = transform.GetComponent<Renderer>();
             if (component == null)
             {
-                Assets.reportError(asset, "paintable section missing renderer \"" + paintableVehicleSection.path + "\"");
+                Assets.ReportError(asset, "paintable section missing renderer \"" + paintableVehicleSection.path + "\"");
                 continue;
             }
             tempMaterialsList.Clear();
@@ -4480,7 +4595,7 @@ public class InteractableVehicle : Interactable
             }
             if (paintableVehicleSection.materialIndex < 0 || paintableVehicleSection.materialIndex >= tempMaterialsList.Count)
             {
-                Assets.reportError(asset, $"paintable section \"{paintableVehicleSection.path}\" material index out of range (index: {paintableVehicleSection.materialIndex} length: {tempMaterialsList.Count})");
+                Assets.ReportError(asset, $"paintable section \"{paintableVehicleSection.path}\" material index out of range (index: {paintableVehicleSection.materialIndex} length: {tempMaterialsList.Count})");
             }
             else
             {
@@ -4517,6 +4632,99 @@ public class InteractableVehicle : Interactable
         else
         {
             renderer.sharedMaterial = skinMaterial;
+        }
+    }
+
+    private void InitializeCrawlerTrackTilingMaterials()
+    {
+        if (asset.crawlerTrackTilingMaterials == null)
+        {
+            return;
+        }
+        crawlerTrackMaterials = new List<CrawlerTrackTilingMaterialInstance>(asset.crawlerTrackTilingMaterials.Length);
+        CrawlerTrackTilingMaterial[] crawlerTrackTilingMaterials = asset.crawlerTrackTilingMaterials;
+        for (int i = 0; i < crawlerTrackTilingMaterials.Length; i++)
+        {
+            CrawlerTrackTilingMaterial crawlerTrackTilingMaterial = crawlerTrackTilingMaterials[i];
+            Transform transform = base.transform.Find(crawlerTrackTilingMaterial.path);
+            if (transform == null)
+            {
+                Assets.ReportError(asset, "crawler track tiling material missing transform \"" + crawlerTrackTilingMaterial.path + "\"");
+                continue;
+            }
+            Renderer component = transform.GetComponent<Renderer>();
+            if (component == null)
+            {
+                Assets.ReportError(asset, "crawler track tiling material missing renderer \"" + crawlerTrackTilingMaterial.path + "\"");
+                continue;
+            }
+            tempMaterialsList.Clear();
+            component.GetMaterials(tempMaterialsList);
+            foreach (Material tempMaterials in tempMaterialsList)
+            {
+                materialsToDestroy.Add(tempMaterials);
+            }
+            if (crawlerTrackTilingMaterial.materialIndex < 0 || crawlerTrackTilingMaterial.materialIndex >= tempMaterialsList.Count)
+            {
+                Assets.ReportError(asset, $"crawler track tiling material \"{crawlerTrackTilingMaterial.path}\" material index out of range (index: {crawlerTrackTilingMaterial.materialIndex} length: {tempMaterialsList.Count})");
+                continue;
+            }
+            tempWheels.Clear();
+            int[] wheelIndices = crawlerTrackTilingMaterial.wheelIndices;
+            foreach (int num in wheelIndices)
+            {
+                Wheel wheelAtIndex = GetWheelAtIndex(num);
+                if (wheelAtIndex != null && wheelAtIndex.wheel != null)
+                {
+                    tempWheels.Add(wheelAtIndex);
+                }
+                else
+                {
+                    UnturnedLog.error($"\"{asset.FriendlyName}\" missing wheel for tiling material \"{crawlerTrackTilingMaterial.path}\" index: {num}");
+                }
+            }
+            if (tempWheels.Count < 1)
+            {
+                Assets.ReportError(asset, "crawler track tiling material \"" + crawlerTrackTilingMaterial.path + "\" has no wheels");
+                continue;
+            }
+            crawlerTrackMaterials.Add(new CrawlerTrackTilingMaterialInstance
+            {
+                material = tempMaterialsList[crawlerTrackTilingMaterial.materialIndex],
+                wheels = tempWheels.ToArray(),
+                initialUvPosition = tempMaterialsList[crawlerTrackTilingMaterial.materialIndex].mainTextureOffset,
+                repeatDistance = crawlerTrackTilingMaterial.repeatDistance,
+                uvDirection = crawlerTrackTilingMaterial.uvDirection
+            });
+        }
+    }
+
+    private void UpdateCrawlerTrackTilingMaterials()
+    {
+        foreach (CrawlerTrackTilingMaterialInstance crawlerTrackMaterial in crawlerTrackMaterials)
+        {
+            float num = 0f;
+            if (isPhysical)
+            {
+                int num2 = 0;
+                Wheel[] wheels = crawlerTrackMaterial.wheels;
+                foreach (Wheel wheel in wheels)
+                {
+                    num += wheel.CalculateWheelSpeed();
+                    num2++;
+                }
+                if (num2 > 0)
+                {
+                    num /= (float)num2;
+                }
+            }
+            else
+            {
+                num = ReplicatedForwardVelocity;
+            }
+            float num3 = num * Time.deltaTime;
+            crawlerTrackMaterial.uvOffset = (crawlerTrackMaterial.uvOffset + num3 * crawlerTrackMaterial.repeatDistance) % 1f;
+            crawlerTrackMaterial.material.mainTextureOffset = crawlerTrackMaterial.initialUvPosition + crawlerTrackMaterial.uvDirection * crawlerTrackMaterial.uvOffset;
         }
     }
 
@@ -4567,6 +4775,15 @@ public class InteractableVehicle : Interactable
         }
     }
 
+    private void PlayIgnitionSound()
+    {
+        if (!Dedicator.IsDedicatedServer && clipAudioSource != null && asset.ignition != null)
+        {
+            clipAudioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+            clipAudioSource.PlayOneShot(asset.ignition);
+        }
+    }
+
     [Obsolete]
     public void tellState(Vector3 newPosition, byte newAngle_X, byte newAngle_Y, byte newAngle_Z, byte newSpeed, byte newPhysicsSpeed, byte newTurn)
     {
@@ -4590,5 +4807,10 @@ public class InteractableVehicle : Interactable
     public void init()
     {
         init(Assets.find(EAssetType.VEHICLE, id) as VehicleAsset);
+    }
+
+    void IExplosionDamageable.ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        ApplyExplosionDamage(in explosionParameters, ref damageParameters);
     }
 }

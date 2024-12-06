@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
-public class ServerListComparer_PasswordDefault : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_PasswordDefault : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (lhs.isPassworded == rhs.isPassworded)
         {

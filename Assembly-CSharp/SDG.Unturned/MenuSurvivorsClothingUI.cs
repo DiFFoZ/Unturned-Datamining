@@ -28,7 +28,7 @@ public class MenuSurvivorsClothingUI
 
     private static SleekButtonIcon backButton;
 
-    private static ISleekButton itemstoreButton;
+    private static SleekButtonIcon itemstoreButton;
 
     private static ISleekLabel itemstoreNewLabel;
 
@@ -955,15 +955,15 @@ public class MenuSurvivorsClothingUI
         backButton.fontSize = ESleekFontSize.Medium;
         backButton.iconColor = ESleekTint.FOREGROUND;
         container.AddChild(backButton);
-        itemstoreButton = Glazier.Get().CreateButton();
+        itemstoreButton = new SleekButtonIcon(icons.load<Texture2D>("ItemStore"), 40);
         itemstoreButton.PositionOffset_Y = -170f;
         itemstoreButton.PositionScale_Y = 1f;
         itemstoreButton.SizeOffset_X = 200f;
         itemstoreButton.SizeOffset_Y = 50f;
-        itemstoreButton.Text = localization.format("Itemstore");
-        itemstoreButton.TooltipText = localization.format("Itemstore_Tooltip");
-        itemstoreButton.OnClicked += onClickedItemstoreButton;
-        itemstoreButton.FontSize = ESleekFontSize.Medium;
+        itemstoreButton.text = localization.format("Itemstore");
+        itemstoreButton.tooltip = localization.format("Itemstore_Tooltip");
+        itemstoreButton.onClickedButton += onClickedItemstoreButton;
+        itemstoreButton.fontSize = ESleekFontSize.Medium;
         container.AddChild(itemstoreButton);
         if (!Provider.provider.economyService.doesCountryAllowRandomItems && Provider.provider.economyService.hasCountryDetails)
         {

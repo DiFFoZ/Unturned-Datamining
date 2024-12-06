@@ -83,7 +83,7 @@ public class SleekCuratedLevelLink : SleekWrapper
             return;
         }
         MainMenuWorkshopFeaturedLiveConfig featured = LiveConfig.Get().mainMenuWorkshop.featured;
-        if (featured.status != 0 && featured.IsFeatured(curatedMap.Workshop_File_Id))
+        if (featured.status != 0 && featured.IsNowFeaturedTimeOrBypassed() && featured.IsFeatured(curatedMap.Workshop_File_Id))
         {
             SleekNew sleekNew = new SleekNew(featured.status == EMapStatus.Updated);
             if (icon != null)

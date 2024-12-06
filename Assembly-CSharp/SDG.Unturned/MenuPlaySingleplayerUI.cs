@@ -235,7 +235,7 @@ public class MenuPlaySingleplayerUI
             num += feedbackButton.SizeOffset_Y + 10f;
         }
         MainMenuWorkshopFeaturedLiveConfig featured = LiveConfig.Get().mainMenuWorkshop.featured;
-        if (featured.IsFeatured(levelInfo.publishedFileId) && !string.IsNullOrEmpty(featured.linkURL))
+        if (featured.IsNowFeaturedTimeOrBypassed() && featured.IsFeatured(levelInfo.publishedFileId) && !string.IsNullOrEmpty(featured.linkURL))
         {
             newsButton.Text = featured.linkText;
             newsButton.PositionOffset_Y = num;

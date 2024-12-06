@@ -9,6 +9,12 @@ namespace SDG.Unturned;
 public class ItemPlaceableAsset : ItemAsset
 {
     /// <summary>
+    /// If true, this item is eligible for zombies to detect and attack when stuck.
+    /// Defaults to true.
+    /// </summary>
+    public bool CanZombiesTarget { get; protected set; }
+
+    /// <summary>
     /// Item recovered when picked up below 100% health.
     /// </summary>
     public AssetReference<ItemAsset> salvageItemRef { get; protected set; }
@@ -79,6 +85,7 @@ public class ItemPlaceableAsset : ItemAsset
     public override void PopulateAsset(Bundle bundle, DatDictionary data, Local localization)
     {
         base.PopulateAsset(bundle, data, localization);
+        CanZombiesTarget = data.ParseBool("Can_Zombies_Target", defaultValue: true);
         salvageItemRef = data.readAssetReference<ItemAsset>("SalvageItem");
         minItemsDroppedOnDestroy = data.ParseInt32("Min_Items_Dropped_On_Destroy");
         maxItemsDroppedOnDestroy = data.ParseInt32("Max_Items_Dropped_On_Destroy");

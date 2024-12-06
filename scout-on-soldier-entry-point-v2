@@ -1,0 +1,273 @@
+#!/bin/bash
+# Copyright 2021 Collabora Ltd.
+# SPDX-License-Identifier: MIT
+
+# This script runs inside a SteamLinuxRuntime_soldier container, so we can
+# safely assume that /bin/bash exists and is under our control.
+
+set -eu
+set -o pipefail
+
+# Don't load the Steam Overlay into this helper script. Put it back later.
+saved_ld_preload="${LD_PRELOAD-}"
+unset LD_PRELOAD
+
+me="$(readlink -f "$0")"
+here="${me%/*}"
+
+log () {
+    printf '%s\n' "${me}[$$]: $*" >&2 || :
+}
+
+usage () {
+    local code="$1"
+    shift
+
+    if [ "$code" -ne 0 ]; then
+        exec >&2
+    fi
+
+    echo "Usage:"
+    echo "$me [OPTIONS] [--] COMMAND [ARGS...]"
+    echo
+    echo "Run a command in the scout Steam Runtime."
+    echo
+    echo "Required arguments:"
+    echo "COMMAND [ARGS...] Run this."
+    echo
+    echo "Options:"
+    echo "--verb=%verb%     Mode to operate in [default=waitforexitandrun]."
+
+    exit "${code}"
+}
+
+main () {
+    local getopt_temp="help"
+    local ours
+    local runtime
+    local src
+    local theirs
+    local theirs_should_be
+    local verbose=
+
+    if [ "${STEAM_LINUX_RUNTIME_VERBOSE-}" = 1 ]; then
+        verbose=yes
+    fi
+
+    getopt_temp="$getopt_temp,verb:"
+    getopt_temp="$getopt_temp,verbose"
+    getopt_temp="$(getopt -o '' --long "$getopt_temp" -n "$me" -- "$@")"
+    eval "set -- $getopt_temp"
+    unset getopt_temp
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            (--help)
+                usage 0
+                # not reached
+                ;;
+
+            (--verb)
+                case "$2" in
+                    (run|waitforexitandrun)
+                        ;;
+                    (*)
+                        log "Ignoring unknown Steam compatibility interface verb: $2"
+                        ;;
+                esac
+                shift 2
+                ;;
+
+            (--verbose)
+                verbose=yes
+                shift
+                ;;
+
+            (--)
+                shift
+                break
+                ;;
+
+            (-*)
+                log "Unknown option: $1"
+                usage 125
+                # not reached
+                ;;
+
+            (*)
+                break
+                ;;
+        esac
+    done
+
+    if [ "$#" -eq 0 ] || [ "$1" = -- ]; then
+        log "Error: A command to run is required"
+        usage 125
+    fi
+
+    mkdir -p "${here}/var"
+
+    if [ "${STEAM_LINUX_RUNTIME_LOG-}" = 1 ]; then
+        echo "See SteamLinuxRuntime_soldier/var/ for newer" \
+            "SteamLinuxRuntime log files." \
+            > "${here}/var/.slr-latest.log.$$"
+        mv -f "${here}/var/.slr-latest.log.$$" "${here}/var/slr-latest.log"
+    fi
+
+    [ -z "$verbose" ] || log "Command to run: $(printf '%q ' "$@")"
+
+    # STEAM_ZENITY might be a host path, reset it to one that is appropriate
+    # for soldier
+    export STEAM_ZENITY=/usr/bin/zenity
+
+    if [ -d "${here}/steam-runtime" ]; then
+        src="${here}/steam-runtime"
+        [ -z "$verbose" ] || log "Using local scout runtime ${src}"
+        rm -fr "${here}/var/unpack"
+    elif [ -n "${STEAM_RUNTIME_SCOUT-}" ] && [ -d "${STEAM_RUNTIME_SCOUT-}" ]; then
+        src="${STEAM_RUNTIME_SCOUT}"
+        [ -z "$verbose" ] || log "Using specified scout runtime ${src}"
+        rm -fr "${here}/var/unpack"
+    else
+        src="${STEAM_COMPAT_CLIENT_INSTALL_PATH:-"$HOME/.steam/root"}/ubuntu12_32/steam-runtime"
+
+        theirs="$(cat "$src/checksum" || echo none)"
+        if [ -e "${src}.tar.xz.checksum" ]; then
+            # Steam beta >= 2024-01-19
+            theirs_should_be="$(cat "${src}.tar.xz.checksum")"
+        else
+            theirs_should_be="$(cat "${src}.checksum")"
+        fi
+
+        if [ "$theirs" = "$theirs_should_be" ]; then
+            [ -z "$verbose" ] || log "Using default scout runtime ${src}"
+            rm -fr "${here}/var/unpack"
+        else
+            log "warning: $src is not the expected version"
+            log "warning: expected: $theirs_should_be"
+            log "warning: found:    $theirs"
+
+            if [ -d "${here}/var/unpack" ]; then
+                ours="$(cat "${here}/var/unpack/steam-runtime/checksum" || echo none)"
+            else
+                ours=none
+            fi
+
+            if [ "$theirs_should_be" != "$ours" ]; then
+                # Recover by unpacking a copy locally.
+                log "Recovering by unpacking $src.tar.xz into ${here}/var/unpack..."
+                mkdir -p "${here}/var/unpack"
+                tar -C "${here}/var/unpack" -Jxf "$src.tar.xz"
+                echo "$theirs_should_be" > "${here}/var/unpack/steam-runtime/checksum"
+            fi
+
+            src="${here}/var/unpack/steam-runtime"
+            [ -z "$verbose" ] || log "Falling back to using ${src}"
+        fi
+    fi
+
+    # Note that this only works because run.sh does not take the
+    # $(realpath) of its $0, and because we are no longer using setup.sh,
+    # which uses the equivalent of $(find ${top} -type l -name '*.so*')
+    # to list the libraries in the runtime (which wouldn't recurse into
+    # the subdirectories of var/steam-runtime in our case).
+    runtime="${here}/var/steam-runtime"
+    mkdir -p "$runtime"
+
+    if [ -e "$runtime/version.txt" ]; then
+        ours="$(cat "$runtime/version.txt" || echo none)"
+    else
+        ours=none
+    fi
+
+    theirs="$(cat "$src/version.txt")"
+
+    if [ "$ours" != "$theirs" ]; then
+        [ -z "$verbose" ] || log "scout runtime switched from '$ours' to '$theirs'"
+        printf '%s\n' "$theirs" > "$runtime/version.txt"
+    else
+        [ -z "$verbose" ] || log "scout runtime version '$ours'"
+    fi
+
+    ln -fns "$src/amd64" "$runtime/"
+    ln -fns "$src/i386" "$runtime/"
+    ln -fns "$src/lib" "$runtime/"
+    ln -fns "$src/run.sh" "$runtime/"
+    ln -fns "$src/scripts" "$runtime/"
+    ln -fns "$src/setup.sh" "$runtime/"
+    ln -fns "$src/usr" "$runtime/"
+    mkdir -p "$runtime/pinned_libs_32"
+    mkdir -p "$runtime/pinned_libs_64"
+
+    # We know exactly what's in the soldier and scout runtimes, and we
+    # know soldier is strictly newer in all cases, so the only libraries
+    # we need to pin are those that we have hard-coded to be pinned;
+    # so we don't need to run setup.sh, and can do something more
+    # abbreviated.
+
+    # libcurl in the Steam Runtime is internally identified
+    # as libcurl.so.4, but with a symlink at libcurl.so.3
+    # as a result of some unfortunate ABI weirdness back in
+    # 2007. It also has Debian-specific symbol versioning as a
+    # result of the versioned symbols introduced as a
+    # Debian-specific change in 2005-2006, which were preserved
+    # across the rename from libcurl.so.3 to libcurl.so.4, not
+    # matching the versioned symbols that upstream subsequently
+    # added to libcurl.so.4; as a result, a system libcurl.so.4
+    # probably isn't going to be a drop-in replacement for our
+    # libcurl.
+    #
+    # Debian/Ubuntu subsequently (in 2018) switched to a SONAME
+    # and versioning that match upstream, but the Steam Runtime
+    # is based on a version that is older than that, so anything
+    # built against the Steam Runtime will expect the old SONAME
+    # and versioned symbols; make sure we use the Steam Runtime
+    # version.
+    ln -fns "$src/usr/lib/x86_64-linux-gnu/libcurl.so.4" \
+        "$runtime/pinned_libs_64/libcurl.so.4"
+    ln -fns "$src/usr/lib/i386-linux-gnu/libcurl.so.4" \
+        "$runtime/pinned_libs_32/libcurl.so.4"
+    # The version of libcurl.so.4 in the Steam Runtime is actually
+    # binary-compatible with the older libcurl.so.3 in Debian/Ubuntu,
+    # so pin it under both names.
+    ln -fns "$src/usr/lib/x86_64-linux-gnu/libcurl.so.4" \
+        "$runtime/pinned_libs_64/libcurl.so.3"
+    ln -fns "$src/usr/lib/i386-linux-gnu/libcurl.so.4" \
+        "$runtime/pinned_libs_32/libcurl.so.3"
+
+    # Deliberately not pinning libcurl-gnutls.so.[34]: soldier has a
+    # newer version of those, which is believed to be compatible with the
+    # ones in scout.
+
+    # Deliberately not pinning 32-bit libgtk-x11-2.0.so.0,
+    # libdbusmenu-gtk.so.4, libdbusmenu-glib.so.4, libdbus-1.so.3:
+    # in the normal scout runtime those are pinned for the benefit of the
+    # Steam client itself, but let's try keeping 32-bit games consistent
+    # with 64-bit games.
+
+    set -- \
+        steam-runtime-launcher-interface-0 \
+        scout-in-container:scout-on-soldier \
+        "$@"
+
+    if [ -n "$saved_ld_preload" ]; then
+        case "$1" in
+            (*=*)
+                # Replace inadvisable executable name with something env(1)
+                # will not misinterpret
+                set -- sh -euc 'exec -- "$@"' sh "$@"
+                ;;
+        esac
+
+        set -- env LD_PRELOAD="$saved_ld_preload" "$@"
+    fi
+
+    [ -z "$verbose" ] || log "Running: $runtime/run.sh $(printf '%q ' "$@")"
+    exec "$runtime/run.sh" "$@"
+    # This should never be reached
+    exit 1
+}
+
+main "$@"
+
+# vim:set sw=4 sts=4 et:

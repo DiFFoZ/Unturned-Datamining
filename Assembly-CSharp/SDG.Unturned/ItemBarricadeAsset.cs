@@ -266,7 +266,7 @@ public class ItemBarricadeAsset : ItemPlaceableAsset
             if (barricade == null)
             {
                 flag = true;
-                Assets.reportError(this, "missing \"Clip\" GameObject, loading \"Barricade\" GameObject instead");
+                Assets.ReportError(this, "missing \"Clip\" GameObject, loading \"Barricade\" GameObject instead");
             }
             else
             {
@@ -282,7 +282,7 @@ public class ItemBarricadeAsset : ItemPlaceableAsset
             _barricade = bundle.load<GameObject>("Barricade");
             if (barricade == null)
             {
-                Assets.reportError(this, "missing \"Barricade\" GameObject");
+                Assets.ReportError(this, "missing \"Barricade\" GameObject");
             }
             else if (Dedicator.IsDedicatedServer)
             {
@@ -304,7 +304,7 @@ public class ItemBarricadeAsset : ItemPlaceableAsset
         _build = (EBuild)Enum.Parse(typeof(EBuild), data.GetString("Build"), ignoreCase: true);
         if ((build == EBuild.DOOR || build == EBuild.GATE || build == EBuild.SHUTTER) && barricade != null && barricade.transform.Find("Placeholder") == null)
         {
-            Assets.reportError(this, "missing 'Placeholder' Collider");
+            Assets.ReportError(this, "missing 'Placeholder' Collider");
         }
         _health = data.ParseUInt16("Health", 0);
         _range = data.ParseFloat("Range");

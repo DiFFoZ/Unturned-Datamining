@@ -73,7 +73,12 @@ public class InteractableObjectBinaryState : InteractableObject
 
     private void initAnimationComponent()
     {
-        Transform transform = base.transform.Find("Root");
+        string text = _objectAsset.interactabilityChildPathOverride;
+        if (string.IsNullOrEmpty(text))
+        {
+            text = "Root";
+        }
+        Transform transform = base.transform.Find(text);
         if (transform != null)
         {
             animationComponent = transform.GetComponent<Animation>();
@@ -128,7 +133,7 @@ public class InteractableObjectBinaryState : InteractableObject
         return navmeshCut;
     }
 
-    private void initCutComponent()
+    private void InitNav()
     {
         if (base.objectAsset.interactabilityNav == EObjectInteractabilityNav.NONE)
         {
@@ -159,20 +164,35 @@ public class InteractableObjectBinaryState : InteractableObject
         }
     }
 
-    private void updateCutComponent()
+    private void UpdateNav()
     {
+        bool flag;
+        switch (base.objectAsset.interactabilityNav)
+        {
+        default:
+            return;
+        case EObjectInteractabilityNav.ON:
+            flag = isUsed;
+            break;
+        case EObjectInteractabilityNav.OFF:
+            flag = !isUsed;
+            break;
+        }
         if (cutComponent != null)
         {
-            if ((base.objectAsset.interactabilityNav == EObjectInteractabilityNav.ON && !isUsed) || (base.objectAsset.interactabilityNav == EObjectInteractabilityNav.OFF && isUsed))
-            {
-                cutHeight = cutComponent.height;
-                cutComponent.height = 0f;
-            }
-            else
+            if (flag)
             {
                 cutComponent.height = cutHeight;
             }
+            else
+            {
+                cutComponent.height = 0f;
+            }
             cutComponent.ForceUpdate();
+        }
+        else if (owningLevelObject != null)
+        {
+            owningLevelObject.SetInteractableWantsNavActive(flag);
         }
     }
 
@@ -216,7 +236,7 @@ public class InteractableObjectBinaryState : InteractableObject
         lastUsed = Time.realtimeSinceStartup;
         _isUsed = newUsed;
         updateAnimationComponent(applyInstantly: false);
-        updateCutComponent();
+        UpdateNav();
         updateAudioSourceComponent();
         updateToggleGameObject();
         this.onStateChanged?.Invoke(this);
@@ -235,12 +255,12 @@ public class InteractableObjectBinaryState : InteractableObject
         {
             isInit = true;
             initAnimationComponent();
-            initCutComponent();
+            InitNav();
             initAudioSourceComponent();
             initToggleGameObject();
         }
         updateAnimationComponent(applyInstantly: true);
-        updateCutComponent();
+        UpdateNav();
         updateToggleGameObject();
         this.onStateInitialized?.Invoke(this);
     }

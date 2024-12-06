@@ -16,4 +16,12 @@ public static class ListEx
             }
         }
     }
+
+    public static void AddIfNotContained<T>(this List<T> list, T item)
+    {
+        if (!list.Contains(item))
+        {
+            list.Add(item);
+        }
+    }
 }

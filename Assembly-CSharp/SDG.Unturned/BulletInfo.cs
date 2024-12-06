@@ -26,6 +26,11 @@ public class BulletInfo
     public ItemMagazineAsset magazineAsset;
 
     /// <summary>
+    /// Combination of gun and attachments' bullet gravity multipliers.
+    /// </summary>
+    internal float gravityMultiplier = 1f;
+
+    /// <summary>
     /// Only available on the server. For use by plugins developers who want to analyze deviation between approximate
     /// start direction and final hit position using <see cref="E:SDG.Unturned.UseableGun.onBulletSpawned" /> and <see cref="E:SDG.Unturned.UseableGun.onBulletHit" />
     /// per public issue #4450. Note that origin and direction on server are not necessarily exactly the same as on

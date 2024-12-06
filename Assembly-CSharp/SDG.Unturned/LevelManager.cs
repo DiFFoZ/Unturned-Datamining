@@ -335,7 +335,11 @@ public class LevelManager : SteamCaller
             {
                 Vector3 point = vehicleSpawnpoint.point;
                 point.y += 1f;
-                VehicleManager.spawnVehicleV2(randomAssetForSpawnpoint, point, Quaternion.Euler(0f, vehicleSpawnpoint.angle, 0f));
+                InteractableVehicle interactableVehicle = VehicleManager.spawnVehicleV2(randomAssetForSpawnpoint, point, Quaternion.Euler(0f, vehicleSpawnpoint.angle, 0f));
+                if (interactableVehicle != null)
+                {
+                    interactableVehicle.WasNaturallySpawned = true;
+                }
             }
         }
         foreach (AnimalSpawnpoint spawn in LevelAnimals.spawns)

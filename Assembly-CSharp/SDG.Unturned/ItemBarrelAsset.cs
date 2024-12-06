@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SDG.Unturned;
@@ -16,8 +17,6 @@ public class ItemBarrelAsset : ItemCaliberAsset
 
     private byte _durability;
 
-    private float _ballisticDrop;
-
     public AudioClip shoot => _shoot;
 
     public GameObject barrel => _barrel;
@@ -32,21 +31,13 @@ public class ItemBarrelAsset : ItemCaliberAsset
 
     public override bool showQuality => durability > 0;
 
-    public float ballisticDrop => _ballisticDrop;
+    [Obsolete("Moved to ItemCaliberAsset.BallisticGravityMultiplier")]
+    public float ballisticDrop => base.BallisticGravityMultiplier;
 
     /// <summary>
     /// Multiplier for the maximum distance the gunshot can be heard.
     /// </summary>
     public float gunshotRolloffDistanceMultiplier { get; protected set; }
-
-    public override void BuildDescription(ItemDescriptionBuilder builder, Item itemInstance)
-    {
-        base.BuildDescription(builder, itemInstance);
-        if (!builder.shouldRestrictToLegacyContent && _ballisticDrop != 1f)
-        {
-            builder.Append(PlayerDashboardInventoryUI.localization.format("ItemDescription_BulletGravityModifier", PlayerDashboardInventoryUI.FormatStatModifier(_ballisticDrop, higherIsPositive: true, higherIsBeneficial: false)), 10000 + DescSort_LowerIsBeneficial(_ballisticDrop));
-        }
-    }
 
     public override void PopulateAsset(Bundle bundle, DatDictionary data, Local localization)
     {
@@ -57,14 +48,6 @@ public class ItemBarrelAsset : ItemCaliberAsset
         _isSilenced = data.ContainsKey("Silenced");
         _volume = data.ParseFloat("Volume", 1f);
         _durability = data.ParseUInt8("Durability", 0);
-        if (data.ContainsKey("Ballistic_Drop"))
-        {
-            _ballisticDrop = data.ParseFloat("Ballistic_Drop");
-        }
-        else
-        {
-            _ballisticDrop = 1f;
-        }
         float defaultValue = (isSilenced ? 0.5f : 1f);
         gunshotRolloffDistanceMultiplier = data.ParseFloat("Gunshot_Rolloff_Distance_Multiplier", defaultValue);
     }

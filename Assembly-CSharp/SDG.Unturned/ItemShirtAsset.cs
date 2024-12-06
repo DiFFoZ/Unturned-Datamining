@@ -76,12 +76,12 @@ public class ItemShirtAsset : ItemBagAsset
                         }
                         else
                         {
-                            Assets.reportError(this, "missing MeshFilter on character mesh 1P override " + i);
+                            Assets.ReportError(this, "missing MeshFilter on character mesh 1P override " + i);
                         }
                     }
                     else
                     {
-                        Assets.reportError(this, "missing 'Character_Mesh_1P_Override_" + i + "' GameObject");
+                        Assets.ReportError(this, "missing 'Character_Mesh_1P_Override_" + i + "' GameObject");
                     }
                 }
             }
@@ -109,12 +109,12 @@ public class ItemShirtAsset : ItemBagAsset
                         }
                         else
                         {
-                            Assets.reportError(this, "missing MeshFilter on character mesh 3P override " + j);
+                            Assets.ReportError(this, "missing MeshFilter on character mesh 3P override " + j);
                         }
                     }
                     else
                     {
-                        Assets.reportError(this, "missing 'Character_Mesh_3P_Override_" + j + "' GameObject");
+                        Assets.ReportError(this, "missing 'Character_Mesh_3P_Override_" + j + "' GameObject");
                     }
                 }
             }
@@ -127,7 +127,7 @@ public class ItemShirtAsset : ItemBagAsset
                 characterMaterialOverride = bundle.load<Material>("Character_Material_Override");
                 if (characterMaterialOverride == null)
                 {
-                    Assets.reportError(this, "missing 'Character_Material_Override' Material");
+                    Assets.ReportError(this, "missing 'Character_Material_Override' Material");
                 }
             }
             else
@@ -142,11 +142,11 @@ public class ItemShirtAsset : ItemBagAsset
             {
                 if (shirt.isReadable)
                 {
-                    Assets.reportError(this, "texture 'Shirt' can save memory by disabling read/write");
+                    Assets.ReportError(this, "texture 'Shirt' can save memory by disabling read/write");
                 }
                 if (shirt.format != TextureFormat.RGBA32 && shirt.format != TextureFormat.RGB24 && (shirt.width <= 128 || shirt.height <= 128))
                 {
-                    Assets.reportError(this, $"texture Shirt might look weird because it is relatively low resolution but has compression enabled ({shirt.format})");
+                    Assets.ReportError(this, $"texture Shirt might look weird because it is relatively low resolution but has compression enabled ({shirt.format})");
                 }
             }
             _emission = bundle.load<Texture2D>("Emission");
@@ -154,17 +154,17 @@ public class ItemShirtAsset : ItemBagAsset
             {
                 if (emission.isReadable)
                 {
-                    Assets.reportError(this, "texture 'Emission' can save memory by disabling read/write");
+                    Assets.ReportError(this, "texture 'Emission' can save memory by disabling read/write");
                 }
                 if (emission.width <= 128 || emission.height <= 128)
                 {
                     if (emission.format == TextureFormat.RGBA32)
                     {
-                        Assets.reportError(this, "texture Emission is relatively low resolution so RGB24 format is recommended");
+                        Assets.ReportError(this, "texture Emission is relatively low resolution so RGB24 format is recommended");
                     }
                     else if (emission.format != TextureFormat.RGB24)
                     {
-                        Assets.reportError(this, $"texture Emission might look weird because it is relatively low resolution but has compression enabled ({emission.format})");
+                        Assets.ReportError(this, $"texture Emission might look weird because it is relatively low resolution but has compression enabled ({emission.format})");
                     }
                 }
             }
@@ -173,11 +173,11 @@ public class ItemShirtAsset : ItemBagAsset
             {
                 if (metallic.isReadable)
                 {
-                    Assets.reportError(this, "texture 'Metallic' can save memory by disabling read/write");
+                    Assets.ReportError(this, "texture 'Metallic' can save memory by disabling read/write");
                 }
                 if (metallic.format != TextureFormat.RGBA32 && (metallic.width <= 128 || metallic.height <= 128))
                 {
-                    Assets.reportError(this, $"texture Metallic might look weird because it is relatively low resolution but has compression enabled ({metallic.format})");
+                    Assets.ReportError(this, $"texture Metallic might look weird because it is relatively low resolution but has compression enabled ({metallic.format})");
                 }
             }
         }

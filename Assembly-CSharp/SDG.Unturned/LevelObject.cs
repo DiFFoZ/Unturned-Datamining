@@ -55,10 +55,16 @@ public class LevelObject
 
     private bool haveConditionsBeenChecked;
 
+    private bool interactableWantsNavActive = true;
+
+    private bool rubbleWantsNavActive = true;
+
     /// <summary>
     /// Assume renderers default to enabled.
     /// </summary>
     private bool areRenderersEnabled = true;
+
+    private GameObject navGameObject;
 
     private HashSet<ushort> associatedFlags;
 
@@ -220,6 +226,32 @@ public class LevelObject
         {
             UnityEngine.Object.Destroy(ownedCullingVolume.gameObject);
             ownedCullingVolume = null;
+        }
+    }
+
+    /// <summary>
+    /// Used by InteractableObjectBinaryState to indicate whether it wants navGameObject to be active. It's only
+    /// active if both IOBS and Rubble want it active.
+    /// </summary>
+    internal void SetInteractableWantsNavActive(bool wantsNavActive)
+    {
+        if (interactableWantsNavActive != wantsNavActive)
+        {
+            interactableWantsNavActive = wantsNavActive;
+            UpdateNavActive();
+        }
+    }
+
+    /// <summary>
+    /// Used by InteractableObjectRubble to indicate whether it wants navGameObject to be active. It's only
+    /// active if both IOBS and Rubble want it active.
+    /// </summary>
+    internal void SetRubbleWantsNavActive(bool wantsNavActive)
+    {
+        if (rubbleWantsNavActive != wantsNavActive)
+        {
+            rubbleWantsNavActive = wantsNavActive;
+            UpdateNavActive();
         }
     }
 
@@ -585,12 +617,21 @@ public class LevelObject
                 }
             }
         }
-        if ((Level.isEditor || Provider.isServer) && asset.type != EObjectType.SMALL)
+        bool flag = false;
+        if (Provider.isServer)
         {
-            GameObject gameObject5 = asset.navGameObject?.getOrLoad();
-            if (gameObject5 != null)
+            flag = asset.ShouldLoadNavOnServer;
+        }
+        else if (Level.isEditor)
+        {
+            flag = asset.ShouldLoadNavInEditor;
+        }
+        if (flag)
+        {
+            navGameObject = asset.navGameObject?.getOrLoad();
+            if (navGameObject != null)
             {
-                Transform transform2 = UnityEngine.Object.Instantiate(gameObject5).transform;
+                Transform transform2 = UnityEngine.Object.Instantiate(navGameObject).transform;
                 transform2.name = "Nav";
                 transform2.parent = this.transform;
                 transform2.localPosition = Vector3.zero;
@@ -615,11 +656,11 @@ public class LevelObject
         }
         if (Provider.isServer)
         {
-            GameObject gameObject6 = asset.triggersGameObject?.getOrLoad();
+            GameObject gameObject5 = asset.triggersGameObject?.getOrLoad();
             Transform transform3;
-            if (gameObject6 != null)
+            if (gameObject5 != null)
             {
-                Transform obj = UnityEngine.Object.Instantiate(gameObject6).transform;
+                Transform obj = UnityEngine.Object.Instantiate(gameObject5).transform;
                 obj.name = "Triggers";
                 obj.parent = this.transform;
                 obj.localPosition = Vector3.zero;
@@ -662,10 +703,10 @@ public class LevelObject
             }
             else if (Provider.isClient)
             {
-                GameObject gameObject7 = asset.slotsGameObject?.getOrLoad();
-                if (gameObject7 != null)
+                GameObject gameObject6 = asset.slotsGameObject?.getOrLoad();
+                if (gameObject6 != null)
                 {
-                    Transform obj2 = UnityEngine.Object.Instantiate(gameObject7).transform;
+                    Transform obj2 = UnityEngine.Object.Instantiate(gameObject6).transform;
                     obj2.name = "Slots";
                     obj2.parent = this.transform;
                     obj2.localPosition = Vector3.zero;
@@ -712,6 +753,7 @@ public class LevelObject
             }
             if (interactable != null)
             {
+                interactable.owningLevelObject = this;
                 interactable.updateState(asset, state);
             }
         }
@@ -720,6 +762,7 @@ public class LevelObject
             if (asset.rubble == EObjectRubble.DESTROY)
             {
                 _rubble = this.transform.gameObject.AddComponent<InteractableObjectRubble>();
+                _rubble.owningLevelObject = this;
             }
             if (rubble != null)
             {
@@ -734,14 +777,14 @@ public class LevelObject
                 }
             }
         }
-        bool flag = false;
+        bool flag2 = false;
         if (asset.conditions != null && asset.conditions.Length != 0 && !Level.isEditor && !Dedicator.IsDedicatedServer)
         {
             areConditionsMet = false;
-            flag = true;
+            flag2 = true;
             Player.onPlayerCreated = (PlayerCreated)Delegate.Combine(Player.onPlayerCreated, new PlayerCreated(onPlayerCreated));
         }
-        if (!flag && (asset.holidayRestriction != 0 || asset.isGore) && !Level.isEditor)
+        if (!flag2 && (asset.holidayRestriction != 0 || asset.isGore) && !Level.isEditor)
         {
             areConditionsMet = false;
             updateConditions();
@@ -812,6 +855,14 @@ public class LevelObject
             {
                 renderer.enabled = areRenderersEnabled;
             }
+        }
+    }
+
+    private void UpdateNavActive()
+    {
+        if (navGameObject != null)
+        {
+            navGameObject.SetActive(interactableWantsNavActive && rubbleWantsNavActive);
         }
     }
 

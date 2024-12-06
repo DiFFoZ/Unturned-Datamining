@@ -248,12 +248,10 @@ public class MenuDashboardUI
             }
             case EBbCodeWidgetType.YouTubeButton:
             {
-                SleekYouTubeVideoButton sleekYouTubeVideoButton = new SleekYouTubeVideoButton();
+                SleekYouTubeVideoButton sleekYouTubeVideoButton = new SleekYouTubeVideoButton(icons);
                 sleekYouTubeVideoButton.UseManualLayout = false;
                 sleekYouTubeVideoButton.UseWidthLayoutOverride = true;
                 sleekYouTubeVideoButton.UseHeightLayoutOverride = true;
-                sleekYouTubeVideoButton.SizeOffset_X = 1300f;
-                sleekYouTubeVideoButton.SizeOffset_Y = 740f;
                 sleekYouTubeVideoButton.Refresh(item.widgetData);
                 parent.AddChild(sleekYouTubeVideoButton);
                 break;
@@ -325,13 +323,23 @@ public class MenuDashboardUI
         for (int i = 0; i < newsResponse.AppNews.NewsItems.Length; i++)
         {
             NewsItem newsItem = newsResponse.AppNews.NewsItems[i];
-            if (newsItem != null)
+            if (newsItem != null && !string.IsNullOrEmpty(newsItem.Title))
             {
                 ISleekBox sleekBox = Glazier.Get().CreateBox();
                 sleekBox.SizeScale_X = 1f;
                 sleekBox.UseManualLayout = false;
                 sleekBox.UseChildAutoLayout = ESleekChildLayout.Vertical;
                 sleekBox.ChildAutoLayoutPadding = 5f;
+                if (newsItem.Title.StartsWith("Community Blog"))
+                {
+                    ISleekSprite sleekSprite = Glazier.Get().CreateSprite(icons.load<Sprite>("CommunityBlogBackground"));
+                    sleekSprite.IgnoreLayout = true;
+                    sleekSprite.SizeScale_X = 1f;
+                    sleekSprite.SizeScale_Y = 1f;
+                    sleekSprite.TintColor = SleekColor.BackgroundIfLight(new Color(0f, 0f, 0f, 0.25f));
+                    sleekSprite.DrawMethod = ESleekSpriteType.Tiled;
+                    sleekBox.AddChild(sleekSprite);
+                }
                 ISleekLabel sleekLabel = Glazier.Get().CreateLabel();
                 sleekLabel.Text = newsItem.Title;
                 sleekLabel.UseManualLayout = false;
@@ -472,7 +480,7 @@ public class MenuDashboardUI
         mainScrollView.AddChild(workshopBox);
         ReviseNewsOrder();
         MainMenuWorkshopFeaturedLiveConfig featured = LiveConfig.Get().mainMenuWorkshop.featured;
-        bool flag = featured.IsFeatured(pDetails.m_nPublishedFileId.m_PublishedFileId);
+        bool flag = featured.IsNowFeaturedTimeOrBypassed() && featured.IsFeatured(pDetails.m_nPublishedFileId.m_PublishedFileId);
         string key = ((!flag) ? "Featured_Workshop_Title" : (featured.type switch
         {
             EFeaturedWorkshopType.Curated => "Curated_Workshop_Title", 
@@ -656,6 +664,11 @@ public class MenuDashboardUI
             UnturnedLog.warn($"Ignoring popular workshop file {pDetails.m_nPublishedFileId} because visibility is {pDetails.m_eVisibility}");
             return false;
         }
+        if (LiveConfig.Get().mainMenuWorkshop.popular.IsHidden(pDetails.m_nPublishedFileId.m_PublishedFileId))
+        {
+            UnturnedLog.info($"Ignoring popular workshop file {pDetails.m_nPublishedFileId} because it's not eligible");
+            return false;
+        }
         if (LocalNews.wasWorkshopItemDismissed(pDetails.m_nPublishedFileId.m_PublishedFileId))
         {
             return false;
@@ -808,6 +821,10 @@ public class MenuDashboardUI
 
     private static bool CreateItemStoreSaleNews(ItemStore itemStore)
     {
+        if (!Glazier.Get().SupportsAutomaticLayout)
+        {
+            return false;
+        }
         int[] unownedDiscountedBundleListingIndices = ItemStore.Get().GetUnownedDiscountedBundleListingIndices();
         if (unownedDiscountedBundleListingIndices == null || unownedDiscountedBundleListingIndices.Length < 3)
         {
@@ -1102,7 +1119,7 @@ public class MenuDashboardUI
         {
             hasBegunQueryingLiveConfigWorkshop = true;
             ulong num = 0uL;
-            if (mainMenuWorkshop.featured.fileIds != null && mainMenuWorkshop.featured.fileIds.Length != 0)
+            if (mainMenuWorkshop.featured.fileIds != null && mainMenuWorkshop.featured.fileIds.Length != 0 && mainMenuWorkshop.featured.IsNowFeaturedTimeOrBypassed())
             {
                 num = mainMenuWorkshop.featured.fileIds.RandomOrDefault();
             }

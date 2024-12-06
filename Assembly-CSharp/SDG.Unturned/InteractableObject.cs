@@ -4,6 +4,8 @@ public class InteractableObject : InteractablePower
 {
     protected ObjectAsset _objectAsset;
 
+    internal LevelObject owningLevelObject;
+
     public ObjectAsset objectAsset => _objectAsset;
 
     public override void updateState(Asset asset, byte[] state)

@@ -77,14 +77,14 @@ public class PlayerAnimator : PlayerCaller
     public Camera viewmodelCamera;
 
     /// <summary>
-    /// Constant (non-animated) offset. Used by gun to center the 3D sights on screen, and by chainsaw to shake the viewmodel.
+    /// Used by gun to hide viewmodel arms while aiming 2D scope, and by chainsaw to shake the viewmodel.
     /// </summary>
     public Vector3 viewmodelCameraLocalPositionOffset;
 
     /// <summary>
     /// Used to hide viewmodel arms while using a vehicle turret gun.
     /// </summary>
-    public Vector3 turretViewmodelCameraLocalPositionOffset;
+    public Vector3 drivingViewmodelCameraLocalPositionOffset;
 
     /// <summary>
     /// Offsets main camera and aim rotation while aiming with a scoped gun.
@@ -1247,9 +1247,9 @@ public class PlayerAnimator : PlayerCaller
             desiredViewmodelCameraLocalPosition.z -= Provider.preferenceData.Viewmodel.Offset_Depth * blendedViewmodelOffsetPreferenceMultiplier;
             if (base.player.stance.stance == EPlayerStance.DRIVING)
             {
-                viewmodelCameraLocalPosition.x = Mathf.Lerp(viewmodelCameraLocalPosition.x, 0f - turretViewmodelCameraLocalPositionOffset.y - 0.65f - Mathf.Abs(base.player.look.yaw) / 90f * 0.25f, 8f * Time.deltaTime);
-                viewmodelCameraLocalPosition.y = Mathf.Lerp(viewmodelCameraLocalPosition.y, turretViewmodelCameraLocalPositionOffset.x + (float)((!base.channel.owner.IsLeftHanded) ? 1 : (-1)) * base.player.movement.getVehicle().AnimatedSteeringAngle * -0.01f, 8f * Time.deltaTime);
-                viewmodelCameraLocalPosition.z = Mathf.Lerp(viewmodelCameraLocalPosition.z, turretViewmodelCameraLocalPositionOffset.z - 0.25f, 8f * Time.deltaTime);
+                viewmodelCameraLocalPosition.x = Mathf.Lerp(viewmodelCameraLocalPosition.x, 0f - drivingViewmodelCameraLocalPositionOffset.y - 0.65f - Mathf.Abs(base.player.look.yaw) / 90f * 0.25f, 8f * Time.deltaTime);
+                viewmodelCameraLocalPosition.y = Mathf.Lerp(viewmodelCameraLocalPosition.y, drivingViewmodelCameraLocalPositionOffset.x + (float)((!base.channel.owner.IsLeftHanded) ? 1 : (-1)) * base.player.movement.getVehicle().AnimatedSteeringAngle * -0.01f, 8f * Time.deltaTime);
+                viewmodelCameraLocalPosition.z = Mathf.Lerp(viewmodelCameraLocalPosition.z, drivingViewmodelCameraLocalPositionOffset.z - 0.25f, 8f * Time.deltaTime);
             }
             else
             {
@@ -1427,7 +1427,7 @@ public class PlayerAnimator : PlayerCaller
             viewmodelCamera = viewmodelCameraTransform.GetComponent<Camera>();
             UnturnedPostProcess.instance.setOverlayCamera(viewmodelCamera);
             viewmodelCameraLocalPositionOffset = Vector3.zero;
-            turretViewmodelCameraLocalPositionOffset = Vector3.zero;
+            drivingViewmodelCameraLocalPositionOffset = Vector3.zero;
             scopeSway = Vector3.zero;
             bayonetViewmodelCameraOffset = Vector3.zero;
             viewmodelCameraLocalPosition = Vector3.zero;

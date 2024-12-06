@@ -25,9 +25,11 @@ public class VehicleManager : SteamCaller
 
     public const byte SAVEDATA_VERSION_ADDED_PAINT_COLOR = 16;
 
-    private const byte SAVEDATA_VERSION_NEWEST = 16;
+    public const byte SAVEDATA_VERSION_ADDED_NATURAL_SPAWNED = 17;
 
-    public static readonly byte SAVEDATA_VERSION = 16;
+    private const byte SAVEDATA_VERSION_NEWEST = 17;
+
+    public static readonly byte SAVEDATA_VERSION = 17;
 
     public static VehicleLockpickedSignature onVehicleLockpicked;
 
@@ -117,6 +119,8 @@ public class VehicleManager : SteamCaller
     private static readonly ServerStaticMethod<byte> SendSwapVehicleRequest = ServerStaticMethod<byte>.Get(ReceiveSwapVehicleRequest);
 
     public static Action<InteractableVehicle> OnVehicleExploded;
+
+    internal HashSet<InteractableVehicle> vehiclesNeedingReplicationUpdate = new HashSet<InteractableVehicle>();
 
     private List<InteractableVehicle> vehiclesToSend = new List<InteractableVehicle>();
 
@@ -867,6 +871,7 @@ public class VehicleManager : SteamCaller
     [SteamCall(ESteamCallValidation.ONLY_FROM_SERVER, legacyName = "tellVehicleDestroy")]
     public static void ReceiveDestroySingleVehicle(uint instanceID)
     {
+        ThreadUtil.assertIsGameThread();
         InteractableVehicle interactableVehicle = null;
         for (int i = 0; i < vehicles.Count; i++)
         {
@@ -900,6 +905,7 @@ public class VehicleManager : SteamCaller
     [SteamCall(ESteamCallValidation.ONLY_FROM_SERVER, legacyName = "tellVehicleDestroyAll")]
     public static void ReceiveDestroyAllVehicles()
     {
+        ThreadUtil.assertIsGameThread();
         for (int num = vehicles.Count - 1; num >= 0; num--)
         {
             BarricadeManager.uprootPlant(vehicles[num].transform);
@@ -923,6 +929,7 @@ public class VehicleManager : SteamCaller
 
     public static void askVehicleDestroy(InteractableVehicle vehicle)
     {
+        ThreadUtil.assertIsGameThread();
         if (Provider.isServer)
         {
             vehicle.forceRemoveAllPlayers();
@@ -932,6 +939,7 @@ public class VehicleManager : SteamCaller
 
     public static void askVehicleDestroyAll()
     {
+        ThreadUtil.assertIsGameThread();
         if (Provider.isServer)
         {
             for (int num = vehicles.Count - 1; num >= 0; num--)
@@ -1426,6 +1434,7 @@ public class VehicleManager : SteamCaller
 
     public static void forceRemovePlayer(InteractableVehicle vehicle, CSteamID player)
     {
+        ThreadUtil.assertIsGameThread();
         if (vehicle.forceRemovePlayer(out var seat, player, out var point, out var angle))
         {
             sendExitVehicle(vehicle, seat, point, angle, forceUpdate: true);
@@ -1439,6 +1448,7 @@ public class VehicleManager : SteamCaller
     /// <returns>True if player was in a vehicle, false otherwise.</returns>
     public static bool forceRemovePlayer(CSteamID player)
     {
+        ThreadUtil.assertIsGameThread();
         InteractableVehicle interactableVehicle = null;
         byte seat = 0;
         Vector3 point = Vector3.zero;
@@ -1556,7 +1566,7 @@ public class VehicleManager : SteamCaller
         GameObject orLoadModel = vehicleAsset.GetOrLoadModel();
         if (orLoadModel == null)
         {
-            Assets.reportError(vehicleAsset, "unable to spawn any gameobject");
+            Assets.ReportError(vehicleAsset, "unable to spawn any gameobject");
             return null;
         }
         if (!vehicleAsset.canBeLocked)
@@ -1721,7 +1731,12 @@ public class VehicleManager : SteamCaller
         Vector3 point = spawn.point;
         point.y += 0.5f;
         NetId netId = NetIdRegistry.ClaimBlock(21u);
-        return addVehicle(vehicleAsset.GUID, 0, 0, 0f, point, Quaternion.Euler(0f, spawn.angle, 0f), sirens: false, blimp: false, headlights: false, taillights: false, ushort.MaxValue, isExploded: false, ushort.MaxValue, ushort.MaxValue, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), getVehicleRandomTireAliveMask(vehicleAsset), netId, paintColor);
+        InteractableVehicle interactableVehicle = addVehicle(vehicleAsset.GUID, 0, 0, 0f, point, Quaternion.Euler(0f, spawn.angle, 0f), sirens: false, blimp: false, headlights: false, taillights: false, ushort.MaxValue, isExploded: false, ushort.MaxValue, ushort.MaxValue, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), getVehicleRandomTireAliveMask(vehicleAsset), netId, paintColor);
+        if (interactableVehicle != null)
+        {
+            interactableVehicle.WasNaturallySpawned = true;
+        }
+        return interactableVehicle;
     }
 
     /// <summary>
@@ -1775,7 +1790,7 @@ public class VehicleManager : SteamCaller
 
     private void despawnAndRespawnVehicles()
     {
-        if (Level.info != null && Level.info.type != ELevelType.ARENA && vehicles != null && (vehicles.Count <= 0 || !respawnVehicles_Destroy()) && LevelVehicles.spawns != null && LevelVehicles.spawns.Count != 0 && vehicles.Count < maxInstances)
+        if (Level.info != null && Level.info.type != ELevelType.ARENA && vehicles != null && (vehicles.Count <= 0 || !respawnVehicles_Destroy()) && LevelVehicles.spawns != null && LevelVehicles.spawns.Count != 0 && GetNumberOfNaturalVehiclesToSpawn() > 0)
         {
             VehicleSpawnpoint vehicleSpawnpoint = findRandomSpawn();
             if (vehicleSpawnpoint != null)
@@ -1783,6 +1798,25 @@ public class VehicleManager : SteamCaller
                 addVehicleAtSpawnAndReplicate(vehicleSpawnpoint);
             }
         }
+    }
+
+    private int GetNumberOfNaturalVehiclesToSpawn()
+    {
+        if (_vehicles == null || Level.info == null || Provider.modeConfigData == null)
+        {
+            return 0;
+        }
+        int num = (int)MathfEx.Min(maxInstances, Provider.modeConfigData.Vehicles.Min_Natural_Vehicles);
+        if (num < 1)
+        {
+            return 0;
+        }
+        int num2 = 0;
+        foreach (InteractableVehicle vehicle in _vehicles)
+        {
+            num2 += (vehicle._wasNaturallySpawned ? 1 : 0);
+        }
+        return Mathf.Max(0, num - num2);
     }
 
     private void RespawnReloadedVehicles()
@@ -1811,8 +1845,17 @@ public class VehicleManager : SteamCaller
                 UnturnedLog.error("Missing replacement asset for reloaded vehicle");
                 continue;
             }
+            bool wasNaturallySpawned = item.WasNaturallySpawned;
             askVehicleDestroy(item);
-            SpawnVehicleV3(vehicleAsset, item.skinID, item.mythicID, item.roadPosition, item.transform.position, item.transform.rotation, item.sirensOn, item.isBlimpFloating, item.headlightsOn, item.taillightsOn, item.fuel, item.health, item.batteryCharge, item.lockedOwner, item.lockedGroup, item.isLocked, null, item.tireAliveMask, item.PaintColor);
+            InteractableVehicle interactableVehicle = SpawnVehicleV3(vehicleAsset, item.skinID, item.mythicID, item.roadPosition, item.transform.position, item.transform.rotation, item.sirensOn, item.isBlimpFloating, item.headlightsOn, item.taillightsOn, item.fuel, item.health, item.batteryCharge, item.lockedOwner, item.lockedGroup, item.isLocked, null, item.tireAliveMask, item.PaintColor);
+            if (interactableVehicle != null)
+            {
+                interactableVehicle.WasNaturallySpawned = wasNaturallySpawned;
+            }
+            else
+            {
+                UnturnedLog.error($"Failed to spawn replacement for reloaded vehicle: {vehicleAsset}");
+            }
         }
     }
 
@@ -1847,8 +1890,11 @@ public class VehicleManager : SteamCaller
                 {
                     list.Add(LevelVehicles.spawns[i]);
                 }
-                while (vehicles.Count < maxInstances && list.Count > 0)
+                int num = GetNumberOfNaturalVehiclesToSpawn();
+                UnturnedLog.info($"Loaded {vehicles.Count} vehicles, will spawn {num} naturally");
+                while (num > 0 && list.Count > 0)
                 {
+                    num--;
                     int index = UnityEngine.Random.Range(0, list.Count);
                     VehicleSpawnpoint spawn = list[index];
                     list.RemoveAt(index);
@@ -1880,12 +1926,16 @@ public class VehicleManager : SteamCaller
                     continue;
                 }
                 float trackSampledLength = road.trackSampledLength;
-                float num = UnityEngine.Random.Range(train.Min_Spawn_Placement, train.Max_Spawn_Placement);
-                float roadPosition = trackSampledLength * num;
+                float num2 = UnityEngine.Random.Range(train.Min_Spawn_Placement, train.Max_Spawn_Placement);
+                float roadPosition = trackSampledLength * num2;
                 if (Assets.find(EAssetType.VEHICLE, train.VehicleID) is VehicleAsset vehicleAsset)
                 {
                     NetId netId = NetIdRegistry.ClaimBlock(21u);
-                    addVehicle(vehicleAsset.GUID, 0, 0, roadPosition, Vector3.zero, Quaternion.identity, sirens: false, blimp: false, headlights: false, taillights: false, ushort.MaxValue, isExploded: false, ushort.MaxValue, ushort.MaxValue, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), getVehicleRandomTireAliveMask(vehicleAsset), netId, new Color32(0, 0, 0, 0));
+                    InteractableVehicle interactableVehicle = addVehicle(vehicleAsset.GUID, 0, 0, roadPosition, Vector3.zero, Quaternion.identity, sirens: false, blimp: false, headlights: false, taillights: false, ushort.MaxValue, isExploded: false, ushort.MaxValue, ushort.MaxValue, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), getVehicleRandomTireAliveMask(vehicleAsset), netId, new Color32(0, 0, 0, 0));
+                    if (interactableVehicle != null)
+                    {
+                        interactableVehicle.WasNaturallySpawned = true;
+                    }
                 }
                 else if ((bool)Assets.shouldLoadAnyAssets)
                 {
@@ -1952,12 +2002,11 @@ public class VehicleManager : SteamCaller
                 continue;
             }
             vehiclesToSend.Clear();
-            for (int j = 0; j < vehicles.Count; j++)
+            foreach (InteractableVehicle item in vehiclesNeedingReplicationUpdate)
             {
-                InteractableVehicle interactableVehicle = vehicles[j];
-                if (!(interactableVehicle == null) && ((interactableVehicle.updates != null && interactableVehicle.updates.Count > 0) || interactableVehicle.needsReplicationUpdate) && !interactableVehicle.checkDriver(client.playerID.steamID))
+                if (!(item == null) && !item.checkDriver(client.playerID.steamID))
                 {
-                    vehiclesToSend.Add(interactableVehicle);
+                    vehiclesToSend.Add(item);
                 }
             }
             if (vehiclesToSend.IsEmpty())
@@ -1969,30 +2018,30 @@ public class VehicleManager : SteamCaller
                 Vector3 position = client.player.transform.position;
                 writer.WriteUInt32(seq);
                 writer.WriteUInt16((ushort)vehiclesToSend.Count);
-                foreach (InteractableVehicle item in vehiclesToSend)
+                foreach (InteractableVehicle item2 in vehiclesToSend)
                 {
-                    Vector3 position2 = item.transform.position;
+                    Vector3 position2 = item2.transform.position;
                     bool flag = (position2 - position).sqrMagnitude < 90000f;
-                    Vector3 value = ((item.asset.engine != EEngine.TRAIN) ? position2 : InteractableVehicle.PackRoadPosition(item.roadPosition));
-                    writer.WriteUInt32(item.instanceID);
+                    Vector3 value = ((item2.asset.engine != EEngine.TRAIN) ? position2 : InteractableVehicle.PackRoadPosition(item2.roadPosition));
+                    writer.WriteUInt32(item2.instanceID);
                     writer.WriteClampedVector3(value, 13, 8);
-                    writer.WriteQuaternion(item.transform.rotation, 11);
-                    writer.WriteUnsignedClampedFloat(item.ReplicatedSpeed, 8, 2);
-                    writer.WriteClampedFloat(item.ReplicatedForwardVelocity, 9, 2);
-                    writer.WriteSignedNormalizedFloat(item.ReplicatedSteeringInput, 2);
-                    writer.WriteClampedFloat(item.ReplicatedVelocityInput, 9, 2);
+                    writer.WriteQuaternion(item2.transform.rotation, 11);
+                    writer.WriteUnsignedClampedFloat(item2.ReplicatedSpeed, 8, 2);
+                    writer.WriteClampedFloat(item2.ReplicatedForwardVelocity, 9, 2);
+                    writer.WriteSignedNormalizedFloat(item2.ReplicatedSteeringInput, 2);
+                    writer.WriteClampedFloat(item2.ReplicatedVelocityInput, 9, 2);
                     writer.WriteBit(flag);
                     if (flag)
                     {
-                        if (item.asset.replicatedWheelIndices != null)
+                        if (item2.asset.replicatedWheelIndices != null)
                         {
-                            int[] replicatedWheelIndices = item.asset.replicatedWheelIndices;
+                            int[] replicatedWheelIndices = item2.asset.replicatedWheelIndices;
                             foreach (int num in replicatedWheelIndices)
                             {
-                                Wheel wheelAtIndex = item.GetWheelAtIndex(num);
+                                Wheel wheelAtIndex = item2.GetWheelAtIndex(num);
                                 if (wheelAtIndex == null)
                                 {
-                                    UnturnedLog.error($"\"{item.asset.FriendlyName}\" missing wheel for replicated index: {num}");
+                                    UnturnedLog.error($"\"{item2.asset.FriendlyName}\" missing wheel for replicated index: {num}");
                                     writer.WriteUnsignedNormalizedFloat(0f, 4);
                                 }
                                 else
@@ -2002,11 +2051,11 @@ public class VehicleManager : SteamCaller
                                 }
                             }
                         }
-                        if (item.asset.UsesEngineRpmAndGears)
+                        if (item2.asset.UsesEngineRpmAndGears)
                         {
-                            uint value2 = (uint)(item.GearNumber + 1);
+                            uint value2 = (uint)(item2.GearNumber + 1);
                             writer.WriteBits(value2, 3);
-                            float value3 = Mathf.InverseLerp(item.asset.EngineIdleRpm, item.asset.EngineMaxRpm, item.ReplicatedEngineRpm);
+                            float value3 = Mathf.InverseLerp(item2.asset.EngineIdleRpm, item2.asset.EngineMaxRpm, item2.ReplicatedEngineRpm);
                             writer.WriteUnsignedNormalizedFloat(value3, 7);
                         }
                     }
@@ -2018,18 +2067,14 @@ public class VehicleManager : SteamCaller
                 }
             });
         }
-        for (int k = 0; k < vehicles.Count; k++)
+        foreach (InteractableVehicle item3 in vehiclesNeedingReplicationUpdate)
         {
-            InteractableVehicle interactableVehicle2 = vehicles[k];
-            if (!(interactableVehicle2 == null))
+            if (item3 != null)
             {
-                if (interactableVehicle2.updates != null)
-                {
-                    interactableVehicle2.updates.Clear();
-                }
-                interactableVehicle2.needsReplicationUpdate = false;
+                item3.needsReplicationUpdate = false;
             }
         }
+        vehiclesNeedingReplicationUpdate.Clear();
     }
 
     private void Update()
@@ -2195,6 +2240,7 @@ public class VehicleManager : SteamCaller
                             paintColor = color;
                         }
                     }
+                    bool wasNaturallySpawned = b < 17 || river.readBoolean();
                     if (vehicleAsset != null)
                     {
                         if (!vehicleAsset.canTiresBeDamaged)
@@ -2218,6 +2264,7 @@ public class VehicleManager : SteamCaller
                                 }
                             }
                             interactableVehicle.decayTimer = decayTimer;
+                            interactableVehicle.WasNaturallySpawned = wasNaturallySpawned;
                         }
                     }
                 }
@@ -2259,7 +2306,11 @@ public class VehicleManager : SteamCaller
                     if (vehicleAsset2 != null)
                     {
                         NetId netId2 = NetIdRegistry.ClaimBlock(21u);
-                        manager.addVehicle(vehicleAsset2.GUID, 0, 0, 0f, point2, angle2, sirens: false, blimp: false, headlights: false, taillights: false, fuel2, isExploded: false, health2, batteryCharge2, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), tireAliveMask2, netId2, paintColor2);
+                        InteractableVehicle interactableVehicle2 = manager.addVehicle(vehicleAsset2.GUID, 0, 0, 0f, point2, angle2, sirens: false, blimp: false, headlights: false, taillights: false, fuel2, isExploded: false, health2, batteryCharge2, CSteamID.Nil, CSteamID.Nil, locked: false, null, null, allocateInstanceID(), tireAliveMask2, netId2, paintColor2);
+                        if (interactableVehicle2 != null)
+                        {
+                            interactableVehicle2.WasNaturallySpawned = true;
+                        }
                     }
                 }
             }
@@ -2275,7 +2326,7 @@ public class VehicleManager : SteamCaller
     public static void save()
     {
         River river = LevelSavedata.openRiver("/Vehicles.dat", isReading: false);
-        river.writeByte(16);
+        river.writeByte(17);
         ushort num = 0;
         for (ushort num2 = 0; num2 < vehicles.Count; num2++)
         {
@@ -2362,6 +2413,7 @@ public class VehicleManager : SteamCaller
                 river.writeByte(interactableVehicle2.PaintColor.g);
                 river.writeByte(interactableVehicle2.PaintColor.b);
                 river.writeByte(interactableVehicle2.PaintColor.a);
+                river.writeBoolean(interactableVehicle2.WasNaturallySpawned);
             }
         }
         river.closeRiver();
@@ -2478,12 +2530,14 @@ public class VehicleManager : SteamCaller
     [Obsolete]
     public void tellVehicleDestroy(CSteamID steamID, uint instanceID)
     {
+        ThreadUtil.assertIsGameThread();
         ReceiveDestroySingleVehicle(instanceID);
     }
 
     [Obsolete]
     public void tellVehicleDestroyAll(CSteamID steamID)
     {
+        ThreadUtil.assertIsGameThread();
         ReceiveDestroyAllVehicles();
     }
 

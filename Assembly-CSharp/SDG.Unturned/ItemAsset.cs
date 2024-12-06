@@ -473,8 +473,9 @@ public class ItemAsset : Asset, ISkinableAsset
     /// <summary>
     /// Find useableType by useable name.
     /// </summary>
-    private void updateUseableType()
+    private void updateUseableType(DatDictionary data)
     {
+        useable = data.GetString("Useable");
         if (string.IsNullOrEmpty(useable))
         {
             useableType = null;
@@ -483,11 +484,15 @@ public class ItemAsset : Asset, ISkinableAsset
         useableType = Assets.useableTypes.getType(useable);
         if (useableType == null)
         {
-            Assets.reportError(this, "cannot find useable type \"{0}\"", useable);
+            useableType = data.ParseType("Useable");
+            if (useableType == null)
+            {
+                Assets.ReportError(this, "cannot find useable type \"{0}\"", useable);
+            }
         }
-        else if (!typeof(Useable).IsAssignableFrom(useableType))
+        if (useableType != null && !typeof(Useable).IsAssignableFrom(useableType))
         {
-            Assets.reportError(this, "type \"{0}\" is not useable", useableType);
+            Assets.ReportError(this, "type \"{0}\" is not useable", useableType);
             useableType = null;
         }
     }
@@ -504,13 +509,13 @@ public class ItemAsset : Asset, ISkinableAsset
         Animation component = anim.GetComponent<Animation>();
         if (component == null)
         {
-            Assets.reportError(this, "missing Animation component on 'Animations' GameObject");
+            Assets.ReportError(this, "missing Animation component on 'Animations' GameObject");
             return;
         }
         _animations = new AnimationClip[component.GetClipCount()];
         if (animations.Length < 1)
         {
-            Assets.reportError(this, "animation clips list is empty");
+            Assets.ReportError(this, "animation clips list is empty");
             return;
         }
         int num = 0;
@@ -525,11 +530,11 @@ public class ItemAsset : Asset, ISkinableAsset
         }
         if (flag)
         {
-            Assets.reportError(this, "has invalid animation clip references");
+            Assets.ReportError(this, "has invalid animation clip references");
         }
         if (!flag2)
         {
-            Assets.reportError(this, "missing 'Equip' animation clip");
+            Assets.ReportError(this, "missing 'Equip' animation clip");
         }
     }
 
@@ -545,6 +550,10 @@ public class ItemAsset : Asset, ISkinableAsset
         if (string.IsNullOrEmpty(_itemName))
         {
             _itemName = string.Empty;
+        }
+        if ((bool)Assets.shouldValidateAssets && _itemName.Trim().Length != _itemName.Length)
+        {
+            Assets.ReportError(this, "Display name has leading or trailing whitespace");
         }
         _itemDescription = localization.format("Description");
         _itemDescription = ItemTool.filterRarityRichText(itemDescription);
@@ -661,8 +670,7 @@ public class ItemAsset : Asset, ISkinableAsset
         shouldLeftHandedCharactersMirrorEquippedItem = data.ParseBool("Left_Handed_Characters_Mirror_Equipable", defaultValue: true);
         isEligibleForAutoStatDescriptions = data.ParseBool("Use_Auto_Stat_Descriptions", defaultValue: true);
         shouldProcedurallyAnimateInertia = data.ParseBool("Procedurally_Animate_Inertia", defaultValue: true);
-        useable = data.GetString("Useable");
-        updateUseableType();
+        updateUseableType(data);
         bool defaultValue = useableType != null;
         canPlayerEquip = data.ParseBool("Can_Player_Equip", defaultValue);
         equipableMovementSpeedMultiplier = data.ParseFloat("Equipable_Movement_Speed_Multiplier", 1f);
@@ -712,7 +720,7 @@ public class ItemAsset : Asset, ISkinableAsset
             }
             if (id < 2000 && (type == EItemType.GUN || type == EItemType.MELEE) && item.transform.Find("Stat_Tracker") == null)
             {
-                Assets.reportError(this, "missing 'Stat_Tracker' Transform");
+                Assets.ReportError(this, "missing 'Stat_Tracker' Transform");
             }
             AssetValidation.searchGameObjectForErrors(this, item);
         }
@@ -745,7 +753,7 @@ public class ItemAsset : Asset, ISkinableAsset
                     }
                     else
                     {
-                        Assets.reportError(this, "Unable to parse " + text + ": \"" + data.GetString(text) + "\"");
+                        Assets.ReportError(this, "Unable to parse " + text + ": \"" + data.GetString(text) + "\"");
                     }
                 }
                 bool newCritical = data.ContainsKey("Blueprint_" + b3 + "_Supply_" + b5 + "_Critical");
@@ -911,6 +919,88 @@ public class ItemAsset : Asset, ISkinableAsset
             _albedoBase = bundle.load<Texture2D>("Albedo_Base");
             _metallicBase = bundle.load<Texture2D>("Metallic_Base");
             _emissionBase = bundle.load<Texture2D>("Emission_Base");
+        }
+    }
+
+    internal override void BuildCargoData(CargoBuilder builder)
+    {
+        base.BuildCargoData(builder);
+        CargoDeclaration orAddDeclaration = builder.GetOrAddDeclaration("Locale_Item");
+        orAddDeclaration.AppendGuid("GUID", GUID);
+        orAddDeclaration.AppendString("Name", FriendlyName);
+        orAddDeclaration.AppendString("Description", itemDescription);
+        CargoDeclaration orAddDeclaration2 = builder.GetOrAddDeclaration("Item");
+        orAddDeclaration2.AppendGuid("GUID", GUID);
+        orAddDeclaration2.AppendToString("Actions", actions.Count);
+        orAddDeclaration2.AppendBool("Allow_Manual_Drop", allowManualDrop);
+        orAddDeclaration2.AppendByte("Amount", amount);
+        orAddDeclaration2.AppendToString("Blueprints", blueprints.Count);
+        orAddDeclaration2.AppendBool("Can_Player_Equip", canPlayerEquip);
+        orAddDeclaration2.AppendBool("Can_Use_Underwater", canUseUnderwater);
+        orAddDeclaration2.AppendByte("Count_Max", countMax);
+        orAddDeclaration2.AppendByte("Count_Min", countMin);
+        orAddDeclaration2.AppendBool("Destroy_Item_Colliders", shouldDestroyItemColliders);
+        orAddDeclaration2.AppendFloat("Equipable_Movement_Speed_Multiplier", equipableMovementSpeedMultiplier);
+        orAddDeclaration2.AppendToString("EquipableModelParent", EquipableModelParent);
+        orAddDeclaration2.AppendToString("EquipablePrefab", equipablePrefab);
+        orAddDeclaration2.AppendToString("EquipAudioClip", equip);
+        orAddDeclaration2.AppendString("Instantiated_Item_Name_Override", instantiatedItemName);
+        orAddDeclaration2.AppendToString("InventoryAudio", inventoryAudio);
+        orAddDeclaration2.AppendBool("Left_Handed_Characters_Mirror_Equipable", shouldLeftHandedCharactersMirrorEquippedItem);
+        orAddDeclaration2.AppendBool("Pro", isPro);
+        orAddDeclaration2.AppendBool("Procedurally_Animate_Inertia", shouldProcedurallyAnimateInertia);
+        orAddDeclaration2.AppendByte("Quality_Max", qualityMax);
+        orAddDeclaration2.AppendByte("Quality_Min", qualityMin);
+        orAddDeclaration2.AppendUShort("Shared_Skin_Lookup_ID", sharedSkinLookupID);
+        orAddDeclaration2.AppendBool("Shared_Skin_Apply_Visuals", SharedSkinShouldApplyVisuals);
+        orAddDeclaration2.AppendBool("Should_Delete_At_Zero_Quality", shouldDeleteAtZeroQuality);
+        orAddDeclaration2.AppendBool("Should_Drop_On_Death", shouldDropOnDeath);
+        orAddDeclaration2.AppendFloat("Size_Z", iconCameraOrthographicSize);
+        orAddDeclaration2.AppendFloat("Size2_Z", econIconCameraOrthographicSize);
+        orAddDeclaration2.AppendToString("Rarity", rarity);
+        orAddDeclaration2.AppendByte("Size_X", size_x);
+        orAddDeclaration2.AppendByte("Size_Y", size_y);
+        orAddDeclaration2.AppendToString("Slot", slot);
+        orAddDeclaration2.AppendToString("Useable", useable);
+        orAddDeclaration2.AppendBool("Use_Auto_Icon_Measurements", isEligibleForAutomaticIconMeasurements);
+        orAddDeclaration2.AppendBool("Use_Auto_Stat_Descriptions", isEligibleForAutoStatDescriptions);
+        for (byte b = 0; b < blueprints.Count; b++)
+        {
+            CargoDeclaration cargoDeclaration = builder.AddDeclaration("Item_Blueprint");
+            cargoDeclaration.AppendGuid("GUID", GUID);
+            cargoDeclaration.AppendToString("blueprintIndex", b);
+            cargoDeclaration.AppendToString("Build", blueprints[b].build);
+            cargoDeclaration.AppendToString("Level", blueprints[b].level);
+            cargoDeclaration.AppendToString("Map", blueprints[b].map);
+            cargoDeclaration.AppendToString("Outputs", blueprints[b].outputs.Length);
+            cargoDeclaration.AppendToString("Searchable", blueprints[b].canBeVisibleWhenSearchedWithoutRequiredItems);
+            cargoDeclaration.AppendToString("Skill", blueprints[b].skill);
+            cargoDeclaration.AppendToString("State_Transfer", blueprints[b].transferState);
+            cargoDeclaration.AppendToString("State_Transfer_Delete_Attachments", blueprints[b].withoutAttachments);
+            cargoDeclaration.AppendToString("Supplies", blueprints[b].supplies.Length);
+            cargoDeclaration.AppendToString("Tool", blueprints[b].tool);
+            cargoDeclaration.AppendToString("Tool_Critical", blueprints[b].toolCritical);
+            cargoDeclaration.AppendToString("Type", blueprints[b].type);
+            for (byte b2 = 0; b2 < blueprints[b].supplies.Length; b2++)
+            {
+                CargoDeclaration cargoDeclaration2 = builder.AddDeclaration("Item_Blueprint_Supply");
+                cargoDeclaration2.AppendGuid("GUID", GUID);
+                cargoDeclaration2.AppendByte("blueprintIndex", b);
+                cargoDeclaration2.AppendByte("supplyIndex", b2);
+                cargoDeclaration2.AppendToString("ID", blueprints[b].supplies[b2].id);
+                cargoDeclaration2.AppendToString("Critical", blueprints[b].supplies[b2].isCritical);
+                cargoDeclaration2.AppendToString("Amount", blueprints[b].supplies[b2].amount);
+            }
+            for (byte b3 = 0; b3 < blueprints[b].outputs.Length; b3++)
+            {
+                CargoDeclaration cargoDeclaration3 = builder.AddDeclaration("Item_Blueprint_Output");
+                cargoDeclaration3.AppendGuid("GUID", GUID);
+                cargoDeclaration3.AppendByte("blueprintIndex", b);
+                cargoDeclaration3.AppendByte("outputIndex", b3);
+                cargoDeclaration3.AppendUShort("ID", blueprints[b].outputs[b3].id);
+                cargoDeclaration3.AppendUShort("Amount", blueprints[b].outputs[b3].amount);
+                cargoDeclaration3.AppendToString("Origin", blueprints[b].outputs[b3].origin);
+            }
         }
     }
 

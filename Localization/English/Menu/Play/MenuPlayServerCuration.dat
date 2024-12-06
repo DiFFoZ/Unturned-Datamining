@@ -1,0 +1,69 @@
+Title Server Browser Curation
+TitleInfo Processed from top to bottom, so curators higher up on this ranking take priority.
+
+Tutorial Subscribe to a Server Curation List on the Steam Workshop to enable here, or add one from the web using the URL field!\nCurators can help you find high-quality, verified hosts in the server browser.
+
+URL_Placeholder https://example.com/curated-list.txt
+URL_Tooltip Link to a curator's list hosted on the Internet.
+AddURLButton_Label Add Curator
+AddURLButton_Tooltip Add a server curation list at the given URL to the ranking.
+
+DenyMode_Label Block Mode
+DenyMode_Hide_Label Hide
+DenyMode_Hide_Tooltip Servers matching a Deny rule are hidden from the server browser.
+DenyMode_MoveToBottom_Label Move to Bottom
+DenyMode_MoveToBottom_Tooltip Servers matching a Deny rule are moved to the bottom of the server browser.
+
+Activate_Label Activate
+Activate_Tooltip Turn this server curation list ON.
+Deactivate_Label Deactivate
+Deactivate_Tooltip Turn this server curation list OFF.
+
+Reload_Label Reload
+Reload_Tooltip Refresh contents of this server curation list.
+
+Remove_Tooltip Delete this server curation list.
+MoveUp_Tooltip Move higher in the ranking to increase priority.
+MoveDown_Tooltip Move lower in the ranking to decrease priority.
+
+WebItemPending Requesting...
+NoWebRequests Cannot request because -NoWebRequests is enabled.
+
+Rule_Action_Label Label
+Rule_Action_Allow Allow
+Rule_Action_Deny Deny
+
+Rule_Type_Name Name
+Rule_Type_IPv4 IPv4
+Rule_Type_ServerID ServerID
+
+Rule_NotInverted_Format {0} {1} {2}
+Rule_Inverted_Format {0} {1} Not {2}
+
+Rule_ApplyLabel Applies label: {0}
+
+Test_Visible_Label Show testing tool
+Test_Visible_Tooltip Tool for checking an imaginary server.
+
+Test_Input_Name_Label Test Name
+Test_Input_Name_Tooltip Display name in server browser. All servers must have a name.
+
+Test_Input_Address_Label Test Address
+Test_Input_Address_Tooltip IPv4 address and port of server.
+
+Test_Input_ServerID_Label Test Server ID
+Test_Input_ServerID_Tooltip Steam ID of the server, also referred to as "server code."
+
+Test_NameInvalid Test Name is empty.
+Test_AddressInvalid Test Address and/or port is invalid.
+Test_ServerIdInvalid Test Server ID is invalid.
+
+Test_NoMatch No match.
+Test_Match_Count Matched {0} rule(s)
+Test_Match_Allowed Allowed
+Test_Match_Denied Denied
+Test_Match_HasLabels Labels: {0}
+Test_Match_NoLabels No labels
+Test_Match_Rule Rule "{0}" in "{1}"
+Test_Match_Format {0} - {1} - {2}
+Test_Match_Final Final match: {0}

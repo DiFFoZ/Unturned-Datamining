@@ -131,7 +131,7 @@ public class DialogueAsset : Asset
                 array2[b3] = data.ParseUInt8(text, 0);
                 if (array2[b3] >= num2)
                 {
-                    Assets.reportError(this, "{0} out of bounds ({1})", text, num2);
+                    Assets.ReportError(this, "{0} out of bounds ({1})", text, num2);
                 }
             }
             Guid guid;
@@ -153,7 +153,7 @@ public class DialogueAsset : Asset
                 array4[b5] = data.ParseUInt8(text2, 0);
                 if (array4[b5] >= num)
                 {
-                    Assets.reportError(this, "{0} out of bounds ({1})", text2, num);
+                    Assets.ReportError(this, "{0} out of bounds ({1})", text2, num);
                 }
             }
             Guid guid2;

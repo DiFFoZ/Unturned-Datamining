@@ -135,7 +135,7 @@ public class AnimalAsset : Asset
         Animation animation = root.transform.Find("Character")?.GetComponent<Animation>();
         if (animation == null)
         {
-            Assets.reportError(this, "{0} missing Animation component on Character", root);
+            Assets.ReportError(this, "{0} missing Animation component on Character", root);
             return;
         }
         validateAnimation(animation, "Idle");
@@ -208,7 +208,7 @@ public class AnimalAsset : Asset
         }
         if (ragdoll == null)
         {
-            Assets.reportError(this, "missing 'Ragdoll' GameObject. Highly recommended to fix.");
+            Assets.ReportError(this, "missing 'Ragdoll' GameObject. Highly recommended to fix.");
         }
         _speedRun = data.ParseFloat("Speed_Run");
         _speedWalk = data.ParseFloat("Speed_Walk");
@@ -259,6 +259,39 @@ public class AnimalAsset : Asset
         attackInterval = data.ParseFloat("Attack_Interval", 1f);
         shouldPlayAnimsOnDedicatedServer = data.ParseBool("Should_Play_Anims_On_Dedicated_Server");
         _rewardXP = data.ParseUInt32("Reward_XP");
+    }
+
+    internal override void BuildCargoData(CargoBuilder builder)
+    {
+        base.BuildCargoData(builder);
+        CargoDeclaration orAddDeclaration = builder.GetOrAddDeclaration("Locale_Animal");
+        orAddDeclaration.AppendGuid("GUID", GUID);
+        orAddDeclaration.AppendString("Name", FriendlyName);
+        CargoDeclaration orAddDeclaration2 = builder.GetOrAddDeclaration("Animal");
+        orAddDeclaration2.AppendGuid("GUID", GUID);
+        orAddDeclaration2.AppendInt("Attack_Anim_Variants", attackAnimVariantsCount);
+        orAddDeclaration2.AppendFloat("Attack_Interval", attackInterval);
+        orAddDeclaration2.AppendToString("Behaviour", behaviour);
+        orAddDeclaration2.AppendByte("Damage", damage);
+        orAddDeclaration2.AppendInt("Eat_Anim_Variants", eatAnimVariantsCount);
+        orAddDeclaration2.AppendInt("Glance_Anim_Variants", glanceAnimVariantsCount);
+        orAddDeclaration2.AppendUShort("Health", health);
+        orAddDeclaration2.AppendFloat("Horizontal_Attack_Range", Mathf.Sqrt(horizontalAttackRangeSquared));
+        orAddDeclaration2.AppendFloat("Horizontal_Vehicle_Attack_Range", Mathf.Sqrt(horizontalVehicleAttackRangeSquared));
+        orAddDeclaration2.AppendUShort("Meat", meat);
+        orAddDeclaration2.AppendToString("Panics", panics.Length);
+        orAddDeclaration2.AppendUShort("Pelt", pelt);
+        orAddDeclaration2.AppendFloat("Regen", regen);
+        orAddDeclaration2.AppendUShort("Reward_ID", rewardID);
+        orAddDeclaration2.AppendByte("Reward_Max", rewardMax);
+        orAddDeclaration2.AppendByte("Reward_Min", rewardMin);
+        orAddDeclaration2.AppendUInt("Reward_XP", rewardXP);
+        orAddDeclaration2.AppendToString("Roars", roars.Length);
+        orAddDeclaration2.AppendBool("Should_Play_Anims_On_Dedicated_Server", shouldPlayAnimsOnDedicatedServer);
+        orAddDeclaration2.AppendFloat("Speed_Run", speedRun);
+        orAddDeclaration2.AppendFloat("Speed_Walk", speedWalk);
+        orAddDeclaration2.AppendInt("Startle_Anim_Variants", startleAnimVariantsCount);
+        orAddDeclaration2.AppendFloat("Vertical_Attack_Range", verticalAttackRange);
     }
 
     internal string OnGetRewardSpawnTableErrorContext()

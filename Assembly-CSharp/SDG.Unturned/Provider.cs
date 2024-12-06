@@ -1178,6 +1178,10 @@ public class Provider : MonoBehaviour
 
     private static void battlEyeServerPrintMessage(string message)
     {
+        if (Logs.ShouldRedactLogs)
+        {
+            Logs.RedactIPv4Addresses(ref message);
+        }
         for (int i = 0; i < clients.Count; i++)
         {
             SteamPlayer steamPlayer = clients[i];
@@ -1736,41 +1740,67 @@ public class Provider : MonoBehaviour
         return steamPlayer;
     }
 
+    internal static void RemoveClient(SteamPlayer clientToRemove)
+    {
+        if (!clients.Contains(clientToRemove))
+        {
+            UnturnedLog.warn($"RemoveClient called but not in list: {clientToRemove}");
+            return;
+        }
+        if (battlEyeServerHandle != IntPtr.Zero && battlEyeServerRunData != null && battlEyeServerRunData.pfnChangePlayerStatus != null)
+        {
+            battlEyeServerRunData.pfnChangePlayerStatus(clientToRemove.battlEyeId, -1);
+        }
+        if (Dedicator.IsDedicatedServer)
+        {
+            clientToRemove.transportConnection.CloseConnection();
+        }
+        broadcastEnemyDisconnected(clientToRemove);
+        try
+        {
+            clientToRemove.player.ReleaseNetIdBlock();
+        }
+        catch (Exception e)
+        {
+            UnturnedLog.exception(e, "Caught exception releasing player Net ID block:");
+        }
+        if (clientToRemove.model != null)
+        {
+            EffectManager.ClearAttachments(clientToRemove.model);
+            clientToRemove.player.isExpectingDestroy = true;
+            UnityEngine.Object.Destroy(clientToRemove.model.gameObject);
+        }
+        NetIdRegistry.Release(clientToRemove.GetNetId());
+        clients.Remove(clientToRemove);
+        verifyNextPlayerInQueue();
+        updateRichPresence();
+    }
+
+    [Obsolete("Shouldn't have been used when it's internal!")]
     internal static void removePlayer(byte index)
     {
         if (index < 0 || index >= clients.Count)
         {
             UnturnedLog.error("Failed to find player: " + index);
-            return;
         }
-        SteamPlayer steamPlayer = clients[index];
-        if (battlEyeServerHandle != IntPtr.Zero && battlEyeServerRunData != null && battlEyeServerRunData.pfnChangePlayerStatus != null)
+        else
         {
-            battlEyeServerRunData.pfnChangePlayerStatus(steamPlayer.battlEyeId, -1);
+            RemoveClient(clients[index]);
         }
-        if (Dedicator.IsDedicatedServer)
-        {
-            steamPlayer.transportConnection.CloseConnection();
-        }
-        broadcastEnemyDisconnected(steamPlayer);
-        steamPlayer.player.ReleaseNetIdBlock();
-        if (steamPlayer.model != null)
-        {
-            EffectManager.ClearAttachments(steamPlayer.model);
-            UnityEngine.Object.Destroy(steamPlayer.model.gameObject);
-        }
-        NetIdRegistry.Release(steamPlayer.GetNetId());
-        clients.RemoveAt(index);
-        verifyNextPlayerInQueue();
-        updateRichPresence();
     }
 
+    private static void ReplicateRemoveClient(SteamPlayer clientToRemove)
+    {
+        NetMessages.SendMessageToClients(EClientMessage.PlayerDisconnected, ENetReliability.Reliable, GatherRemoteClientConnectionsMatchingPredicate((SteamPlayer potentialRecipient) => potentialRecipient != clientToRemove), delegate(NetPakWriter writer)
+        {
+            writer.WriteNetId(clientToRemove.GetNetId());
+        });
+    }
+
+    [Obsolete("Shouldn't have been used in the first place because it's private!")]
     private static void replicateRemovePlayer(CSteamID skipSteamID, byte removalIndex)
     {
-        NetMessages.SendMessageToClients(EClientMessage.PlayerDisconnected, ENetReliability.Reliable, GatherRemoteClientConnectionsMatchingPredicate((SteamPlayer potentialRecipient) => potentialRecipient.playerID.steamID != skipSteamID), delegate(NetPakWriter writer)
-        {
-            writer.WriteUInt8(removalIndex);
-        });
+        ReplicateRemoveClient(clients[removalIndex]);
     }
 
     /// <summary>
@@ -4001,10 +4031,18 @@ public class Provider : MonoBehaviour
         }
         foreach (SteamPlayer aboutClient in _clients)
         {
-            NetMessages.SendMessageToClient(EClientMessage.PlayerConnected, ENetReliability.Reliable, newClient.transportConnection, delegate(NetPakWriter writer)
+            try
             {
-                WriteConnectedMessage(writer, aboutClient, newClient);
-            });
+                NetMessages.SendMessageToClient(EClientMessage.PlayerConnected, ENetReliability.Reliable, newClient.transportConnection, delegate(NetPakWriter writer)
+                {
+                    WriteConnectedMessage(writer, aboutClient, newClient);
+                });
+            }
+            catch (Exception e)
+            {
+                UnturnedLog.exception(e, $"Caught exception sending PlayerConnected message about {aboutClient} to new client {newClient}:");
+                UnturnedLog.error("This is likely a fatal error!");
+            }
         }
         GetAddressAndPortForClientAdvertisement(out var ipForClient, out var queryPortForClient);
         NetMessages.SendMessageToClient(EClientMessage.Accepted, ENetReliability.Reliable, transportConnection, delegate(NetPakWriter writer)
@@ -4056,10 +4094,18 @@ public class Provider : MonoBehaviour
             battlEyeServerRunData.pfnReceivedPlayerGUID(newClient.battlEyeId, pvGUID, 8);
             gCHandle.Free();
         }
-        NetMessages.SendMessageToClients(EClientMessage.PlayerConnected, ENetReliability.Reliable, GatherRemoteClientConnectionsMatchingPredicate((SteamPlayer potentialRecipient) => potentialRecipient != newClient), delegate(NetPakWriter writer)
+        try
         {
-            WriteConnectedMessage(writer, newClient, null);
-        });
+            NetMessages.SendMessageToClients(EClientMessage.PlayerConnected, ENetReliability.Reliable, GatherRemoteClientConnectionsMatchingPredicate((SteamPlayer potentialRecipient) => potentialRecipient != newClient), delegate(NetPakWriter writer)
+            {
+                WriteConnectedMessage(writer, newClient, null);
+            });
+        }
+        catch (Exception e2)
+        {
+            UnturnedLog.exception(e2, $"Caught exception sending PlayerConnected message for new client {newClient} to existing clients:");
+            UnturnedLog.error("This is likely a fatal error!");
+        }
         SendInitialGlobalState(newClient);
         newClient.player.InitializePlayer();
         foreach (SteamPlayer client in _clients)
@@ -4071,10 +4117,10 @@ public class Provider : MonoBehaviour
         {
             onServerConnected?.Invoke(playerID.steamID);
         }
-        catch (Exception e)
+        catch (Exception e3)
         {
             UnturnedLog.warn("Plugin raised an exception from onServerConnected:");
-            UnturnedLog.exception(e);
+            UnturnedLog.exception(e3);
         }
         if (CommandWindow.shouldLogJoinLeave)
         {
@@ -4240,8 +4286,8 @@ public class Provider : MonoBehaviour
             broadcastServerDisconnected(steamID);
             validateDisconnectedMaintainedIndex(steamID, foundIndex);
             SteamGameServer.EndAuthSession(steamID);
-            removePlayer(foundIndex);
-            replicateRemovePlayer(steamID, foundIndex);
+            RemoveClient(foundClient);
+            ReplicateRemoveClient(foundClient);
         }
     }
 
@@ -4266,8 +4312,8 @@ public class Provider : MonoBehaviour
             broadcastServerDisconnected(steamID);
             validateDisconnectedMaintainedIndex(steamID, foundIndex);
             SteamGameServer.EndAuthSession(steamID);
-            removePlayer(foundIndex);
-            replicateRemovePlayer(steamID, foundIndex);
+            RemoveClient(foundClient);
+            ReplicateRemoveClient(foundClient);
         }
     }
 
@@ -4290,8 +4336,8 @@ public class Provider : MonoBehaviour
             {
                 UnturnedLog.info(localization.format("PlayerDisconnectedText", steamID, foundClient.playerID.playerName, foundClient.playerID.characterName));
             }
-            removePlayer(foundIndex);
-            replicateRemovePlayer(steamID, foundIndex);
+            RemoveClient(foundClient);
+            ReplicateRemoveClient(foundClient);
         }
     }
 
@@ -5217,6 +5263,10 @@ public class Provider : MonoBehaviour
             HostBansManager.Get().Refresh();
         }
         LiveConfig.Refresh();
+        if ((bool)allowWebRequests)
+        {
+            ServerListCuration.Get().StartupLoadWebUrls();
+        }
         ProfanityFilter.InitSteam();
         if (CommandLine.tryGetLanguage(out var local2, out _path))
         {

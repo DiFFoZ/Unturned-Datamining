@@ -1,13 +1,11 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
 /// <summary>
 /// Sort servers by name A to Z.
 /// </summary>
-public class ServerListComparer_NameAscending : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_NameAscending : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         return lhs.name.CompareTo(rhs.name);
     }

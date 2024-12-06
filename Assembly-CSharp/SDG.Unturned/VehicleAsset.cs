@@ -57,6 +57,17 @@ public class VehicleAsset : Asset, ISkinableAsset
     /// </summary>
     internal float steeringLeaningForceMultiplier;
 
+    /// <summary>
+    /// If true, leaning force is multiplied by normalized speed to the power of steeringLeaningForceSpeedExponent.
+    /// Defaults to false.
+    /// </summary>
+    internal bool steeringLeaningForceShouldScaleWithSpeed;
+
+    /// <summary>
+    /// Refer to steeringLeaningForceShouldScaleWithSpeed.
+    /// </summary>
+    internal float steeringLeaningForceSpeedExponent;
+
     protected float _brake;
 
     protected float _lift;
@@ -82,6 +93,8 @@ public class VehicleAsset : Asset, ISkinableAsset
     protected bool _hasSirens;
 
     protected bool _hasHook;
+
+    protected int _numSeats;
 
     protected bool _hasZip;
 
@@ -170,6 +183,8 @@ public class VehicleAsset : Asset, ISkinableAsset
     /// </summary>
     internal string[] extraTransparentSections;
 
+    internal CrawlerTrackTilingMaterial[] crawlerTrackTilingMaterials;
+
     internal EVehicleDefaultPaintColorMode defaultPaintColorMode;
 
     /// <summary>
@@ -255,6 +270,25 @@ public class VehicleAsset : Asset, ISkinableAsset
     /// </summary>
     public float SteeringAngleTurnSpeed { get; private set; }
 
+    /// <summary>
+    /// Added or subtracted from wheel motor torque in <see cref="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack" /> mode.
+    /// </summary>
+    public float CrawlerTrackSteeringTorque { get; private set; }
+
+    /// <summary>
+    /// When a wheel is in <see cref="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack" /> mode and a steering input is applied the
+    /// <see cref="P:UnityEngine.WheelCollider.sidewaysFriction" /> stiffness is multiplied by this factor. This allows the vehicle
+    /// to rotate in-place with a lower steering torque, which helps prevent the vehicle from going out of control
+    /// while turning and accelerating.
+    /// </summary>
+    public float CrawlerTrackSteeringSidewaysFrictionMultiplier { get; private set; }
+
+    /// <summary>
+    /// Multiplier for <see cref="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringTorque" /> and <see cref="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringSidewaysFrictionMultiplier" />
+    /// while at target maximum speed (for the current forward/backward direction).
+    /// </summary>
+    public float CrawlerTrackSteeringMaxSpeedScale { get; private set; }
+
     public float brake => _brake;
 
     public float lift => _lift;
@@ -301,6 +335,8 @@ public class VehicleAsset : Asset, ISkinableAsset
     public bool hasSirens => _hasSirens;
 
     public bool hasHook => _hasHook;
+
+    public int numSeats => _numSeats;
 
     public bool hasZip => _hasZip;
 
@@ -684,16 +720,26 @@ public class VehicleAsset : Asset, ISkinableAsset
         Transform transform = asset.transform.Find("Seats");
         if (transform == null)
         {
-            Assets.reportError(this, "missing 'Seats' Transform");
+            Assets.ReportError(this, "missing 'Seats' Transform");
         }
         else if (transform.childCount < 1)
         {
-            Assets.reportError(this, "empty 'Seats' Transform has zero children");
+            Assets.ReportError(this, "empty 'Seats' Transform has zero children");
+        }
+        else
+        {
+            for (int i = 0; i <= transform.childCount; i++)
+            {
+                if ((bool)transform.Find($"Seat_{i}"))
+                {
+                    _numSeats++;
+                }
+            }
         }
         Rigidbody component = asset.GetComponent<Rigidbody>();
         if (component == null)
         {
-            Assets.reportError(this, "missing root Rigidbody");
+            Assets.ReportError(this, "missing root Rigidbody");
         }
         else if (physicsProfileRef.isNull && MathfEx.IsNearlyEqual(component.mass, 1f))
         {
@@ -701,9 +747,9 @@ public class VehicleAsset : Asset, ISkinableAsset
             Transform transform2 = asset.transform.Find("Tires");
             if (transform2 != null)
             {
-                for (int i = 0; i < transform2.childCount; i++)
+                for (int j = 0; j < transform2.childCount; j++)
                 {
-                    Transform child = transform2.GetChild(i);
+                    Transform child = transform2.GetChild(j);
                     if (!(child == null))
                     {
                         WheelCollider component2 = child.GetComponent<WheelCollider>();
@@ -748,7 +794,7 @@ public class VehicleAsset : Asset, ISkinableAsset
     {
         if (asset == null)
         {
-            Assets.reportError(this, "missing \"Clip\" GameObject, loading \"Vehicle\" GameObject instead");
+            Assets.ReportError(this, "missing \"Clip\" GameObject, loading \"Vehicle\" GameObject instead");
             return;
         }
         _hasHeadlights = true;
@@ -764,7 +810,7 @@ public class VehicleAsset : Asset, ISkinableAsset
     {
         if (asset == null)
         {
-            Assets.reportError(this, "missing \"Vehicle\" GameObject");
+            Assets.ReportError(this, "missing \"Vehicle\" GameObject");
             return;
         }
         AssetValidation.searchGameObjectForErrors(this, asset);
@@ -847,7 +893,7 @@ public class VehicleAsset : Asset, ISkinableAsset
             output.Append(vehicleWheelConfiguration.wheelColliderPath);
             output.AppendLine("\"");
             output.Append("Is collider steered: ");
-            output.Append(vehicleWheelConfiguration.isColliderSteered);
+            output.Append(vehicleWheelConfiguration.steeringMode == EWheelSteeringMode.SteeringAngle);
             output.AppendLine();
             output.Append("Is collider powered: ");
             output.Append(vehicleWheelConfiguration.isColliderPowered);
@@ -880,10 +926,10 @@ public class VehicleAsset : Asset, ISkinableAsset
             {
                 datWriter.WriteDictionaryStart();
                 datWriter.WriteKeyValue("WheelColliderPath", vehicleWheelConfiguration.wheelColliderPath);
-                datWriter.WriteKeyValue("IsColliderSteered", vehicleWheelConfiguration.isColliderSteered);
                 datWriter.WriteKeyValue("IsColliderPowered", vehicleWheelConfiguration.isColliderPowered);
                 datWriter.WriteKeyValue("ModelPath", vehicleWheelConfiguration.modelPath);
                 datWriter.WriteKeyValue("IsModelSteered", vehicleWheelConfiguration.isModelSteered);
+                datWriter.WriteKeyValue("SteeringMode", vehicleWheelConfiguration.steeringMode.ToString());
                 datWriter.WriteDictionaryEnd();
             }
             datWriter.WriteListEnd();
@@ -915,18 +961,18 @@ public class VehicleAsset : Asset, ISkinableAsset
                 Transform transform3 = transform2.Find(text);
                 if (transform3 == null)
                 {
-                    Assets.reportError(this, "missing \"{0}\" Transform", text);
+                    Assets.ReportError(this, "missing \"{0}\" Transform", text);
                     continue;
                 }
                 if (transform3.GetComponent<WheelCollider>() == null)
                 {
-                    Assets.reportError(this, "missing \"{0}\" WheelCollider", text);
+                    Assets.ReportError(this, "missing \"{0}\" WheelCollider", text);
                     continue;
                 }
                 VehicleWheelConfiguration vehicleWheelConfiguration = new VehicleWheelConfiguration();
                 vehicleWheelConfiguration.wasAutomaticallyGenerated = true;
                 vehicleWheelConfiguration.wheelColliderPath = "Tires/" + text;
-                vehicleWheelConfiguration.isColliderSteered = i < 2;
+                vehicleWheelConfiguration.steeringMode = ((i < 2) ? EWheelSteeringMode.SteeringAngle : EWheelSteeringMode.None);
                 vehicleWheelConfiguration.isColliderPowered = i >= transform2.childCount - 2;
                 list.Add(vehicleWheelConfiguration);
             }
@@ -1041,7 +1087,7 @@ public class VehicleAsset : Asset, ISkinableAsset
                     }
                     else
                     {
-                        Assets.reportError(this, "unable to match physical tire with steering tire model {0}", num3);
+                        Assets.ReportError(this, "unable to match physical tire with steering tire model {0}", num3);
                     }
                 }
             }
@@ -1205,8 +1251,16 @@ public class VehicleAsset : Asset, ISkinableAsset
         }
         _steerMin = data.ParseFloat("Steer_Min");
         _steerMax = data.ParseFloat("Steer_Max") * 0.75f;
+        CrawlerTrackSteeringTorque = data.ParseFloat("CrawlerTrackSteering_Torque");
+        CrawlerTrackSteeringSidewaysFrictionMultiplier = data.ParseFloat("CrawlerTrackSteering_SidewaysFrictionMultiplier", 1f);
+        CrawlerTrackSteeringMaxSpeedScale = data.ParseFloat("CrawlerTrackSteering_MaxSpeedScale", 1f);
         SteeringAngleTurnSpeed = data.ParseFloat("Steering_Angle_Turn_Speed", _steerMax * 5f);
         steeringLeaningForceMultiplier = data.ParseFloat("Steering_LeaningForceMultiplier", -1f);
+        steeringLeaningForceShouldScaleWithSpeed = data.ParseBool("Steering_LeaningForce_ScaleWithSpeed");
+        if (steeringLeaningForceShouldScaleWithSpeed)
+        {
+            steeringLeaningForceSpeedExponent = data.ParseFloat("Steering_LeaningForce_SpeedExponent", 1f);
+        }
         _brake = data.ParseFloat("Brake");
         _lift = data.ParseFloat("Lift");
         _fuelMin = data.ParseUInt16("Fuel_Min", 0);
@@ -1415,6 +1469,7 @@ public class VehicleAsset : Asset, ISkinableAsset
         {
             IsPaintable = false;
         }
+        crawlerTrackTilingMaterials = data.ParseArrayOfStructs<CrawlerTrackTilingMaterial>("CrawlerTrackTilingMaterials");
         if (data.TryGetList("AdditionalTransparentSections", out var node))
         {
             List<string> list = new List<string>(node.Count);
@@ -1426,7 +1481,7 @@ public class VehicleAsset : Asset, ISkinableAsset
                 }
                 else
                 {
-                    Assets.reportError(this, "unable to parse additional transparent section " + item.DebugDumpToString());
+                    Assets.ReportError(this, "unable to parse additional transparent section " + item.DebugDumpToString());
                 }
             }
             if (!list.IsEmpty())
@@ -1455,12 +1510,12 @@ public class VehicleAsset : Asset, ISkinableAsset
             {
                 if (!randomPaintColorConfiguration.TryParse(node4))
                 {
-                    Assets.reportError(this, "unable to parse DefaultPaintColor_Configuration");
+                    Assets.ReportError(this, "unable to parse DefaultPaintColor_Configuration");
                 }
             }
             else
             {
-                Assets.reportError(this, "missing DefaultPaintColor_Configuration");
+                Assets.ReportError(this, "missing DefaultPaintColor_Configuration");
             }
         }
         wheelBalancingForceMultiplier = data.ParseFloat("WheelBalancing_ForceMultiplier", -1f);
@@ -1543,8 +1598,126 @@ public class VehicleAsset : Asset, ISkinableAsset
             GameObject orLoadModel = GetOrLoadModel();
             if (orLoadModel != null && orLoadModel.GetComponent<EngineCurvesComponent>() == null)
             {
-                Assets.reportError(this, "needs EngineCurvesComponent on vehicle prefab for engine RPM and gearbox to work properly");
+                Assets.ReportError(this, "needs EngineCurvesComponent on vehicle prefab for engine RPM and gearbox to work properly");
             }
+        }
+    }
+
+    internal override void BuildCargoData(CargoBuilder builder)
+    {
+        base.BuildCargoData(builder);
+        CargoDeclaration orAddDeclaration = builder.GetOrAddDeclaration("Locale_Vehicle");
+        orAddDeclaration.AppendGuid("GUID", GUID);
+        orAddDeclaration.AppendString("Name", FriendlyName);
+        CargoDeclaration orAddDeclaration2 = builder.GetOrAddDeclaration("Vehicle");
+        orAddDeclaration2.AppendGuid("GUID", GUID);
+        orAddDeclaration2.AppendFloat("Air_Steer_Max", airSteerMax);
+        orAddDeclaration2.AppendFloat("Air_Steer_Min", airSteerMin);
+        orAddDeclaration2.AppendFloat("Air_Turn_Responsiveness", airTurnResponsiveness);
+        orAddDeclaration2.AppendToString("BatteryMode_Driving", batteryDriving);
+        orAddDeclaration2.AppendToString("BatteryMode_Empty", batteryEmpty);
+        orAddDeclaration2.AppendToString("BatteryMode_Headlights", batteryHeadlights);
+        orAddDeclaration2.AppendToString("BatteryMode_Sirens", batterySirens);
+        orAddDeclaration2.AppendFloat("Battery_Burn_Rate", batteryBurnRate);
+        orAddDeclaration2.AppendFloat("Battery_Charge_Rate", batteryChargeRate);
+        orAddDeclaration2.AppendBool("Battery_Powered", isBatteryPowered);
+        orAddDeclaration2.AppendFloat("Battery_Spawn_Charge_Multiplier", batterySpawnChargeMultiplier);
+        orAddDeclaration2.AppendBool("Bicycle", hasBicycle);
+        orAddDeclaration2.AppendToString("Buildable_Placement_Rule", BuildablePlacementRule);
+        orAddDeclaration2.AppendBool("isVulnerableToBumper", isVulnerableToBumper);
+        orAddDeclaration2.AppendFloat("Bumper_Multiplier", bumperMultiplier);
+        orAddDeclaration2.AppendFloat("Brake", brake);
+        orAddDeclaration2.AppendBool("Can_Be_Locked", canBeLocked);
+        orAddDeclaration2.AppendBool("Can_Repair_While_Seated", canRepairWhileSeated);
+        orAddDeclaration2.AppendBool("Can_Steal_Battery", canStealBattery);
+        orAddDeclaration2.AppendBool("canSpawnWithBattery", canSpawnWithBattery);
+        orAddDeclaration2.AppendFloat("Carjack_Force_Multiplier", carjackForceMultiplier);
+        orAddDeclaration2.AppendFloat("Child_Explosion_Armor_Multiplier", childExplosionArmorMultiplier);
+        orAddDeclaration2.AppendBool("Crawler", _hasCrawler);
+        orAddDeclaration2.AppendToString("DefaultPaintColor_Mode", defaultPaintColorMode);
+        orAddDeclaration2.AppendGuid("Default_Battery", defaultBatteryGuid);
+        orAddDeclaration2.AppendByte("Drops_Max", dropsMax);
+        orAddDeclaration2.AppendByte("Drops_Min", dropsMin);
+        orAddDeclaration2.AppendUShort("Drops_Table_ID", dropsTableId);
+        orAddDeclaration2.AppendToString("Engine", engine);
+        orAddDeclaration2.AppendFloat("EngineIdleRPM", EngineIdleRpm);
+        orAddDeclaration2.AppendFloat("EngineMaxRPM", EngineMaxRpm);
+        orAddDeclaration2.AppendFloat("EngineMaxTorque", EngineMaxTorque);
+        orAddDeclaration2.AppendFloat("EngineRPM_DecreaseRate", EngineRpmDecreaseRate);
+        orAddDeclaration2.AppendFloat("EngineRPM_IncreaseRate", EngineRpmIncreaseRate);
+        orAddDeclaration2.AppendFloat("Engine_Force_Multiplier", engineForceMultiplier);
+        orAddDeclaration2.AppendBool("isVulnerableToEnvironment", isVulnerableToEnvironment);
+        orAddDeclaration2.AppendBool("isVulnerableToExplosions", isVulnerableToExplosions);
+        orAddDeclaration2.AppendUShort("Fuel", fuel);
+        orAddDeclaration2.AppendFloat("Fuel_Burn_Rate", fuelBurnRate);
+        orAddDeclaration2.AppendUShort("Fuel_Max", fuelMax);
+        orAddDeclaration2.AppendUShort("Fuel_Min", fuelMin);
+        orAddDeclaration2.AppendBool("Has_Horn", hasHorn);
+        orAddDeclaration2.AppendUShort("Health", health);
+        orAddDeclaration2.AppendUShort("Health_Max", healthMax);
+        orAddDeclaration2.AppendUShort("Health_Min", healthMin);
+        orAddDeclaration2.AppendToString("HornAudioClip", horn);
+        orAddDeclaration2.AppendBool("isVulnerable", isVulnerable);
+        orAddDeclaration2.AppendBool("IsPaintable", IsPaintable);
+        orAddDeclaration2.AppendFloat("Lift", lift);
+        orAddDeclaration2.AppendBool("LockMouse", hasLockMouse);
+        orAddDeclaration2.AppendFloat("Passenger_Explosion_Armor", passengerExplosionArmor);
+        orAddDeclaration2.AppendToString("Physics_Profile", physicsProfileRef);
+        orAddDeclaration2.AppendToString("Rarity", rarity);
+        orAddDeclaration2.AppendBool("ShouldExplosionCauseDamage", ShouldExplosionCauseDamage);
+        orAddDeclaration2.AppendBool("Should_Spawn_Seat_Capsules", shouldSpawnSeatCapsules);
+        orAddDeclaration2.AppendBool("Sleds", hasSleds);
+        orAddDeclaration2.AppendFloat("TargetForwardVelocity", TargetForwardVelocity);
+        orAddDeclaration2.AppendFloat("TargetReverseVelocity", TargetReverseVelocity);
+        orAddDeclaration2.AppendFloat("Stamina_Boost", staminaBoost);
+        orAddDeclaration2.AppendBool("Stamina_Powered", isStaminaPowered);
+        orAddDeclaration2.AppendFloat("steerMax", steerMax);
+        orAddDeclaration2.AppendFloat("steerMin", steerMin);
+        orAddDeclaration2.AppendFloat("Steering_Angle_Turn_Speed", SteeringAngleTurnSpeed);
+        orAddDeclaration2.AppendFloat("Steering_LeaningForceMultiplier", steeringLeaningForceMultiplier);
+        orAddDeclaration2.AppendUShort("Tire_ID", tireID);
+        orAddDeclaration2.AppendBool("canTiresBeDamaged", canTiresBeDamaged);
+        orAddDeclaration2.AppendBool("Traction", hasTraction);
+        orAddDeclaration2.AppendByte("Trunk_Storage_X", trunkStorage_X);
+        orAddDeclaration2.AppendByte("Trunk_Storage_Y", trunkStorage_Y);
+        orAddDeclaration2.AppendInt("Turrets", turrets.Length);
+        orAddDeclaration2.AppendFloat("Valid_Speed_Down", validSpeedDown);
+        orAddDeclaration2.AppendFloat("Valid_Speed_Up", validSpeedUp);
+        orAddDeclaration2.AppendBool("hasSirens", hasSirens);
+        orAddDeclaration2.AppendBool("hasHook", hasHook);
+        orAddDeclaration2.AppendBool("hasHeadlights", hasHeadlights);
+        orAddDeclaration2.AppendInt("numSeats", numSeats);
+        if (defaultPaintColorMode == EVehicleDefaultPaintColorMode.RandomHueOrGrayscale)
+        {
+            CargoDeclaration orAddDeclaration3 = builder.GetOrAddDeclaration("Vehicle_VehicleRandomPaintColorConfiguration");
+            orAddDeclaration3.AppendGuid("GUID", GUID);
+            orAddDeclaration3.AppendFloat("MinSaturation", randomPaintColorConfiguration.minSaturation);
+            orAddDeclaration3.AppendFloat("MaxSaturation", randomPaintColorConfiguration.maxSaturation);
+            orAddDeclaration3.AppendFloat("MinValue", randomPaintColorConfiguration.minValue);
+            orAddDeclaration3.AppendFloat("MaxValue", randomPaintColorConfiguration.maxValue);
+            orAddDeclaration3.AppendFloat("GrayscaleChance", randomPaintColorConfiguration.grayscaleChance);
+        }
+        if (defaultPaintColorMode == EVehicleDefaultPaintColorMode.List)
+        {
+            for (byte b = 0; b < DefaultPaintColors.Count; b++)
+            {
+                CargoDeclaration cargoDeclaration = builder.AddDeclaration("Vehicle_DefaultPaintColors");
+                cargoDeclaration.AppendGuid("GUID", GUID);
+                cargoDeclaration.AppendColor32("Color", DefaultPaintColors[b]);
+            }
+        }
+        for (byte b2 = 0; b2 < turrets.Length; b2++)
+        {
+            CargoDeclaration cargoDeclaration2 = builder.AddDeclaration("Vehicle_TurretInfo");
+            cargoDeclaration2.AppendGuid("GUID", GUID);
+            cargoDeclaration2.AppendToString("turretIndex", b2);
+            cargoDeclaration2.AppendBool("Ignore_Aim_Camera", !turrets[b2].useAimCamera);
+            cargoDeclaration2.AppendUShort("Item_ID", turrets[b2].itemID);
+            cargoDeclaration2.AppendFloat("Pitch_Max", turrets[b2].pitchMax);
+            cargoDeclaration2.AppendFloat("Pitch_Min", turrets[b2].pitchMin);
+            cargoDeclaration2.AppendByte("Seat_Index", turrets[b2].seatIndex);
+            cargoDeclaration2.AppendFloat("Yaw_Max", turrets[b2].yawMax);
+            cargoDeclaration2.AppendFloat("Yaw_Min", turrets[b2].yawMin);
         }
     }
 }

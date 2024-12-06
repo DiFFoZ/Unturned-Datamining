@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace SDG.Unturned;
 
-public class ExplosionRangeComparator : IComparer<Transform>
+internal class ExplosionRangeComparator : IComparer<ExplosionDamageCandidate>
 {
-    public Vector3 point;
+    public Vector3 explosionCenter;
 
-    public int Compare(Transform a, Transform b)
+    public int Compare(ExplosionDamageCandidate lhs, ExplosionDamageCandidate rhs)
     {
-        return Mathf.RoundToInt(((a.position - point).sqrMagnitude - (b.position - point).sqrMagnitude) * 100f);
+        return Mathf.RoundToInt(((lhs.closestPoint - explosionCenter).sqrMagnitude - (rhs.closestPoint - explosionCenter).sqrMagnitude) * 100f);
     }
 }

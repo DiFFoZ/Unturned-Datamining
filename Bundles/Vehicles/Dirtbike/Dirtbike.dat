@@ -85,6 +85,7 @@ WheelConfigurations
 WheelBalancing_ForceMultiplier 30
 WheelBalancing_UprightExponent 0.7
 Steering_LeaningForceMultiplier 4
+Steering_LeaningForce_ScaleWithSpeed true
 RollAngularVelocityDamping 2
 
 ReverseGearRatio 7

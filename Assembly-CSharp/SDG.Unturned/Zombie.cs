@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SDG.Unturned;
 
-public class Zombie : MonoBehaviour
+public class Zombie : MonoBehaviour, IExplosionDamageable, IEquatable<IExplosionDamageable>
 {
     private enum EAbilityChoice
     {
@@ -25,6 +25,8 @@ public class Zombie : MonoBehaviour
     private static List<InteractableVehicle> vehiclesInRadius = new List<InteractableVehicle>();
 
     private static List<Transform> barricadesInRadius = new List<Transform>();
+
+    private static List<Transform> objectsInRadius = new List<Transform>();
 
     private static readonly float ATTACK_BARRICADE = 16f;
 
@@ -118,6 +120,11 @@ public class Zombie : MonoBehaviour
     /// </summary>
     private InteractableVehicle targetPassengerVehicle;
 
+    /// <summary>
+    /// If zombie is stuck this was a nearby object potentially blocking our path.
+    /// </summary>
+    private InteractableObjectRubble targetObject;
+
     private Transform target;
 
     private Animation animator;
@@ -141,6 +148,11 @@ public class Zombie : MonoBehaviour
     private float lastRegen;
 
     private float lastStuck;
+
+    /// <summary>
+    /// Incremented while stuck. Prevents doing overlap test too frequently.
+    /// </summary>
+    private float stuckSearchTimer;
 
     private Vector3 cameFrom;
 
@@ -356,6 +368,8 @@ public class Zombie : MonoBehaviour
         }
     }
 
+    public bool IsEligibleForExplosionDamage => !isDead;
+
     public bool isHunting
     {
         get
@@ -431,6 +445,67 @@ public class Zombie : MonoBehaviour
     public bool isCutesy => speciality == EZombieSpeciality.SPIRIT;
 
     public ZombieDifficultyAsset difficulty { get; private set; }
+
+    public bool Equals(IExplosionDamageable obj)
+    {
+        return this == obj;
+    }
+
+    public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
+    {
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+    }
+
+    public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        if (explosionParameters.damageType == EExplosionDamageType.ZOMBIE_FIRE)
+        {
+            if (speciality == EZombieSpeciality.NORMAL)
+            {
+                ZombieManager.sendZombieSpeciality(this, EZombieSpeciality.BURNER);
+            }
+        }
+        else
+        {
+            if (!damageParameters.shouldAffectZombies)
+            {
+                return;
+            }
+            Vector3 vector = damageParameters.closestPoint - explosionParameters.point;
+            float magnitude = vector.magnitude;
+            if (magnitude > explosionParameters.damageRadius)
+            {
+                return;
+            }
+            Vector3 vector2 = vector / magnitude;
+            if (damageParameters.LineOfSightTest(explosionParameters.point, vector2, magnitude, out var hit) && hit.transform != null && !hit.transform.IsChildOf(base.transform))
+            {
+                return;
+            }
+            if (explosionParameters.playImpactEffect)
+            {
+                EffectAsset effectAsset = (isRadioactive ? DamageTool.AlienDynamicRef.Find() : DamageTool.FleshDynamicRef.Find());
+                if (effectAsset != null)
+                {
+                    TriggerEffectParameters parameters = new TriggerEffectParameters(effectAsset);
+                    parameters.relevantDistance = EffectManager.SMALL;
+                    parameters.position = base.transform.position + Vector3.up;
+                    EffectManager.triggerEffect(parameters);
+                    parameters.SetDirection(-vector2);
+                    EffectManager.triggerEffect(parameters);
+                }
+            }
+            float num = 1f - magnitude / explosionParameters.damageRadius;
+            float zombieExplosionArmor = DamageTool.GetZombieExplosionArmor(this);
+            num *= zombieExplosionArmor;
+            DamageTool.damage(this, vector2, explosionParameters.zombieDamage, num, out var kill, out var xp, EZombieStunOverride.None, explosionParameters.ragdollEffect);
+            if (kill != 0)
+            {
+                damageParameters.kills.Add(kill);
+            }
+            damageParameters.xp += xp;
+        }
+    }
 
     /// <summary>
     /// Add or remove from ticking list if needed.
@@ -999,6 +1074,7 @@ public class Zombie : MonoBehaviour
             isStuck = false;
             lastHunted = Time.time;
             lastStuck = Time.time;
+            stuckSearchTimer = 0f;
             player = newPlayer;
             target.position = player.transform.position;
             seeker.canSearch = true;
@@ -1108,6 +1184,7 @@ public class Zombie : MonoBehaviour
             isStuck = false;
             lastHunted = Time.time;
             lastStuck = Time.time;
+            stuckSearchTimer = 0f;
             target.position = newPosition;
             seeker.canSearch = true;
             seeker.canMove = true;
@@ -1133,6 +1210,7 @@ public class Zombie : MonoBehaviour
         isHunting = false;
         isStuck = false;
         lastStuck = Time.time;
+        stuckSearchTimer = 0f;
         if (player != null)
         {
             player.agro--;
@@ -1142,6 +1220,7 @@ public class Zombie : MonoBehaviour
         targetStructure = null;
         targetObstructionVehicle = null;
         targetPassengerVehicle = null;
+        targetObject = null;
         seeker.canSearch = false;
         seeker.canMove = false;
         target.position = base.transform.position;
@@ -1476,6 +1555,7 @@ public class Zombie : MonoBehaviour
         lastStartle = Time.time;
         lastStun = Time.time;
         lastStuck = Time.time;
+        stuckSearchTimer = 0f;
         cameFrom = base.transform.position;
         isPulled = false;
         pullDelay = UnityEngine.Random.Range(24f, 96f);
@@ -1512,6 +1592,7 @@ public class Zombie : MonoBehaviour
         targetStructure = null;
         targetObstructionVehicle = null;
         targetPassengerVehicle = null;
+        targetObject = null;
         seeker.canSearch = false;
         seeker.canMove = false;
         health = LevelZombies.tables[type].health;
@@ -1572,8 +1653,9 @@ public class Zombie : MonoBehaviour
         bool can_Target_Structures = Provider.modeConfigData.Zombies.Can_Target_Structures;
         bool can_Target_Barricades = Provider.modeConfigData.Zombies.Can_Target_Barricades;
         bool can_Target_Vehicles = Provider.modeConfigData.Zombies.Can_Target_Vehicles;
+        bool can_Target_Objects = Provider.modeConfigData.Zombies.Can_Target_Objects;
         can_Target_Vehicles &= speciality != EZombieSpeciality.BOSS_KUWAIT;
-        if (can_Target_Structures || can_Target_Barricades)
+        if (can_Target_Structures || can_Target_Barricades || can_Target_Objects)
         {
             regionsInRadius.Clear();
             Regions.getRegionsInRadius(base.transform.position, 4f, regionsInRadius);
@@ -1584,8 +1666,15 @@ public class Zombie : MonoBehaviour
             StructureManager.getStructuresInRadius(base.transform.position, 16f, regionsInRadius, structuresInRadius);
             if (structuresInRadius.Count > 0)
             {
-                targetStructure = structuresInRadius[0];
-                return;
+                foreach (Transform item in structuresInRadius)
+                {
+                    StructureDrop structureDrop = StructureDrop.FindByRootFast(item);
+                    if (structureDrop != null && structureDrop.asset != null && structureDrop.asset.CanZombiesTarget)
+                    {
+                        targetStructure = item;
+                        return;
+                    }
+                }
             }
         }
         if (can_Target_Vehicles)
@@ -1604,7 +1693,33 @@ public class Zombie : MonoBehaviour
             BarricadeManager.getBarricadesInRadius(base.transform.position, 16f, regionsInRadius, barricadesInRadius);
             if (barricadesInRadius.Count > 0)
             {
-                targetBarricade = barricadesInRadius[0];
+                foreach (Transform item2 in barricadesInRadius)
+                {
+                    BarricadeDrop barricadeDrop = BarricadeDrop.FindByRootFast(item2);
+                    if (barricadeDrop != null && barricadeDrop.asset != null && barricadeDrop.asset.CanZombiesTarget)
+                    {
+                        targetBarricade = item2;
+                        return;
+                    }
+                }
+            }
+        }
+        if (!can_Target_Objects)
+        {
+            return;
+        }
+        objectsInRadius.Clear();
+        ObjectManager.getObjectsInRadius(base.transform.position, 16f, regionsInRadius, objectsInRadius);
+        if (objectsInRadius.Count <= 0)
+        {
+            return;
+        }
+        foreach (Transform item3 in objectsInRadius)
+        {
+            InteractableObjectRubble component = item3.GetComponent<InteractableObjectRubble>();
+            if (component != null && component.asset.RubbleCanZombiesDamage && !component.isAllDead())
+            {
+                targetObject = component;
             }
         }
     }
@@ -1669,16 +1784,33 @@ public class Zombie : MonoBehaviour
         {
             targetPassengerVehicle = null;
         }
+        if (targetObject != null && targetObject.isAllDead())
+        {
+            targetObject = null;
+        }
         if (isStuck)
         {
             float num2 = Time.time - lastStuck;
-            if (num2 > 1f && targetBarricade == null && targetStructure == null && targetObstructionVehicle == null && targetPassengerVehicle == null)
+            if (num2 > 0.75f)
             {
-                findTargetWhileStuck();
+                stuckSearchTimer += num;
+                if (stuckSearchTimer > 0.25f)
+                {
+                    stuckSearchTimer = 0f;
+                    if (targetBarricade == null && targetStructure == null && targetObstructionVehicle == null && targetPassengerVehicle == null && targetObject == null)
+                    {
+                        findTargetWhileStuck();
+                    }
+                }
+            }
+            else
+            {
+                stuckSearchTimer = 0f;
             }
             if (num2 > 5f && zombieRegion.hasBeacon && Time.time - lastAttack > 10f)
             {
                 lastStuck = Time.time;
+                stuckSearchTimer = 0f;
                 ZombieManager.teleportZombieBackIntoMap(this);
                 return;
             }
@@ -1716,6 +1848,14 @@ public class Zombie : MonoBehaviour
             target.position = targetObstructionVehicle.transform.position;
             seeker.canTurn = false;
             seeker.targetDirection = targetObstructionVehicle.transform.position - base.transform.position;
+        }
+        else if (targetObject != null)
+        {
+            num3 = 0f;
+            num4 = 0f;
+            target.position = base.transform.position;
+            seeker.canTurn = false;
+            seeker.targetDirection = targetObject.transform.position - base.transform.position;
         }
         else if (player != null)
         {
@@ -1847,7 +1987,7 @@ public class Zombie : MonoBehaviour
             leave(quick: false);
             return;
         }
-        if (player != null || targetBarricade != null || targetStructure != null || targetObstructionVehicle != null || targetPassengerVehicle != null)
+        if (player != null || targetBarricade != null || targetStructure != null || targetObstructionVehicle != null || targetPassengerVehicle != null || targetObject != null)
         {
             if (player != null && Time.time - lastStartle > specialStartleDelay && Time.time - lastAttack > specialAttackDelay && Time.time - lastSpecial > specialUseDelay)
             {
@@ -1959,6 +2099,7 @@ public class Zombie : MonoBehaviour
                                     targetStructure = null;
                                     isStuck = false;
                                     lastStuck = Time.time;
+                                    stuckSearchTimer = 0f;
                                 }
                             }
                             else if (targetBarricade != null)
@@ -1972,6 +2113,15 @@ public class Zombie : MonoBehaviour
                             else if (targetPassengerVehicle != null)
                             {
                                 VehicleManager.damage(targetPassengerVehicle, (int)b, 1f, canRepair: true, default(CSteamID), EDamageOrigin.Zombie_Swipe);
+                            }
+                            else if (targetObject != null)
+                            {
+                                if (targetObject.TryGetRandomAliveSectionIndex(out var sectionIndex))
+                                {
+                                    float rubbleZombieDamageMultiplier = targetObject.asset.RubbleZombieDamageMultiplier;
+                                    Vector3 direction = (target.position - base.transform.position).normalized * (int)b;
+                                    ObjectManager.damage(targetObject.transform, direction, sectionIndex, (int)b, rubbleZombieDamageMultiplier, out var _, out var _, default(CSteamID), EDamageOrigin.Zombie_Swipe, trackKill: false);
+                                }
                             }
                             else if (player != null)
                             {
@@ -2143,6 +2293,7 @@ public class Zombie : MonoBehaviour
                     zombieRegion.updates++;
                     isStuck = false;
                     lastStuck = Time.time;
+                    stuckSearchTimer = 0f;
                 }
                 else if (!isStuck)
                 {
@@ -2455,6 +2606,7 @@ public class Zombie : MonoBehaviour
             }
             lastTarget = Time.time;
             lastStuck = Time.time;
+            stuckSearchTimer = 0f;
             isStunned = false;
             seeker.canMove = true;
         }
@@ -2666,5 +2818,10 @@ public class Zombie : MonoBehaviour
                 component2.height = height;
             }
         }
+    }
+
+    void IExplosionDamageable.ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        ApplyExplosionDamage(in explosionParameters, ref damageParameters);
     }
 }

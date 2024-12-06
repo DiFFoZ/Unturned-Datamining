@@ -114,7 +114,7 @@ public class EffectAsset : Asset
             splatters[i] = bundle.load<GameObject>("Splatter_" + i);
             if (splatters[i] == null)
             {
-                Assets.reportError(this, $"missing 'Splatter_{i}' gameobject");
+                Assets.ReportError(this, $"missing 'Splatter_{i}' gameobject");
             }
         }
         _splatter = data.ParseUInt8("Splatters", 0);

@@ -46,6 +46,14 @@ public class VehiclesConfigData
 
     public uint Max_Instances_Insane;
 
+    /// <summary>
+    /// Vehicles are considered "natural" if they were spawned by the level as opposed to players or vendors.
+    /// If less than this many natural vehicles exist in the level, more will be spawned. The minimum of this or
+    /// Max_Instances is used. (i.e., if this value is higher than max instances the max instances value is used
+    /// instead.)
+    /// </summary>
+    public uint Min_Natural_Vehicles;
+
     public VehiclesConfigData(EGameMode mode)
     {
         Decay_Time = 604800f;
@@ -93,5 +101,6 @@ public class VehiclesConfigData
         Max_Instances_Medium = 16u;
         Max_Instances_Large = 32u;
         Max_Instances_Insane = 64u;
+        Min_Natural_Vehicles = 16u;
     }
 }

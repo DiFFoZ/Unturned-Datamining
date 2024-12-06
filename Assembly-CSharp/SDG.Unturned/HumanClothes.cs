@@ -889,7 +889,7 @@ public class HumanClothes : MonoBehaviour
         Transform transform = rootModel.FindChildRecursive(itemAsset.hairOverride);
         if (transform == null)
         {
-            Assets.reportError(itemAsset, "cannot find hair override \"{0}\"", itemAsset.hairOverride);
+            Assets.ReportError(itemAsset, "cannot find hair override \"{0}\"", itemAsset.hairOverride);
             return;
         }
         Renderer component = transform.GetComponent<Renderer>();
@@ -899,7 +899,7 @@ public class HumanClothes : MonoBehaviour
         }
         else
         {
-            Assets.reportError(itemAsset, "hair override \"{0}\" does not have a renderer component", itemAsset.hairOverride);
+            Assets.ReportError(itemAsset, "hair override \"{0}\" does not have a renderer component", itemAsset.hairOverride);
         }
     }
 
@@ -912,7 +912,7 @@ public class HumanClothes : MonoBehaviour
         Transform transform = rootModel.FindChildRecursive(itemAsset.skinOverride);
         if (transform == null)
         {
-            Assets.reportError(itemAsset, "cannot find skin override \"{0}\"", itemAsset.skinOverride);
+            Assets.ReportError(itemAsset, "cannot find skin override \"{0}\"", itemAsset.skinOverride);
             return;
         }
         Renderer component = transform.GetComponent<Renderer>();
@@ -922,7 +922,7 @@ public class HumanClothes : MonoBehaviour
         }
         else
         {
-            Assets.reportError(itemAsset, "skin override \"{0}\" does not have a renderer component", itemAsset.skinOverride);
+            Assets.ReportError(itemAsset, "skin override \"{0}\" does not have a renderer component", itemAsset.skinOverride);
         }
     }
 

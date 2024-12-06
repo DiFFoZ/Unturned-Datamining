@@ -22,7 +22,7 @@ public class SleekWebImage : SleekWrapper
     /// </summary>
     public float maxImageDimensionsHeight = -1f;
 
-    private ISleekImage internalImage;
+    internal ISleekImage internalImage;
 
     public SleekColor color
     {

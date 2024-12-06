@@ -28,7 +28,7 @@ public static class AssetValidation
         int layer = gameObject.layer;
         if (layer != expectedLayer)
         {
-            Assets.reportError(owningAsset, "expected '{0}' to have layer {1}, but it actually has layer {2}", gameObject.name, expectedLayer, layer);
+            Assets.ReportError(owningAsset, "expected '{0}' to have layer {1}, but it actually has layer {2}", gameObject.name, expectedLayer, layer);
         }
     }
 
@@ -49,7 +49,7 @@ public static class AssetValidation
         {
             if (clothComponent.capsuleColliders.Length != 0 || clothComponent.sphereColliders.Length != 0)
             {
-                Assets.reportError(owningAsset, gameObject.name + " cloth component \"" + clothComponent.name + "\" has colliders which is problematic because unfortunately the game does not yet have a way for weapons to ignore them");
+                Assets.ReportError(owningAsset, gameObject.name + " cloth component \"" + clothComponent.name + "\" has colliders which is problematic because unfortunately the game does not yet have a way for weapons to ignore them");
             }
         }
     }
@@ -85,7 +85,7 @@ public static class AssetValidation
         {
             if (allRenderer.motionVectorGenerationMode == MotionVectorGenerationMode.ForceNoMotion)
             {
-                Assets.reportError(owningAsset, "{0} Renderer \"{1}\" motion vectors disabled could be a problem for TAA", gameObject.name, allRenderer.name);
+                Assets.ReportError(owningAsset, "{0} Renderer \"{1}\" motion vectors disabled could be a problem for TAA", gameObject.name, allRenderer.name);
             }
         }
         meshRenderers.Clear();
@@ -96,7 +96,7 @@ public static class AssetValidation
             {
                 if (meshRenderer.GetComponent<TextMeshPro>() == null)
                 {
-                    Assets.reportError(owningAsset, "{0} missing MeshFilter or TextMesh for MeshRenderer '{1}'", gameObject.name, meshRenderer.name);
+                    Assets.ReportError(owningAsset, "{0} missing MeshFilter or TextMesh for MeshRenderer '{1}'", gameObject.name, meshRenderer.name);
                 }
             }
             else if (meshRenderer.name != "DepthMask")
@@ -126,12 +126,12 @@ public static class AssetValidation
         {
             if (!(component.GetComponent<TextMeshPro>() != null))
             {
-                Assets.reportError(owningAsset, "{0} missing mesh for {1} '{2}'", gameObject.name, component.GetType().Name, component.name);
+                Assets.ReportError(owningAsset, "{0} missing mesh for {1} '{2}'", gameObject.name, component.GetType().Name, component.name);
             }
         }
         else if (sharedMesh.vertexCount > maximumVertexCount)
         {
-            Assets.reportError(owningAsset, "{0} mesh for {1} '{2}' has {3} vertices (ideal maximum of {4}) and might have room for optimization.", gameObject.name, component.GetType().Name, component.name, sharedMesh.vertexCount, maximumVertexCount);
+            Assets.ReportError(owningAsset, "{0} mesh for {1} '{2}' has {3} vertices (ideal maximum of {4}) and might have room for optimization.", gameObject.name, component.GetType().Name, component.name, sharedMesh.vertexCount, maximumVertexCount);
         }
     }
 
@@ -140,19 +140,19 @@ public static class AssetValidation
         int num = component.sharedMaterials.Length;
         if (num == 0)
         {
-            Assets.reportError(owningAsset, "{0} missing materials for Renderer '{1}'", gameObject.name, component.name);
+            Assets.ReportError(owningAsset, "{0} missing materials for Renderer '{1}'", gameObject.name, component.name);
             return;
         }
         if (num > 4)
         {
-            Assets.reportError(owningAsset, "{0} Renderer '{1}' has {2} separate materials (ideal maximum of {3}) which should be optimized to reduce draw calls.", gameObject.name, component.name, num, 4);
+            Assets.ReportError(owningAsset, "{0} Renderer '{1}' has {2} separate materials (ideal maximum of {3}) which should be optimized to reduce draw calls.", gameObject.name, component.name, num, 4);
         }
         for (int i = 0; i < num; i++)
         {
             Material material = component.sharedMaterials[i];
             if (material == null)
             {
-                Assets.reportError(owningAsset, "{0} missing material[{1}] for Renderer '{2}'", gameObject.name, i, component.name);
+                Assets.ReportError(owningAsset, "{0} missing material[{1}] for Renderer '{2}'", gameObject.name, i, component.name);
             }
             else
             {
@@ -170,12 +170,12 @@ public static class AssetValidation
             Texture texture = sharedMaterial.GetTexture(texturePropertyNameID);
             if (texture != null && !owningAsset.ignoreTextureReadable && !(texture is RenderTexture) && texture.isReadable)
             {
-                Assets.reportError(owningAsset, "{0} texture '{1}' referenced by material '{2}' used by Renderer '{3}' can save memory by disabling read/write.", gameObject.name, texture.name, sharedMaterial.name, component.name);
+                Assets.ReportError(owningAsset, "{0} texture '{1}' referenced by material '{2}' used by Renderer '{3}' can save memory by disabling read/write.", gameObject.name, texture.name, sharedMaterial.name, component.name);
             }
             Texture2D texture2D = texture as Texture2D;
             if (texture2D != null && !owningAsset.ignoreNPOT && (!Mathf.IsPowerOfTwo(texture2D.width) || !Mathf.IsPowerOfTwo(texture2D.height)))
             {
-                Assets.reportError(owningAsset, "{0} texture '{1}' referenced by material '{2}' used by Renderer '{3}' has NPOT dimensions ({4} x {5})", gameObject.name, texture.name, sharedMaterial.name, component.name, texture2D.width, texture2D.height);
+                Assets.ReportError(owningAsset, "{0} texture '{1}' referenced by material '{2}' used by Renderer '{3}' has NPOT dimensions ({4} x {5})", gameObject.name, texture.name, sharedMaterial.name, component.name, texture2D.width, texture2D.height);
             }
         }
     }
@@ -188,7 +188,7 @@ public static class AssetValidation
             LOD lOD = lODs[i];
             if (lOD.renderers.Length < 1)
             {
-                Assets.reportError(owningAsset, "LOD group on \"{0}\" LOD level {1} is empty", component.GetSceneHierarchyPath(), i);
+                Assets.ReportError(owningAsset, "LOD group on \"{0}\" LOD level {1} is empty", component.GetSceneHierarchyPath(), i);
                 continue;
             }
             int num = 0;
@@ -201,7 +201,7 @@ public static class AssetValidation
             }
             if (num > 0)
             {
-                Assets.reportError(owningAsset, "LOD group on \"{0}\" LOD level {1} missing {2} renderer(s)", component.GetSceneHierarchyPath(), i, num);
+                Assets.ReportError(owningAsset, "LOD group on \"{0}\" LOD level {1} missing {2} renderer(s)", component.GetSceneHierarchyPath(), i, num);
             }
         }
     }
@@ -237,7 +237,7 @@ public static class AssetValidation
                                 }
                                 else if (lodGroupComponent != lODGroup)
                                 {
-                                    Assets.reportError(owningAsset, "renderer on \"{0}\" is registered with more than one LOD group, found in \"{1}\" LOD level {2} and \"{3}\" LOD level {4}", allRenderer.GetSceneHierarchyPath(), lODGroup.GetSceneHierarchyPath(), num, lodGroupComponent.GetSceneHierarchyPath(), num2);
+                                    Assets.ReportError(owningAsset, "renderer on \"{0}\" is registered with more than one LOD group, found in \"{1}\" LOD level {2} and \"{3}\" LOD level {4}", allRenderer.GetSceneHierarchyPath(), lODGroup.GetSceneHierarchyPath(), num, lodGroupComponent.GetSceneHierarchyPath(), num2);
                                     goto end_IL_00e5;
                                 }
                             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace SDG.Unturned;
@@ -21,6 +22,29 @@ public class MainMenuWorkshopFeaturedLiveConfig
     public string linkURL;
 
     public int[] associatedStockpileItems;
+
+    public bool useTimeWindow;
+
+    public DateTime startTime;
+
+    public DateTime endTime;
+
+    public bool IsNowFeaturedTime
+    {
+        get
+        {
+            if (useTimeWindow)
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                if (utcNow >= startTime)
+                {
+                    return utcNow <= endTime;
+                }
+                return false;
+            }
+            return true;
+        }
+    }
 
     public bool IsFeatured(ulong fileId)
     {
@@ -80,5 +104,8 @@ public class MainMenuWorkshopFeaturedLiveConfig
         {
             associatedStockpileItems = new int[0];
         }
+        useTimeWindow = data.ParseBool("UseTimeWindow");
+        startTime = data.ParseDateTimeUtc("StartTime");
+        endTime = data.ParseDateTimeUtc("EndTime");
     }
 }

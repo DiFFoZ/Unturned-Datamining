@@ -23,4 +23,7 @@ public interface IConvenientSavedata
     bool hasFlag(string flag);
 
     void setFlag(string flag);
+
+    /// <returns>true if key existed and was removed.</returns>
+    bool DeleteBool(string key);
 }

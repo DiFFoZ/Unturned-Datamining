@@ -201,6 +201,11 @@ public class MenuWorkshopUI
         AssetIdListExporter.Export();
     }
 
+    private static void OnExportCargoClicked(ISleekElement button)
+    {
+        CargoExporter.Export();
+    }
+
     public static void toggleIconTools()
     {
         iconToolsContainer.IsVisible = !iconToolsContainer.IsVisible;
@@ -445,6 +450,14 @@ public class MenuWorkshopUI
         sleekButton.Text = "Export Asset IDs";
         sleekButton.OnClicked += OnExportAssetIdListClicked;
         iconToolsContainer.AddChild(sleekButton);
+        num += 25;
+        ISleekButton sleekButton2 = Glazier.Get().CreateButton();
+        sleekButton2.PositionOffset_Y = num;
+        sleekButton2.SizeOffset_X = 150f;
+        sleekButton2.SizeOffset_Y = 25f;
+        sleekButton2.Text = "Export Wiki Cargo Data";
+        sleekButton2.OnClicked += OnExportCargoClicked;
+        iconToolsContainer.AddChild(sleekButton2);
         submitUI = new MenuWorkshopSubmitUI();
         editorUI = new MenuWorkshopEditorUI();
         errorUI = new MenuWorkshopErrorUI();

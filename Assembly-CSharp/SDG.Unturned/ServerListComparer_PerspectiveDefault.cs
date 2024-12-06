@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
-public class ServerListComparer_PerspectiveDefault : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_PerspectiveDefault : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (lhs.cameraMode == rhs.cameraMode)
         {

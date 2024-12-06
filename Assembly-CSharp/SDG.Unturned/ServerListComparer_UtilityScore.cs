@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
-public class ServerListComparer_UtilityScore : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_UtilityScore : ServerListComparer_Base
 {
-    public int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (MathfEx.IsNearlyEqual(lhs.utilityScore, rhs.utilityScore, 0.001f))
         {

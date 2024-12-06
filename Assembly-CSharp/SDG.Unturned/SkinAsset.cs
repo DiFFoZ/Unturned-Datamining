@@ -141,7 +141,7 @@ public class SkinAsset : Asset
         _tertiarySkin = bundle.load<Material>("Skin_Tertiary");
         if (attachmentSkin != null && tertiarySkin == null)
         {
-            Assets.reportError(this, "has Skin_Attachment material without a Skin_Tertiary material");
+            Assets.ReportError(this, "has Skin_Attachment material without a Skin_Tertiary material");
         }
         ushort num3 = data.ParseUInt16("Override_Meshes", 0);
         overrideMeshes = new List<Mesh>(num3);

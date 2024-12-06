@@ -22,11 +22,11 @@ public class RedirectorAsset : Asset
         assetCategoryOverride = data.ParseEnum("AssetCategory", EAssetType.NONE);
         if (id > 0 && assetCategoryOverride == EAssetType.NONE)
         {
-            Assets.reportError(this, "legacy ID was assigned but AssetCategory was not");
+            Assets.ReportError(this, "legacy ID was assigned but AssetCategory was not");
         }
         if (!data.TryParseGuid("TargetAsset", out _targetGuid))
         {
-            Assets.reportError(this, "unable to parse TargetAsset");
+            Assets.ReportError(this, "unable to parse TargetAsset");
         }
     }
 }

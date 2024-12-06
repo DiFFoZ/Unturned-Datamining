@@ -25,35 +25,29 @@ public class DamageTool
     [Obsolete("Use damageAnimalRequested")]
     public static DamageToolAnimalDamagedHandler animalDamaged;
 
-    private static List<RegionCoordinate> regionsInRadius = new List<RegionCoordinate>(4);
-
-    private static List<Player> playersInRadius = new List<Player>();
-
-    private static List<Zombie> zombiesInRadius = new List<Zombie>();
-
-    private static List<Animal> animalsInRadius = new List<Animal>();
-
-    private static List<Transform> barricadesInRadius = new List<Transform>();
-
-    private static List<Transform> structuresInRadius = new List<Transform>();
-
-    private static List<InteractableVehicle> vehiclesInRadius = new List<InteractableVehicle>();
-
-    private static List<Transform> resourcesInRadius = new List<Transform>();
-
-    private static List<Transform> objectsInRadius = new List<Transform>();
+    /// <summary>
+    /// Refer to ExplosionPoolData for pooling explanation.
+    /// </summary>
+    private static List<ExplosionPoolData> explosionDataPool = new List<ExplosionPoolData>();
 
     private static ExplosionRangeComparator explosionRangeComparator = new ExplosionRangeComparator();
 
-    private static List<EPlayerKill> explosionKills = new List<EPlayerKill>();
+    private static Collider[] explosionColliders = new Collider[256];
+
+    private static HashSet<IExplosionDamageable> explosionOverlaps = new HashSet<IExplosionDamageable>();
+
+    /// <summary>
+    /// Used if explosion won't damage anything.
+    /// </summary>
+    private static List<EPlayerKill> emptyKillsList = new List<EPlayerKill>();
 
     private static ClientStaticMethod<Vector3, Vector3, string, Transform, NetId> SendSpawnBulletImpact = ClientStaticMethod<Vector3, Vector3, string, Transform, NetId>.Get(ReceiveSpawnBulletImpact);
 
     private static ClientStaticMethod<Vector3, Vector3, string, Transform> SendSpawnLegacyImpact = ClientStaticMethod<Vector3, Vector3, string, Transform>.Get(ReceiveSpawnLegacyImpact);
 
-    private static readonly AssetReference<EffectAsset> FleshDynamicRef = new AssetReference<EffectAsset>("cea791255ba74b43a20e511a52ebcbec");
+    internal static readonly AssetReference<EffectAsset> FleshDynamicRef = new AssetReference<EffectAsset>("cea791255ba74b43a20e511a52ebcbec");
 
-    private static readonly AssetReference<EffectAsset> AlienDynamicRef = new AssetReference<EffectAsset>("67a4addd45174d7e9ca5c8ec24f8010f");
+    internal static readonly AssetReference<EffectAsset> AlienDynamicRef = new AssetReference<EffectAsset>("67a4addd45174d7e9ca5c8ec24f8010f");
 
     /// <summary>
     /// Replacement for playerDamaged.
@@ -732,408 +726,128 @@ public class DamageTool
     /// </summary>
     public static void explode(ExplosionParameters parameters, out List<EPlayerKill> kills)
     {
-        explosionKills.Clear();
-        kills = explosionKills;
-        explosionRangeComparator.point = parameters.point;
-        float num = parameters.damageRadius * parameters.damageRadius;
-        regionsInRadius.Clear();
-        Regions.getRegionsInRadius(parameters.point, parameters.damageRadius, regionsInRadius);
-        int layerMask = ((!parameters.penetrateBuildables) ? RayMasks.BLOCK_EXPLOSION : RayMasks.BLOCK_EXPLOSION_PENETRATE_BUILDABLES);
-        RaycastHit hitInfo;
-        if (parameters.structureDamage > 0.5f)
+        ThreadUtil.assertIsGameThread();
+        emptyKillsList.Clear();
+        kills = emptyKillsList;
+        bool flag = parameters.structureDamage > 0.5f;
+        bool flag2 = parameters.resourceDamage > 0.5f;
+        bool flag3 = parameters.objectDamage > 0.5f;
+        bool flag4 = parameters.barricadeDamage > 0.5f;
+        bool flag5 = (Provider.isPvP || parameters.damageType == EExplosionDamageType.ZOMBIE_ACID || parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE || parameters.damageType == EExplosionDamageType.ZOMBIE_ELECTRIC) && parameters.playerDamage > 0.5f;
+        bool flag6 = flag5 || parameters.launchSpeed > 0.01f;
+        bool flag7 = parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE || parameters.zombieDamage > 0.5f;
+        bool flag8 = parameters.animalDamage > 0.5f;
+        bool flag9 = parameters.vehicleDamage > 0.5f;
+        int num = 0;
+        num |= (flag ? 268435456 : 0);
+        num |= (flag2 ? 16384 : 0);
+        num |= (flag3 ? 229376 : 0);
+        num |= (flag4 ? 134234112 : 0);
+        num |= (flag6 ? 1536 : 0);
+        num |= (flag7 ? 16777216 : 0);
+        num |= (flag8 ? 16777216 : 0);
+        num |= (flag9 ? 67108864 : 0);
+        if (num == 0)
         {
-            structuresInRadius.Clear();
-            StructureManager.getStructuresInRadius(parameters.point, num, regionsInRadius, structuresInRadius);
-            structuresInRadius.Sort(explosionRangeComparator);
-            for (int i = 0; i < structuresInRadius.Count; i++)
-            {
-                Transform transform = structuresInRadius[i];
-                if (transform == null)
-                {
-                    continue;
-                }
-                StructureDrop structureDrop = StructureDrop.FindByRootFast(transform);
-                if (structureDrop == null)
-                {
-                    continue;
-                }
-                ItemStructureAsset asset = structureDrop.asset;
-                if (asset == null || asset.proofExplosion)
-                {
-                    continue;
-                }
-                Vector3 vector = CollisionUtil.ClosestPoint(transform.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude = vector.sqrMagnitude;
-                if (!(sqrMagnitude < num))
-                {
-                    continue;
-                }
-                float num2 = Mathf.Sqrt(sqrMagnitude);
-                Vector3 direction = vector / num2;
-                if (num2 > 0.01f)
-                {
-                    Ray ray = new Ray(parameters.point, direction);
-                    float maxDistance = num2 - 0.01f;
-                    Physics.Raycast(ray, out hitInfo, maxDistance, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(transform))
-                    {
-                        continue;
-                    }
-                }
-                StructureManager.damage(transform, vector.normalized, parameters.structureDamage, 1f - num2 / parameters.damageRadius, armor: true, parameters.killer, parameters.damageOrigin);
-            }
+            return;
         }
-        EPlayerKill kill;
-        uint xp;
-        if (parameters.resourceDamage > 0.5f)
+        QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.Collide;
+        int num2 = Physics.OverlapSphereNonAlloc(parameters.point, parameters.damageRadius, explosionColliders, num, queryTriggerInteraction);
+        if (num2 < 1)
         {
-            resourcesInRadius.Clear();
-            ResourceManager.getResourcesInRadius(parameters.point, num, regionsInRadius, resourcesInRadius);
-            resourcesInRadius.Sort(explosionRangeComparator);
-            for (int j = 0; j < resourcesInRadius.Count; j++)
-            {
-                Transform transform2 = resourcesInRadius[j];
-                if (transform2 == null)
-                {
-                    continue;
-                }
-                Vector3 vector2 = CollisionUtil.ClosestPoint(transform2.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude2 = vector2.sqrMagnitude;
-                if (!(sqrMagnitude2 < num))
-                {
-                    continue;
-                }
-                float num3 = Mathf.Sqrt(sqrMagnitude2);
-                Vector3 direction2 = vector2 / num3;
-                if (num3 > 0.01f)
-                {
-                    Ray ray2 = new Ray(parameters.point, direction2);
-                    float maxDistance2 = num3 - 0.01f;
-                    Physics.Raycast(ray2, out hitInfo, maxDistance2, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(transform2))
-                    {
-                        continue;
-                    }
-                }
-                ResourceManager.damage(transform2, vector2.normalized, parameters.resourceDamage, 1f - num3 / parameters.damageRadius, 1f, out kill, out xp, parameters.killer, parameters.damageOrigin);
-                if (kill != 0)
-                {
-                    kills.Add(kill);
-                }
-            }
+            return;
         }
-        if (parameters.objectDamage > 0.5f)
+        if (num2 == explosionColliders.Length)
         {
-            objectsInRadius.Clear();
-            ObjectManager.getObjectsInRadius(parameters.point, num, regionsInRadius, objectsInRadius);
-            objectsInRadius.Sort(explosionRangeComparator);
-            for (int k = 0; k < objectsInRadius.Count; k++)
+            UnturnedLog.warn($"Explosion overlap reached non-alloc collider limit ({num2})! (Radius: {parameters.damageRadius})");
+            explosionColliders = Physics.OverlapSphere(parameters.point, parameters.damageRadius, num, queryTriggerInteraction);
+            num2 = explosionColliders.Length;
+            UnturnedLog.warn($"New explosion collider limit: {num2}");
+        }
+        ExplosionPoolData item;
+        if (explosionDataPool.Count > 0)
+        {
+            item = explosionDataPool.GetAndRemoveTail();
+        }
+        else
+        {
+            ExplosionPoolData explosionPoolData = default(ExplosionPoolData);
+            explosionPoolData.damageCandidates = new List<ExplosionDamageCandidate>();
+            explosionPoolData.kills = new List<EPlayerKill>();
+            item = explosionPoolData;
+        }
+        item.damageCandidates.Clear();
+        item.kills.Clear();
+        explosionOverlaps.Clear();
+        try
+        {
+            for (int i = 0; i < num2; i++)
             {
-                Transform transform3 = objectsInRadius[k];
-                if (transform3 == null)
+                Collider collider = explosionColliders[i];
+                if (collider == null)
                 {
                     continue;
                 }
-                InteractableObjectRubble componentInParent = transform3.GetComponentInParent<InteractableObjectRubble>();
-                if (componentInParent == null || componentInParent.asset.rubbleProofExplosion)
+                Transform transform = collider.transform;
+                if (!(transform == null))
                 {
-                    continue;
-                }
-                for (byte b = 0; b < componentInParent.getSectionCount(); b++)
-                {
-                    RubbleInfo sectionInfo = componentInParent.getSectionInfo(b);
-                    if (sectionInfo.isDead)
+                    IExplosionDamageable componentInParent = transform.GetComponentInParent<IExplosionDamageable>();
+                    if (componentInParent != null && componentInParent.IsEligibleForExplosionDamage && explosionOverlaps.Add(componentInParent))
                     {
-                        continue;
-                    }
-                    Vector3 vector3 = sectionInfo.section.position;
-                    if (sectionInfo.aliveGameObject != null)
-                    {
-                        vector3 = CollisionUtil.ClosestPoint(sectionInfo.section.gameObject, parameters.point, includeInactive: false);
-                    }
-                    Vector3 vector4 = vector3 - parameters.point;
-                    float sqrMagnitude3 = vector4.sqrMagnitude;
-                    if (!(sqrMagnitude3 < num))
-                    {
-                        continue;
-                    }
-                    float num4 = Mathf.Sqrt(sqrMagnitude3);
-                    Vector3 direction3 = vector4 / num4;
-                    if (num4 > 0.01f)
-                    {
-                        Ray ray3 = new Ray(parameters.point, direction3);
-                        float maxDistance3 = num4 - 0.01f;
-                        Physics.Raycast(ray3, out hitInfo, maxDistance3, layerMask, QueryTriggerInteraction.Ignore);
-                        if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(componentInParent.transform))
-                        {
-                            continue;
-                        }
-                    }
-                    ObjectManager.damage(componentInParent.transform, vector4.normalized, b, parameters.objectDamage, 1f - num4 / parameters.damageRadius, out kill, out xp, parameters.killer, parameters.damageOrigin);
-                    if (kill != 0)
-                    {
-                        kills.Add(kill);
+                        Vector3 closestPointToExplosion = componentInParent.GetClosestPointToExplosion(parameters.point);
+                        ExplosionDamageCandidate explosionDamageCandidate = default(ExplosionDamageCandidate);
+                        explosionDamageCandidate.target = componentInParent;
+                        explosionDamageCandidate.closestPoint = closestPointToExplosion;
+                        ExplosionDamageCandidate item2 = explosionDamageCandidate;
+                        item.damageCandidates.Add(item2);
                     }
                 }
             }
         }
-        if (parameters.barricadeDamage > 0.5f)
+        catch (Exception e)
         {
-            barricadesInRadius.Clear();
-            BarricadeManager.getBarricadesInRadius(parameters.point, num, regionsInRadius, barricadesInRadius);
-            BarricadeManager.getBarricadesInRadius(parameters.point, num, barricadesInRadius);
-            barricadesInRadius.Sort(explosionRangeComparator);
-            for (int l = 0; l < barricadesInRadius.Count; l++)
+            UnturnedLog.exception(e, "Caught exception while evaluating explosion damage candidates:");
+        }
+        if (item.damageCandidates.IsEmpty())
+        {
+            explosionDataPool.Add(item);
+            return;
+        }
+        explosionRangeComparator.explosionCenter = parameters.point;
+        item.damageCandidates.Sort(explosionRangeComparator);
+        int obstructionMask = ((!parameters.penetrateBuildables) ? RayMasks.BLOCK_EXPLOSION : RayMasks.BLOCK_EXPLOSION_PENETRATE_BUILDABLES);
+        ExplosionDamageParameters explosionDamageParameters = default(ExplosionDamageParameters);
+        explosionDamageParameters.kills = item.kills;
+        explosionDamageParameters.xp = 0u;
+        explosionDamageParameters.obstructionMask = obstructionMask;
+        explosionDamageParameters.shouldAffectStructures = flag;
+        explosionDamageParameters.shouldAffectTrees = flag2;
+        explosionDamageParameters.shouldAffectObjects = flag3;
+        explosionDamageParameters.shouldAffectBarricades = flag4;
+        explosionDamageParameters.canDealPlayerDamage = flag5;
+        explosionDamageParameters.shouldAffectPlayers = flag6;
+        explosionDamageParameters.shouldAffectZombies = flag7;
+        explosionDamageParameters.shouldAffectAnimals = flag8;
+        explosionDamageParameters.shouldAffectVehicles = flag9;
+        ExplosionDamageParameters damageParameters = explosionDamageParameters;
+        try
+        {
+            foreach (ExplosionDamageCandidate damageCandidate in item.damageCandidates)
             {
-                Transform transform4 = barricadesInRadius[l];
-                if (transform4 == null)
+                if (damageCandidate.target != null && damageCandidate.target.IsEligibleForExplosionDamage)
                 {
-                    continue;
-                }
-                Vector3 vector5 = CollisionUtil.ClosestPoint(transform4.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude4 = vector5.sqrMagnitude;
-                if (!(sqrMagnitude4 < num))
-                {
-                    continue;
-                }
-                float num5 = Mathf.Sqrt(sqrMagnitude4);
-                Vector3 direction4 = vector5 / num5;
-                if (num5 > 0.01f)
-                {
-                    Ray ray4 = new Ray(parameters.point, direction4);
-                    float maxDistance4 = num5 - 0.01f;
-                    Physics.Raycast(ray4, out hitInfo, maxDistance4, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(transform4))
-                    {
-                        continue;
-                    }
-                }
-                BarricadeDrop barricadeDrop = BarricadeDrop.FindByRootFast(transform4);
-                if (barricadeDrop != null)
-                {
-                    ItemBarricadeAsset asset2 = barricadeDrop.asset;
-                    if (asset2 != null && !asset2.proofExplosion)
-                    {
-                        BarricadeManager.damage(transform4, parameters.barricadeDamage, 1f - num5 / parameters.damageRadius, armor: true, parameters.killer, parameters.damageOrigin);
-                    }
+                    damageParameters.closestPoint = damageCandidate.closestPoint;
+                    damageCandidate.target.ApplyExplosionDamage(in parameters, ref damageParameters);
                 }
             }
         }
-        bool flag = (Provider.isPvP || parameters.damageType == EExplosionDamageType.ZOMBIE_ACID || parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE || parameters.damageType == EExplosionDamageType.ZOMBIE_ELECTRIC) && parameters.playerDamage > 0.5f;
-        if (flag || parameters.launchSpeed > 0.01f)
+        catch (Exception e2)
         {
-            playersInRadius.Clear();
-            PlayerTool.getPlayersInRadius(parameters.point, num, playersInRadius);
-            for (int m = 0; m < playersInRadius.Count; m++)
-            {
-                Player player = playersInRadius[m];
-                if (player == null || player.life.isDead || (parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE && player.clothing.shirtAsset != null && player.clothing.shirtAsset.proofFire && player.clothing.pantsAsset != null && player.clothing.pantsAsset.proofFire))
-                {
-                    continue;
-                }
-                Vector3 vector6 = CollisionUtil.ClosestPoint(player.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude5 = vector6.sqrMagnitude;
-                if (!(sqrMagnitude5 < num))
-                {
-                    continue;
-                }
-                float num6 = Mathf.Sqrt(sqrMagnitude5);
-                Vector3 vector7 = vector6 / num6;
-                if (num6 > 0.01f)
-                {
-                    Ray ray5 = new Ray(parameters.point, vector7);
-                    float maxDistance5 = num6 - 0.01f;
-                    Physics.Raycast(ray5, out hitInfo, maxDistance5, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(player.transform))
-                    {
-                        continue;
-                    }
-                }
-                if (flag)
-                {
-                    if (parameters.playImpactEffect)
-                    {
-                        EffectAsset effectAsset = FleshDynamicRef.Find();
-                        if (effectAsset != null)
-                        {
-                            TriggerEffectParameters parameters2 = new TriggerEffectParameters(effectAsset);
-                            parameters2.relevantDistance = EffectManager.SMALL;
-                            parameters2.position = player.transform.position + Vector3.up;
-                            EffectManager.triggerEffect(parameters2);
-                            parameters2.SetDirection(-vector7);
-                            EffectManager.triggerEffect(parameters2);
-                        }
-                    }
-                    float num7 = 1f - MathfEx.Square(num6 / parameters.damageRadius);
-                    if (player.movement.getVehicle() != null && player.movement.getVehicle().asset != null)
-                    {
-                        num7 *= player.movement.getVehicle().asset.passengerExplosionArmor;
-                    }
-                    float playerExplosionArmor = getPlayerExplosionArmor(player);
-                    num7 *= playerExplosionArmor;
-                    damage(player, parameters.cause, ELimb.SPINE, parameters.killer, vector7, parameters.playerDamage, num7, out kill, applyGlobalArmorMultiplier: true, trackKill: true);
-                    if (kill != 0 && player.channel.owner.playerID.steamID != parameters.killer)
-                    {
-                        kills.Add(kill);
-                    }
-                }
-                if (parameters.launchSpeed > 0.01f)
-                {
-                    Vector3 normalized = (player.transform.position + Vector3.up - parameters.point).normalized;
-                    float num8 = 1f - MathfEx.Square(num6 / parameters.damageRadius);
-                    num8 *= Provider.modeConfigData.Gameplay.Explosion_Launch_Speed_Multiplier;
-                    player.movement.pendingLaunchVelocity += normalized * parameters.launchSpeed * num8;
-                }
-            }
-        }
-        if (parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE || parameters.zombieDamage > 0.5f)
-        {
-            zombiesInRadius.Clear();
-            ZombieManager.getZombiesInRadius(parameters.point, num, zombiesInRadius);
-            for (int n = 0; n < zombiesInRadius.Count; n++)
-            {
-                Zombie zombie = zombiesInRadius[n];
-                if (zombie == null || zombie.isDead)
-                {
-                    continue;
-                }
-                if (parameters.damageType == EExplosionDamageType.ZOMBIE_FIRE)
-                {
-                    if (zombie.speciality == EZombieSpeciality.NORMAL)
-                    {
-                        ZombieManager.sendZombieSpeciality(zombie, EZombieSpeciality.BURNER);
-                    }
-                    continue;
-                }
-                Vector3 vector8 = CollisionUtil.ClosestPoint(zombie.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude6 = vector8.sqrMagnitude;
-                if (!(sqrMagnitude6 < num))
-                {
-                    continue;
-                }
-                float num9 = Mathf.Sqrt(sqrMagnitude6);
-                Vector3 vector9 = vector8 / num9;
-                if (num9 > 0.01f)
-                {
-                    Ray ray6 = new Ray(parameters.point, vector9);
-                    float maxDistance6 = num9 - 0.01f;
-                    Physics.Raycast(ray6, out hitInfo, maxDistance6, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(zombie.transform))
-                    {
-                        continue;
-                    }
-                }
-                if (parameters.playImpactEffect)
-                {
-                    EffectAsset effectAsset2 = (zombie.isRadioactive ? AlienDynamicRef.Find() : FleshDynamicRef.Find());
-                    if (effectAsset2 != null)
-                    {
-                        TriggerEffectParameters parameters3 = new TriggerEffectParameters(effectAsset2);
-                        parameters3.relevantDistance = EffectManager.SMALL;
-                        parameters3.position = zombie.transform.position + Vector3.up;
-                        EffectManager.triggerEffect(parameters3);
-                        parameters3.SetDirection(-vector9);
-                        EffectManager.triggerEffect(parameters3);
-                    }
-                }
-                float num10 = 1f - num9 / parameters.damageRadius;
-                float zombieExplosionArmor = GetZombieExplosionArmor(zombie);
-                num10 *= zombieExplosionArmor;
-                damage(zombie, vector9, parameters.zombieDamage, num10, out kill, out xp, EZombieStunOverride.None, parameters.ragdollEffect);
-                if (kill != 0)
-                {
-                    kills.Add(kill);
-                }
-            }
-        }
-        if (parameters.animalDamage > 0.5f)
-        {
-            animalsInRadius.Clear();
-            AnimalManager.getAnimalsInRadius(parameters.point, num, animalsInRadius);
-            for (int num11 = 0; num11 < animalsInRadius.Count; num11++)
-            {
-                Animal animal = animalsInRadius[num11];
-                if (animal == null || animal.isDead)
-                {
-                    continue;
-                }
-                Vector3 vector10 = CollisionUtil.ClosestPoint(animal.gameObject, parameters.point, includeInactive: false) - parameters.point;
-                float sqrMagnitude7 = vector10.sqrMagnitude;
-                if (!(sqrMagnitude7 < num))
-                {
-                    continue;
-                }
-                float num12 = Mathf.Sqrt(sqrMagnitude7);
-                Vector3 vector11 = vector10 / num12;
-                if (num12 > 0.01f)
-                {
-                    Ray ray7 = new Ray(parameters.point, vector11);
-                    float maxDistance7 = num12 - 0.01f;
-                    Physics.Raycast(ray7, out hitInfo, maxDistance7, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null && !hitInfo.transform.IsChildOf(animal.transform))
-                    {
-                        continue;
-                    }
-                }
-                if (parameters.playImpactEffect)
-                {
-                    EffectAsset effectAsset3 = FleshDynamicRef.Find();
-                    if (effectAsset3 != null)
-                    {
-                        TriggerEffectParameters parameters4 = new TriggerEffectParameters(effectAsset3);
-                        parameters4.relevantDistance = EffectManager.SMALL;
-                        parameters4.position = animal.transform.position + Vector3.up + Vector3.up;
-                        EffectManager.triggerEffect(parameters4);
-                        parameters4.SetDirection(-vector11);
-                        EffectManager.triggerEffect(parameters4);
-                    }
-                }
-                damage(animal, vector11, parameters.animalDamage, 1f - num12 / parameters.damageRadius, out kill, out xp, parameters.ragdollEffect);
-                if (kill != 0)
-                {
-                    kills.Add(kill);
-                }
-            }
-        }
-        if (parameters.vehicleDamage > 0.5f)
-        {
-            vehiclesInRadius.Clear();
-            VehicleManager.getVehiclesInRadius(parameters.point, num, vehiclesInRadius);
-            for (int num13 = 0; num13 < vehiclesInRadius.Count; num13++)
-            {
-                InteractableVehicle interactableVehicle = vehiclesInRadius[num13];
-                if (interactableVehicle == null || interactableVehicle.isDead || interactableVehicle.asset == null || !interactableVehicle.asset.isVulnerableToExplosions)
-                {
-                    continue;
-                }
-                Vector3 vector12 = interactableVehicle.getClosestPointOnHull(parameters.point) - parameters.point;
-                float sqrMagnitude8 = vector12.sqrMagnitude;
-                if (!(sqrMagnitude8 < num))
-                {
-                    continue;
-                }
-                float num14 = Mathf.Sqrt(sqrMagnitude8);
-                Vector3 direction5 = vector12 / num14;
-                float num15 = 1f - num14 / parameters.damageRadius;
-                if (num14 > 0.01f)
-                {
-                    Ray ray8 = new Ray(parameters.point, direction5);
-                    float maxDistance8 = num14 - 0.01f;
-                    Physics.Raycast(ray8, out hitInfo, maxDistance8, layerMask, QueryTriggerInteraction.Ignore);
-                    if (hitInfo.transform != null)
-                    {
-                        if (!hitInfo.transform.IsChildOf(interactableVehicle.transform))
-                        {
-                            continue;
-                        }
-                        num15 *= interactableVehicle.asset.childExplosionArmorMultiplier;
-                        num15 *= Provider.modeConfigData.Vehicles.Child_Explosion_Armor_Multiplier;
-                    }
-                }
-                VehicleManager.damage(interactableVehicle, parameters.vehicleDamage, num15, canRepair: false, parameters.killer, parameters.damageOrigin);
-            }
+            UnturnedLog.exception(e2, "Caught exception while applying explosion damage:");
         }
         AlertTool.alert(parameters.point, parameters.alertRadius);
+        kills = item.kills;
+        explosionDataPool.Add(item);
     }
 
     [Obsolete("Physics material enum replaced by string names")]

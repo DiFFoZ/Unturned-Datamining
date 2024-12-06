@@ -157,6 +157,8 @@ public class MenuPlayServersUI : SleekFullscreenBox
 
     public static MenuPlayServerListFiltersUI serverListFiltersUI;
 
+    public static MenuPlayServerCurationUI serverCurationUI;
+
     public void open(bool shouldRefresh)
     {
         if (!active)
@@ -755,9 +757,10 @@ public class MenuPlayServersUI : SleekFullscreenBox
         }
     }
 
-    private void onClickedHostingButton(ISleekElement button)
+    private void OnClickedCurationButton(ISleekElement button)
     {
-        Provider.provider.browserService.open("https://docs.smartlydressedgames.com/en/stable/servers/server-hosting.html");
+        serverCurationUI.open();
+        close();
     }
 
     private void OnPresetsEditorButtonClicked(ISleekElement button)
@@ -2055,14 +2058,14 @@ public class MenuPlayServersUI : SleekFullscreenBox
         sleekImage4.Texture = (Texture2D)GlazierResources.PixelTexture;
         sleekImage4.TintColor = new SleekColor(ESleekTint.FOREGROUND, 0.5f);
         AddChild(sleekImage4);
-        SleekButtonIcon sleekButtonIcon2 = new SleekButtonIcon(icons.load<Texture2D>("Hosting"));
+        SleekButtonIcon sleekButtonIcon2 = new SleekButtonIcon(icons.load<Texture2D>("ServerListCuration"), 40);
         sleekButtonIcon2.PositionOffset_X = 5f;
         sleekButtonIcon2.SizeOffset_X = -10f;
         sleekButtonIcon2.SizeOffset_Y = 50f;
         sleekButtonIcon2.SizeScale_X = 0.25f;
-        sleekButtonIcon2.text = localization.format("HostingButtonText");
-        sleekButtonIcon2.tooltip = localization.format("HostingButtonTooltip");
-        sleekButtonIcon2.onClickedButton += onClickedHostingButton;
+        sleekButtonIcon2.text = localization.format("CurationButtonText");
+        sleekButtonIcon2.tooltip = localization.format("CurationButtonTooltip");
+        sleekButtonIcon2.onClickedButton += OnClickedCurationButton;
         sleekButtonIcon2.fontSize = ESleekFontSize.Medium;
         sleekButtonIcon2.iconColor = ESleekTint.FOREGROUND;
         sleekElement.AddChild(sleekButtonIcon2);
@@ -2143,5 +2146,14 @@ public class MenuPlayServersUI : SleekFullscreenBox
         serverListFiltersUI.SizeScale_X = 1f;
         serverListFiltersUI.SizeScale_Y = 1f;
         MenuUI.container.AddChild(serverListFiltersUI);
+        serverCurationUI = new MenuPlayServerCurationUI(this);
+        serverCurationUI.PositionOffset_X = 10f;
+        serverCurationUI.PositionOffset_Y = 10f;
+        serverCurationUI.PositionScale_Y = 1f;
+        serverCurationUI.SizeOffset_X = -20f;
+        serverCurationUI.SizeOffset_Y = -20f;
+        serverCurationUI.SizeScale_X = 1f;
+        serverCurationUI.SizeScale_Y = 1f;
+        MenuUI.container.AddChild(serverCurationUI);
     }
 }

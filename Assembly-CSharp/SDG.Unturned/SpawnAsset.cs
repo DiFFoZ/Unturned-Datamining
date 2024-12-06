@@ -246,11 +246,11 @@ public class SpawnAsset : Asset
                 spawnTable2.normalizedWeight = 0f;
                 if (spawnTable2.legacySpawnId == 0 && spawnTable2.targetGuid.IsEmpty())
                 {
-                    Assets.reportError(this, "root " + i + " has neither a Spawn_ID or GUID set!");
+                    Assets.ReportError(this, "root " + i + " has neither a Spawn_ID or GUID set!");
                 }
                 if (spawnTable2.weight <= 0)
                 {
-                    Assets.reportError(this, "root " + i + " has no weight!");
+                    Assets.ReportError(this, "root " + i + " has no weight!");
                 }
                 insertRoots.Add(spawnTable2);
             }
@@ -285,11 +285,11 @@ public class SpawnAsset : Asset
                 spawnTable4.normalizedWeight = 0f;
                 if (spawnTable4.legacySpawnId == 0 && spawnTable4.legacyAssetId == 0 && spawnTable4.targetGuid.IsEmpty())
                 {
-                    Assets.reportError(this, "table " + j + " has neither a Spawn_ID, Asset_ID, or GUID set!");
+                    Assets.ReportError(this, "table " + j + " has neither a Spawn_ID, Asset_ID, or GUID set!");
                 }
                 if (spawnTable4.weight <= 0)
                 {
-                    Assets.reportError(this, "table " + j + " has no weight!");
+                    Assets.ReportError(this, "table " + j + " has no weight!");
                 }
                 tables.Add(spawnTable4);
             }

@@ -871,6 +871,7 @@ public class UseableGun : Useable
                 }
                 float halfAngleRadians = CalculateSpreadAngleRadians(num, GetSimulationAimAlpha());
                 byte b = (byte)((thirdAttachments.magazineAsset == null) ? 1 : thirdAttachments.magazineAsset.pellets);
+                float gravityMultiplier = CalculateBulletGravityMultiplier();
                 for (byte b2 = 0; b2 < b; b2++)
                 {
                     BulletInfo bulletInfo = new BulletInfo();
@@ -882,6 +883,7 @@ public class UseableGun : Useable
                     bulletInfo.quality = num;
                     bulletInfo.barrelAsset = thirdAttachments.barrelAsset;
                     bulletInfo.magazineAsset = thirdAttachments.magazineAsset;
+                    bulletInfo.gravityMultiplier = gravityMultiplier;
                     bullets.Add(bulletInfo);
                     if (Provider.provider.statisticsService.userStatisticsService.getStatistic("Accuracy_Shot", out int data))
                     {
@@ -1031,6 +1033,7 @@ public class UseableGun : Useable
             if (equippedGunAsset.projectile == null)
             {
                 byte b3 = (byte)((thirdAttachments.magazineAsset == null) ? 1 : thirdAttachments.magazineAsset.pellets);
+                float gravityMultiplier2 = CalculateBulletGravityMultiplier();
                 for (byte b4 = 0; b4 < b3; b4++)
                 {
                     BulletInfo bulletInfo2;
@@ -1048,6 +1051,7 @@ public class UseableGun : Useable
                         bulletInfo2.quality = num;
                         bulletInfo2.barrelAsset = thirdAttachments.barrelAsset;
                         bulletInfo2.magazineAsset = thirdAttachments.magazineAsset;
+                        bulletInfo2.gravityMultiplier = gravityMultiplier2;
                         bullets.Add(bulletInfo2);
                         UseableGun.onBulletSpawned?.Invoke(this, bulletInfo2);
                     }
@@ -1495,14 +1499,10 @@ public class UseableGun : Useable
                 }
                 if (base.player.input.isRaycastInvalid(raycastInfo))
                 {
-                    float num = Physics.gravity.y;
-                    if (bulletInfo.barrelAsset != null)
-                    {
-                        num *= bulletInfo.barrelAsset.ballisticDrop;
-                    }
-                    num *= equippedGunAsset.bulletGravityMultiplier;
+                    float y2 = Physics.gravity.y;
+                    y2 *= bulletInfo.gravityMultiplier;
                     bulletInfo.position += bulletInfo.velocity * 0.02f;
-                    bulletInfo.velocity = new Vector3(bulletInfo.velocity.x, bulletInfo.velocity.y + num * 0.02f, bulletInfo.velocity.z);
+                    bulletInfo.velocity = new Vector3(bulletInfo.velocity.x, bulletInfo.velocity.y + y2 * 0.02f, bulletInfo.velocity.z);
                     continue;
                 }
                 if (ePlayerHit != 0)
@@ -1638,8 +1638,8 @@ public class UseableGun : Useable
                 {
                     if (input.vehicle != null && input.vehicle.asset != null && input.vehicle.canBeDamaged && (input.vehicle.asset.isVulnerable || CanDamageInvulnerableEntities))
                     {
-                        float num2 = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Vehicles.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Vehicles.Gun_Lowcal_Damage_Multiplier);
-                        DamageTool.damage(input.vehicle, damageTires: true, input.point, isRepairing: false, equippedGunAsset.vehicleDamage, bulletDamageMultiplier * num2, canRepair: true, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
+                        float num = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Vehicles.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Vehicles.Gun_Lowcal_Damage_Multiplier);
+                        DamageTool.damage(input.vehicle, damageTires: true, input.point, isRepairing: false, equippedGunAsset.vehicleDamage, bulletDamageMultiplier * num, canRepair: true, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
                     }
                 }
                 else if (input.type == ERaycastInfoType.BARRICADE)
@@ -1652,8 +1652,8 @@ public class UseableGun : Useable
                             ItemBarricadeAsset asset3 = barricadeDrop2.asset;
                             if (asset3 != null && asset3.canBeDamaged && (asset3.isVulnerable || CanDamageInvulnerableEntities))
                             {
-                                float num3 = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Barricades.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Barricades.Gun_Lowcal_Damage_Multiplier);
-                                DamageTool.damage(input.transform, isRepairing: false, equippedGunAsset.barricadeDamage, bulletDamageMultiplier * num3, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
+                                float num2 = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Barricades.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Barricades.Gun_Lowcal_Damage_Multiplier);
+                                DamageTool.damage(input.transform, isRepairing: false, equippedGunAsset.barricadeDamage, bulletDamageMultiplier * num2, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
                             }
                         }
                     }
@@ -1668,17 +1668,17 @@ public class UseableGun : Useable
                             ItemStructureAsset asset4 = structureDrop2.asset;
                             if (asset4 != null && asset4.canBeDamaged && (asset4.isVulnerable || CanDamageInvulnerableEntities))
                             {
-                                float num4 = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Structures.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Structures.Gun_Lowcal_Damage_Multiplier);
-                                DamageTool.damage(input.transform, isRepairing: false, input.direction * Mathf.Ceil((float)(int)b2 / 2f), equippedGunAsset.structureDamage, bulletDamageMultiplier * num4, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
+                                float num3 = (CanDamageInvulnerableEntities ? Provider.modeConfigData.Structures.Gun_Highcal_Damage_Multiplier : Provider.modeConfigData.Structures.Gun_Lowcal_Damage_Multiplier);
+                                DamageTool.damage(input.transform, isRepairing: false, input.direction * Mathf.Ceil((float)(int)b2 / 2f), equippedGunAsset.structureDamage, bulletDamageMultiplier * num3, out kill, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
                             }
                         }
                     }
                 }
                 else if (input.type == ERaycastInfoType.RESOURCE)
                 {
-                    if (input.transform != null && input.transform.CompareTag("Resource") && ResourceManager.tryGetRegion(input.transform, out var x2, out var y2, out var index2))
+                    if (input.transform != null && input.transform.CompareTag("Resource") && ResourceManager.tryGetRegion(input.transform, out var x2, out var y3, out var index2))
                     {
-                        ResourceSpawnpoint resourceSpawnpoint2 = ResourceManager.getResourceSpawnpoint(x2, y2, index2);
+                        ResourceSpawnpoint resourceSpawnpoint2 = ResourceManager.getResourceSpawnpoint(x2, y3, index2);
                         if (resourceSpawnpoint2 != null && !resourceSpawnpoint2.isDead && equippedGunAsset.hasBladeID(resourceSpawnpoint2.asset.bladeID))
                         {
                             DamageTool.damage(input.transform, input.direction * Mathf.Ceil((float)(int)b2 / 2f), equippedGunAsset.resourceDamage, bulletDamageMultiplier, 1f, out kill, out xp, base.channel.owner.playerID.steamID, EDamageOrigin.Useable_Gun);
@@ -1695,8 +1695,8 @@ public class UseableGun : Useable
                 }
                 if (input.type != ERaycastInfoType.PLAYER && input.type != ERaycastInfoType.ZOMBIE && input.type != ERaycastInfoType.ANIMAL && !base.player.life.isAggressor)
                 {
-                    float num5 = equippedGunAsset.range + Provider.modeConfigData.Players.Ray_Aggressor_Distance;
-                    num5 *= num5;
+                    float num4 = equippedGunAsset.range + Provider.modeConfigData.Players.Ray_Aggressor_Distance;
+                    num4 *= num4;
                     float ray_Aggressor_Distance = Provider.modeConfigData.Players.Ray_Aggressor_Distance;
                     ray_Aggressor_Distance *= ray_Aggressor_Distance;
                     Vector3 normalized = (bullet.position - base.player.look.aim.position).normalized;
@@ -1711,7 +1711,7 @@ public class UseableGun : Useable
                         {
                             Vector3 vector = player.look.aim.position - base.player.look.aim.position;
                             Vector3 vector2 = Vector3.Project(vector, normalized);
-                            if (vector2.sqrMagnitude < num5 && (vector2 - vector).sqrMagnitude < ray_Aggressor_Distance)
+                            if (vector2.sqrMagnitude < num4 && (vector2 - vector).sqrMagnitude < ray_Aggressor_Distance)
                             {
                                 base.player.life.markAggressive(force: false);
                             }
@@ -1773,13 +1773,13 @@ public class UseableGun : Useable
         }
         if (Provider.modeConfigData.Gameplay.Ballistics)
         {
-            for (int num6 = bullets.Count - 1; num6 >= 0; num6--)
+            for (int num5 = bullets.Count - 1; num5 >= 0; num5--)
             {
-                BulletInfo bulletInfo2 = bullets[num6];
+                BulletInfo bulletInfo2 = bullets[num5];
                 bulletInfo2.steps++;
                 if (bulletInfo2.steps >= equippedGunAsset.ballisticSteps)
                 {
-                    bullets.RemoveAt(num6);
+                    bullets.RemoveAt(num5);
                 }
             }
         }
@@ -2506,7 +2506,14 @@ public class UseableGun : Useable
             {
                 base.player.animator.viewmodelCameraLocalPositionOffset = Vector3.up;
             }
-            base.player.animator.turretViewmodelCameraLocalPositionOffset = Vector3.zero;
+            if (equippedGunAsset.driverTurretViewmodelMode == EDriverTurretViewmodelMode.AlwaysOffscreen)
+            {
+                base.player.animator.drivingViewmodelCameraLocalPositionOffset = Vector3.up;
+            }
+            else
+            {
+                base.player.animator.drivingViewmodelCameraLocalPositionOffset = Vector3.zero;
+            }
         }
         thirdAttachments = base.player.equipment.thirdModel.gameObject.GetComponent<Attachments>();
         if (base.channel.IsLocalPlayer)
@@ -2567,7 +2574,7 @@ public class UseableGun : Useable
                     {
                         trigger.SetCollider(i, list[i].volumeCollider);
                     }
-                    if (base.player.look.perspective == EPlayerPerspective.FIRST)
+                    if (base.player.look.perspective == EPlayerPerspective.FIRST && !equippedGunAsset.isTurret)
                     {
                         thirdShellRenderer.forceRenderingOff = true;
                     }
@@ -2813,11 +2820,8 @@ public class UseableGun : Useable
         base.player.disableItemSpotLight();
         if (base.channel.IsLocalPlayer)
         {
-            if (equippedGunAsset.isTurret)
-            {
-                base.player.animator.viewmodelCameraLocalPositionOffset = Vector3.zero;
-            }
-            base.player.animator.turretViewmodelCameraLocalPositionOffset = Vector3.zero;
+            base.player.animator.viewmodelCameraLocalPositionOffset = Vector3.zero;
+            base.player.animator.drivingViewmodelCameraLocalPositionOffset = Vector3.zero;
             if (gunshotAudioSource != null)
             {
                 UnityEngine.Object.Destroy(gunshotAudioSource);
@@ -3823,9 +3827,12 @@ public class UseableGun : Useable
         }
     }
 
+    /// <summary>
+    /// Note: This is the m/s² acceleration, not the multiplier.
+    /// </summary>
     internal float CalculateBulletGravity()
     {
-        return Physics.gravity.y * equippedGunAsset.bulletGravityMultiplier;
+        return Physics.gravity.y * CalculateBulletGravityMultiplier();
     }
 
     internal float CalculateSpreadAngleRadians()
@@ -4153,7 +4160,7 @@ public class UseableGun : Useable
         }
         if (thirdShellRenderer != null)
         {
-            thirdShellRenderer.forceRenderingOff = newPerspective == EPlayerPerspective.FIRST;
+            thirdShellRenderer.forceRenderingOff = newPerspective == EPlayerPerspective.FIRST && !equippedGunAsset.isTurret;
         }
     }
 
@@ -4310,9 +4317,9 @@ public class UseableGun : Useable
             {
                 PlayerLifeUI.scopeOverlay.scopeImage.Texture = null;
             }
-            if (equippedGunAsset.isTurret)
+            if (equippedGunAsset.driverTurretViewmodelMode == EDriverTurretViewmodelMode.OffscreenWhileAiming)
             {
-                base.player.animator.turretViewmodelCameraLocalPositionOffset = Vector3.up;
+                base.player.animator.drivingViewmodelCameraLocalPositionOffset = Vector3.up;
             }
             base.player.look.shouldUseZoomFactorForSensitivity = true;
             if (equippedGunAsset.isTurret || equippedGunAsset.action == EAction.Minigun || shouldZoomUsingEyes)
@@ -4366,7 +4373,10 @@ public class UseableGun : Useable
             {
                 base.player.animator.viewmodelCameraLocalPositionOffset = Vector3.zero;
             }
-            base.player.animator.turretViewmodelCameraLocalPositionOffset = Vector3.zero;
+            if (equippedGunAsset.driverTurretViewmodelMode == EDriverTurretViewmodelMode.OffscreenWhileAiming)
+            {
+                base.player.animator.drivingViewmodelCameraLocalPositionOffset = Vector3.zero;
+            }
             base.player.animator.scopeSway = Vector3.zero;
             base.player.animator.viewmodelSwayMultiplier = 1f;
             base.player.animator.viewmodelOffsetPreferenceMultiplier = 1f;
@@ -4978,6 +4988,35 @@ public class UseableGun : Useable
             float animationLength2 = base.player.animator.GetAnimationLength("Aim_Stop", scaled: false);
             base.player.animator.setAnimationSpeed("Aim_Stop", animationLength2 / num2);
         }
+    }
+
+    /// <summary>
+    /// Note: This is the multiplier, not the m/s² acceleration.
+    /// </summary>
+    private float CalculateBulletGravityMultiplier()
+    {
+        float num = equippedGunAsset.bulletGravityMultiplier;
+        if (thirdAttachments.barrelAsset != null)
+        {
+            num *= thirdAttachments.barrelAsset.BallisticGravityMultiplier;
+        }
+        if (thirdAttachments.tacticalAsset != null)
+        {
+            num *= thirdAttachments.tacticalAsset.BallisticGravityMultiplier;
+        }
+        if (thirdAttachments.sightAsset != null)
+        {
+            num *= thirdAttachments.sightAsset.BallisticGravityMultiplier;
+        }
+        if (thirdAttachments.magazineAsset != null)
+        {
+            num *= thirdAttachments.magazineAsset.BallisticGravityMultiplier;
+        }
+        if (thirdAttachments.gripAsset != null)
+        {
+            num *= thirdAttachments.gripAsset.BallisticGravityMultiplier;
+        }
+        return num;
     }
 
     private void DestroyLaser()

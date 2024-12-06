@@ -14,7 +14,7 @@ public class Wheel
 
     public Quaternion rest;
 
-    private bool _isSteered;
+    private ECrawlerTrackForwardMode crawlerTrackForwardMode;
 
     public bool isPowered;
 
@@ -63,6 +63,11 @@ public class Wheel
     /// </summary>
     private float animatedSuspensionState;
 
+    /// <summary>
+    /// Model position interpolated toward animatedSuspensionState according to modelSuspensionSpeed.
+    /// </summary>
+    private float animatedModelSuspension;
+
     internal PhysicsMaterialNetId replicatedGroundMaterial;
 
     /// <summary>
@@ -93,8 +98,6 @@ public class Wheel
     public int index { get; private set; }
 
     public WheelCollider wheel => _wheel;
-
-    public bool isSteered => _isSteered;
 
     public bool isGrounded => _isGrounded;
 
@@ -257,10 +260,7 @@ public class Wheel
     {
         if (!(wheel == null))
         {
-            if (isSteered)
-            {
-                latestLocalSteeringInput = input_x;
-            }
+            latestLocalSteeringInput = input_x;
             latestLocalAccelerationInput = input_y;
             latestLocalBrakingInput = inputBrake;
             UpdateGrounded();
@@ -432,6 +432,24 @@ public class Wheel
     {
         replicatedSuspensionState = state;
         animatedSuspensionState = state;
+        if (wheel != null)
+        {
+            animatedModelSuspension = state * wheel.suspensionDistance;
+        }
+    }
+
+    /// <summary>
+    /// Supported when locally simulated and on remote clients.
+    /// </summary>
+    internal float CalculateWheelSpeed()
+    {
+        if (_wheel != null && isPhysical)
+        {
+            float num = _wheel.rpm / 60f;
+            float num2 = MathF.PI * 2f * _wheel.radius;
+            return num * num2;
+        }
+        return 0f;
     }
 
     /// <summary>
@@ -461,7 +479,8 @@ public class Wheel
                     replicatedGroundMaterial = PhysicsMaterialNetId.NULL;
                     UpdateMotionEffect(Vector3.zero, isVisualGrounded: false);
                 }
-                Vector3 vector3 = Vector3.Project(vector2 * num, onNormal);
+                MoveModelSuspension(num, deltaTime);
+                Vector3 vector3 = Vector3.Project(vector2 * (animatedModelSuspension - config.modelSuspensionOffset), onNormal);
                 Vector3 position = vector + vector3;
                 float num2 = _wheel.rpm / 60f * 360f * deltaTime;
                 rollAngleDegrees += num2;
@@ -478,8 +497,9 @@ public class Wheel
             float t = 1f - Mathf.Pow(2f, -13f * Time.deltaTime);
             animatedSuspensionState = Mathf.Lerp(animatedSuspensionState, replicatedSuspensionState, t);
             float num3 = animatedSuspensionState * _wheel.suspensionDistance;
-            Vector3.Project(vector2 * num3, onNormal);
-            Vector3 position2 = vector + vector2 * num3;
+            MoveModelSuspension(num3, deltaTime);
+            Vector3 vector4 = Vector3.Project(vector2 * (animatedModelSuspension - config.modelSuspensionOffset), onNormal);
+            Vector3 position2 = vector + vector4;
             if (_wheel.radius > float.Epsilon)
             {
                 float num4 = vehicle.AnimatedForwardVelocity * deltaTime;
@@ -490,9 +510,9 @@ public class Wheel
             }
             Quaternion quaternion2 = rest;
             quaternion2 = Quaternion.AngleAxis(rollAngleDegrees, Vector3.right) * quaternion2;
-            if (config.isColliderSteered)
+            if (config.steeringMode == EWheelSteeringMode.SteeringAngle)
             {
-                quaternion2 = Quaternion.AngleAxis(vehicle.AnimatedSteeringAngle, Vector3.up) * quaternion2;
+                quaternion2 = Quaternion.AngleAxis(vehicle.AnimatedSteeringAngle * config.steeringAngleMultiplier, Vector3.up) * quaternion2;
             }
             Quaternion rotation2 = model.parent.TransformRotation(quaternion2);
             model.SetPositionAndRotation(position2, rotation2);
@@ -535,7 +555,9 @@ public class Wheel
         model.localRotation = rest;
         if (config.isModelSteered)
         {
-            model.Rotate(0f, vehicle.AnimatedSteeringAngle, 0f, Space.Self);
+            float animatedSteeringAngle = vehicle.AnimatedSteeringAngle;
+            animatedSteeringAngle *= config.steeringAngleMultiplier;
+            model.Rotate(0f, animatedSteeringAngle, 0f, Space.Self);
         }
         model.Rotate(rollAngleDegrees, 0f, 0f, Space.Self);
     }
@@ -549,25 +571,14 @@ public class Wheel
         {
             return;
         }
-        float num = Mathf.Lerp(vehicle.asset.steerMax, vehicle.asset.steerMin, vehicle.GetReplicatedForwardSpeedPercentageOfTargetSpeed());
-        float target = latestLocalSteeringInput * num;
-        float maxDelta = vehicle.asset.SteeringAngleTurnSpeed * delta;
-        wheel.steerAngle = Mathf.MoveTowards(wheel.steerAngle, target, maxDelta);
-        WheelFrictionCurve sidewaysFriction = wheel.sidewaysFriction;
-        WheelFrictionCurve forwardFriction = wheel.forwardFriction;
-        if (vehicle.asset.hasSleds)
+        if (config.steeringMode == EWheelSteeringMode.SteeringAngle)
         {
-            sidewaysFriction.stiffness = Mathf.Lerp(wheel.sidewaysFriction.stiffness, 0.25f, 4f * delta);
-            forwardFriction.stiffness = Mathf.Lerp(wheel.forwardFriction.stiffness, 0.25f, 4f * delta);
+            float num = Mathf.Lerp(vehicle.asset.steerMax, vehicle.asset.steerMin, vehicle.GetReplicatedForwardSpeedPercentageOfTargetSpeed());
+            float num2 = latestLocalSteeringInput * num;
+            num2 *= config.steeringAngleMultiplier;
+            float maxDelta = vehicle.asset.SteeringAngleTurnSpeed * delta;
+            wheel.steerAngle = Mathf.MoveTowards(wheel.steerAngle, num2, maxDelta);
         }
-        else
-        {
-            float num2 = Mathf.Lerp(1f, stiffnessTractionMultiplier, vehicle.slip);
-            sidewaysFriction.stiffness = Mathf.Lerp(wheel.sidewaysFriction.stiffness, stiffnessSideways * num2, 4f * delta);
-            forwardFriction.stiffness = Mathf.Lerp(wheel.forwardFriction.stiffness, stiffnessForward * num2, 4f * delta);
-        }
-        wheel.sidewaysFriction = sidewaysFriction;
-        wheel.forwardFriction = forwardFriction;
         bool flag = false;
         float num3;
         bool flag2;
@@ -625,19 +636,40 @@ public class Wheel
             flag2 = false;
             flag = true;
         }
-        if (isPowered)
+        float num4 = (isPowered ? num3 : 0f);
+        float num5 = 1f;
+        if (config.steeringMode == EWheelSteeringMode.CrawlerTrack)
         {
-            wheel.motorTorque = num3;
+            float num6 = Mathf.Lerp(1f, vehicle.asset.CrawlerTrackSteeringMaxSpeedScale, vehicle.GetReplicatedForwardSpeedPercentageOfTargetSpeed());
+            if (!MathfEx.IsNearlyZero(latestLocalSteeringInput))
+            {
+                flag = false;
+                float crawlerTrackSteeringSidewaysFrictionMultiplier = vehicle.asset.CrawlerTrackSteeringSidewaysFrictionMultiplier;
+                float t = Mathf.Abs(latestLocalSteeringInput) * num6;
+                num5 *= Mathf.Lerp(1f, crawlerTrackSteeringSidewaysFrictionMultiplier, t);
+            }
+            float num7 = 1f;
+            if (latestLocalAccelerationInput < -0.01f)
+            {
+                num7 = -1f;
+            }
+            float num8 = vehicle.asset.CrawlerTrackSteeringTorque * num6;
+            switch (crawlerTrackForwardMode)
+            {
+            case ECrawlerTrackForwardMode.Clockwise:
+                num4 += num7 * latestLocalSteeringInput * num8;
+                break;
+            case ECrawlerTrackForwardMode.CounterClockwise:
+                num4 -= num7 * latestLocalSteeringInput * num8;
+                break;
+            }
         }
-        else
-        {
-            wheel.motorTorque = 0f;
-        }
+        wheel.motorTorque = num4;
         if (hasBrakes && (flag2 || latestLocalBrakingInput))
         {
-            float num4 = Mathf.Lerp(1f, brakeTorqueTractionMultiplier, vehicle.slip);
-            num4 *= brakeTorqueMultiplier;
-            wheel.brakeTorque = vehicle.asset.brake * num4;
+            float num9 = Mathf.Lerp(1f, brakeTorqueTractionMultiplier, vehicle.slip);
+            num9 *= brakeTorqueMultiplier;
+            wheel.brakeTorque = vehicle.asset.brake * num9;
         }
         else if (flag)
         {
@@ -647,6 +679,22 @@ public class Wheel
         {
             wheel.brakeTorque = 0f;
         }
+        WheelFrictionCurve sidewaysFriction = wheel.sidewaysFriction;
+        WheelFrictionCurve forwardFriction = wheel.forwardFriction;
+        if (vehicle.asset.hasSleds)
+        {
+            sidewaysFriction.stiffness = Mathf.Lerp(wheel.sidewaysFriction.stiffness, 0.25f, 4f * delta);
+            forwardFriction.stiffness = Mathf.Lerp(wheel.forwardFriction.stiffness, 0.25f, 4f * delta);
+        }
+        else
+        {
+            float num10 = Mathf.Lerp(1f, stiffnessTractionMultiplier, vehicle.slip);
+            sidewaysFriction.stiffness = Mathf.Lerp(wheel.sidewaysFriction.stiffness, stiffnessSideways * num10, 4f * delta);
+            forwardFriction.stiffness = Mathf.Lerp(wheel.forwardFriction.stiffness, stiffnessForward * num10, 4f * delta);
+        }
+        sidewaysFriction.stiffness *= num5;
+        wheel.sidewaysFriction = sidewaysFriction;
+        wheel.forwardFriction = forwardFriction;
     }
 
     /// <summary>
@@ -676,13 +724,39 @@ public class Wheel
             }
             replicatedSuspensionState = wheel.suspensionSpring.targetPosition;
             animatedSuspensionState = replicatedSuspensionState;
+            animatedModelSuspension = wheel.suspensionSpring.targetPosition * wheel.suspensionDistance;
             if (config.modelUseColliderPose)
             {
                 motionEffectInstances = new List<TireMotionEffectInstance>();
             }
             currentGroundEffect = null;
         }
-        _isSteered = config.isColliderSteered;
+        if (config.steeringMode == EWheelSteeringMode.CrawlerTrack)
+        {
+            switch (config.crawlerTrackForwardMode)
+            {
+            case ECrawlerTrackForwardMode.Auto:
+                if (newWheel != null)
+                {
+                    if (newVehicle.transform.InverseTransformPoint(newWheel.transform.position).x < 0f)
+                    {
+                        crawlerTrackForwardMode = ECrawlerTrackForwardMode.Clockwise;
+                    }
+                    else
+                    {
+                        crawlerTrackForwardMode = ECrawlerTrackForwardMode.CounterClockwise;
+                    }
+                }
+                else
+                {
+                    Assets.ReportError(vehicle.asset, $"wheel at index {index} has Auto CrawlerTrackForwardMode without a collider");
+                }
+                break;
+            default:
+                crawlerTrackForwardMode = config.crawlerTrackForwardMode;
+                break;
+            }
+        }
         isPowered = config.isColliderPowered;
         hasBrakes = true;
         isAlive = true;
@@ -690,6 +764,17 @@ public class Wheel
         {
             rest = model.localRotation;
         }
+    }
+
+    private void MoveModelSuspension(float target, float deltaTime)
+    {
+        if (config.modelSuspensionSpeed < -0.01f)
+        {
+            animatedModelSuspension = target;
+            return;
+        }
+        float maxDelta = config.modelSuspensionSpeed * deltaTime;
+        animatedModelSuspension = Mathf.MoveTowards(animatedModelSuspension, target, maxDelta);
     }
 
     [Obsolete("Should not have been public.")]

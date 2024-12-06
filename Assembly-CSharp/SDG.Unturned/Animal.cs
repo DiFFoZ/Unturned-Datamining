@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SDG.Unturned;
 
-public class Animal : MonoBehaviour
+public class Animal : MonoBehaviour, IExplosionDamageable, IEquatable<IExplosionDamageable>
 {
     private Animation animator;
 
@@ -118,6 +118,8 @@ public class Animal : MonoBehaviour
 
     public Vector3 target { get; private set; }
 
+    public bool IsEligibleForExplosionDamage => IsAlive;
+
     public bool isFleeing => _isFleeing;
 
     public bool isHunting { get; private set; }
@@ -127,6 +129,54 @@ public class Animal : MonoBehaviour
     public bool IsAlive => !isDead;
 
     public AnimalAsset asset => _asset;
+
+    public bool Equals(IExplosionDamageable obj)
+    {
+        return this == obj;
+    }
+
+    public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
+    {
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+    }
+
+    public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        if (!damageParameters.shouldAffectAnimals)
+        {
+            return;
+        }
+        Vector3 vector = damageParameters.closestPoint - explosionParameters.point;
+        float magnitude = vector.magnitude;
+        if (magnitude > explosionParameters.damageRadius)
+        {
+            return;
+        }
+        Vector3 vector2 = vector / magnitude;
+        if (damageParameters.LineOfSightTest(explosionParameters.point, vector2, magnitude, out var hit) && hit.transform != null && !hit.transform.IsChildOf(base.transform))
+        {
+            return;
+        }
+        if (explosionParameters.playImpactEffect)
+        {
+            EffectAsset effectAsset = DamageTool.FleshDynamicRef.Find();
+            if (effectAsset != null)
+            {
+                TriggerEffectParameters parameters = new TriggerEffectParameters(effectAsset);
+                parameters.relevantDistance = EffectManager.SMALL;
+                parameters.position = base.transform.position + Vector3.up + Vector3.up;
+                EffectManager.triggerEffect(parameters);
+                parameters.SetDirection(-vector2);
+                EffectManager.triggerEffect(parameters);
+            }
+        }
+        DamageTool.damage(this, vector2, explosionParameters.animalDamage, 1f - magnitude / explosionParameters.damageRadius, out var kill, out var xp, explosionParameters.ragdollEffect);
+        if (kill != 0)
+        {
+            damageParameters.kills.Add(kill);
+        }
+        damageParameters.xp += xp;
+    }
 
     private void updateTicking()
     {
@@ -176,7 +226,7 @@ public class Animal : MonoBehaviour
             }
             else if ((bool)Assets.shouldValidateAssets)
             {
-                Assets.reportError(asset, "missing AnimationClip \"" + text + "\"");
+                Assets.ReportError(asset, "missing AnimationClip \"" + text + "\"");
             }
         }
     }
@@ -201,7 +251,7 @@ public class Animal : MonoBehaviour
             }
             else if ((bool)Assets.shouldValidateAssets)
             {
-                Assets.reportError(asset, "missing AnimationClip \"" + text + "\"");
+                Assets.ReportError(asset, "missing AnimationClip \"" + text + "\"");
             }
         }
     }
@@ -225,7 +275,7 @@ public class Animal : MonoBehaviour
             }
             else if ((bool)Assets.shouldValidateAssets)
             {
-                Assets.reportError(asset, "missing AnimationClip \"" + text + "\"");
+                Assets.ReportError(asset, "missing AnimationClip \"" + text + "\"");
             }
         }
     }
@@ -250,7 +300,7 @@ public class Animal : MonoBehaviour
             }
             else if ((bool)Assets.shouldValidateAssets)
             {
-                Assets.reportError(asset, "missing AnimationClip \"" + text + "\"");
+                Assets.ReportError(asset, "missing AnimationClip \"" + text + "\"");
             }
             if (asset != null && asset.roars != null && asset.roars.Length != 0 && Time.timeAsDouble - startedRoar > 1.0)
             {
@@ -980,7 +1030,7 @@ public class Animal : MonoBehaviour
             }
             else
             {
-                Assets.reportError(asset, "missing CharacterController component");
+                Assets.ReportError(asset, "missing CharacterController component");
             }
         }
         else
@@ -1002,5 +1052,10 @@ public class Animal : MonoBehaviour
     public void askStartle()
     {
         PlayStartleAnimation();
+    }
+
+    void IExplosionDamageable.ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        ApplyExplosionDamage(in explosionParameters, ref damageParameters);
     }
 }

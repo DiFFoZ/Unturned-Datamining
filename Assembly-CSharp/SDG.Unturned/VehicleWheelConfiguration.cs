@@ -14,11 +14,6 @@ internal class VehicleWheelConfiguration : IDatParseable
     public string wheelColliderPath;
 
     /// <summary>
-    /// If true, WheelCollider's steerAngle is set according to steering wheel.
-    /// </summary>
-    public bool isColliderSteered;
-
-    /// <summary>
     /// If true, WheelCollider's motorTorque is set according to accelerator input.
     /// </summary>
     public bool isColliderPowered;
@@ -54,18 +49,50 @@ internal class VehicleWheelConfiguration : IDatParseable
     /// </summary>
     public int copyColliderRpmIndex;
 
+    /// <summary>
+    /// Target steering angle is multiplied by this value. For example, can be set to a negative number for
+    /// rear-wheel steering. Defaults to 1.
+    /// </summary>
+    public float steeringAngleMultiplier;
+
+    /// <summary>
+    /// Vertical offset of model from simulated suspension position.
+    /// </summary>
+    public float modelSuspensionOffset;
+
+    /// <summary>
+    /// How quickly to interpolate model toward suspension position in meters per second.
+    /// If negative, position teleports immediately.
+    /// </summary>
+    public float modelSuspensionSpeed;
+
+    public EWheelSteeringMode steeringMode;
+
+    public ECrawlerTrackForwardMode crawlerTrackForwardMode;
+
     public bool TryParse(IDatNode node)
     {
         if (node is DatDictionary datDictionary)
         {
             wheelColliderPath = datDictionary.GetString("WheelColliderPath");
-            isColliderSteered = datDictionary.ParseBool("IsColliderSteered");
             isColliderPowered = datDictionary.ParseBool("IsColliderPowered");
             modelPath = datDictionary.GetString("ModelPath");
             isModelSteered = datDictionary.ParseBool("IsModelSteered");
             modelUseColliderPose = datDictionary.ParseBool("ModelUseColliderPose");
             modelRadius = datDictionary.ParseFloat("ModelRadius", -1f);
             copyColliderRpmIndex = datDictionary.ParseInt32("CopyColliderRpmIndex", -1);
+            steeringAngleMultiplier = datDictionary.ParseFloat("SteeringAngleMultiplier", 1f);
+            modelSuspensionOffset = datDictionary.ParseFloat("ModelSuspensionOffset");
+            modelSuspensionSpeed = datDictionary.ParseFloat("ModelSuspensionSpeed", -1f);
+            if (datDictionary.ParseBool("IsColliderSteered"))
+            {
+                steeringMode = EWheelSteeringMode.SteeringAngle;
+            }
+            else
+            {
+                steeringMode = datDictionary.ParseEnum("SteeringMode", EWheelSteeringMode.None);
+            }
+            crawlerTrackForwardMode = datDictionary.ParseEnum("CrawlerTrackForwardMode", ECrawlerTrackForwardMode.Auto);
             return true;
         }
         return false;

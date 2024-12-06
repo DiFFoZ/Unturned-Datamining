@@ -162,6 +162,10 @@ public class FoliageSystem : DevkitHierarchyItemBase
         }
         foreach (IFoliageSurface surface in surfaces)
         {
+            if (!surface.IsValidFoliageSurface)
+            {
+                continue;
+            }
             FoliageBounds foliageSurfaceBounds = surface.getFoliageSurfaceBounds();
             for (int i = foliageSurfaceBounds.min.x; i <= foliageSurfaceBounds.max.x; i++)
             {
@@ -287,7 +291,10 @@ public class FoliageSystem : DevkitHierarchyItemBase
         {
             foreach (IFoliageSurface item in list)
             {
-                item.bakeFoliageSurface(bakeSettings, tile);
+                if (item.IsValidFoliageSurface)
+                {
+                    item.bakeFoliageSurface(bakeSettings, tile);
+                }
             }
         }
         FoliageSystem.postBakeTile?.Invoke(bakeSettings, tile);

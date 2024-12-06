@@ -73,4 +73,9 @@ internal class ConvenientSavedataImplementation : IConvenientSavedata
         Flags.Add(flag);
         isDirty = true;
     }
+
+    public bool DeleteBool(string key)
+    {
+        return Booleans.Remove(key);
+    }
 }

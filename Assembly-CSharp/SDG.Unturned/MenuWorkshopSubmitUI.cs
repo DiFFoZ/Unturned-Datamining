@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using SDG.Provider;
 using UnityEngine;
+using Unturned.SystemEx;
 
 namespace SDG.Unturned;
 
@@ -147,9 +148,19 @@ public class MenuWorkshopSubmitUI
         }
         else if (text.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase) || text.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase))
         {
-            if (new FileInfo(text).Length > 1000000)
+            long length = new FileInfo(text).Length;
+            if (length > 1000000)
             {
-                text2 = localization.format("PreviewFieldNotification_FileSize");
+                if (localization.has("PreviewFieldNotification_FileSize_V2"))
+                {
+                    string arg = ByteDisplay.FileSizeToString(length);
+                    string arg2 = ByteDisplay.FileSizeToString(1000000L);
+                    text2 = localization.format("PreviewFieldNotification_FileSize_V2", arg, arg2);
+                }
+                else
+                {
+                    text2 = localization.format("PreviewFieldNotification_FileSize");
+                }
             }
         }
         else

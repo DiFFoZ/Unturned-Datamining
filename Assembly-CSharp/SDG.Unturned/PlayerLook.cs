@@ -1057,7 +1057,11 @@ public class PlayerLook : PlayerCaller
                                 {
                                     orbitPosition = result - base.player.first.position;
                                 }
-                                _orbitPitch = result2;
+                                if (result2 > 180f)
+                                {
+                                    result2 -= 360f;
+                                }
+                                _orbitPitch = Mathf.Clamp(result2, -90f, 90f);
                                 _orbitYaw = result3;
                             }
                         }

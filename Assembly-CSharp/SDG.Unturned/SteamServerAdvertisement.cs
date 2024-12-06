@@ -80,6 +80,15 @@ public class SteamServerAdvertisement
 
     internal EHostBanFlags hostBanFlags;
 
+    internal string serverCurationLabels;
+
+    internal bool isDeniedByServerCurationRule;
+
+    /// <summary>
+    /// If set, this server was denied by a server curation list.
+    /// </summary>
+    internal ServerListCurationRule deniedByRule;
+
     public CSteamID steamID => _steamID;
 
     public uint ip => _ip;

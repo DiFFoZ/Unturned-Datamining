@@ -1,13 +1,11 @@
-using System.Collections.Generic;
-
 namespace SDG.Unturned;
 
 /// <summary>
 /// Sort servers by map name A to Z.
 /// </summary>
-public class ServerListComparer_MapAscending : IComparer<SteamServerAdvertisement>
+public class ServerListComparer_MapAscending : ServerListComparer_Base
 {
-    public virtual int Compare(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
+    protected override int CompareDetails(SteamServerAdvertisement lhs, SteamServerAdvertisement rhs)
     {
         if (string.Equals(lhs.map, rhs.map))
         {

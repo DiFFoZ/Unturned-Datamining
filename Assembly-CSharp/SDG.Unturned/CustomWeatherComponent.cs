@@ -187,7 +187,7 @@ public class CustomWeatherComponent : WeatherComponentBase
         ParticleSystem componentInChildren = gameObject2.GetComponentInChildren<ParticleSystem>();
         if (componentInChildren == null)
         {
-            Assets.reportError(asset, "effect {0} missing particle system", gameObject.name);
+            Assets.ReportError(asset, "effect {0} missing particle system", gameObject.name);
             Object.Destroy(gameObject2);
             yield break;
         }

@@ -248,7 +248,7 @@ internal static class ServerMessageHandler_ReadyToConnect
             Provider.notifyBannedInternal(transportConnection, banReason, banRemainingDuration);
             return;
         }
-        if (flag && IsBlockedByAddressRateLimiting(address))
+        if (flag && !Provider.configData.Server.Use_FakeIP && IsBlockedByAddressRateLimiting(address))
         {
             Provider.reject(transportConnection, ESteamRejection.CONNECT_RATE_LIMITING);
             return;

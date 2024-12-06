@@ -11,7 +11,7 @@ public abstract class VendorSellingBase : VendorElement
             ItemCurrencyAsset itemCurrencyAsset = base.outerAsset.currency.Find();
             if (itemCurrencyAsset == null)
             {
-                Assets.reportError(base.outerAsset, "missing currency asset");
+                Assets.ReportError(base.outerAsset, "missing currency asset");
                 return false;
             }
             return itemCurrencyAsset.canAfford(player, base.cost);
@@ -26,7 +26,7 @@ public abstract class VendorSellingBase : VendorElement
             ItemCurrencyAsset itemCurrencyAsset = base.outerAsset.currency.Find();
             if (itemCurrencyAsset == null)
             {
-                Assets.reportError(base.outerAsset, "missing currency asset");
+                Assets.ReportError(base.outerAsset, "missing currency asset");
             }
             else if (!itemCurrencyAsset.spendValue(player, base.cost))
             {

@@ -44,8 +44,6 @@ public class SleekServer : SleekWrapper
 
     private ISleekLabel nameLabel;
 
-    private ISleekLabel descLabel;
-
     public ClickedServer onClickedServer;
 
     /// <summary>
@@ -266,6 +264,14 @@ public class SleekServer : SleekWrapper
         button.SizeScale_X = 1f;
         button.SizeScale_Y = 1f;
         button.OnClicked += onClickedButton;
+        if (info.deniedByRule != null)
+        {
+            button.TooltipText = MenuPlayUI.serverListUI.localization.format("BlockedByCurator_Tooltip", info.deniedByRule.owner.Name, info.deniedByRule.description);
+        }
+        if (info.isDeniedByServerCurationRule)
+        {
+            button.BackgroundColor = new SleekColor(ESleekTint.BACKGROUND, 0.5f);
+        }
         nameLabel = Glazier.Get().CreateLabel();
         nameLabel.PositionOffset_X = 45f;
         nameLabel.SizeScale_X = 1f;
@@ -273,26 +279,56 @@ public class SleekServer : SleekWrapper
         nameLabel.TextAlignment = TextAnchor.MiddleLeft;
         nameLabel.Text = info.name;
         button.AddChild(nameLabel);
-        if (string.IsNullOrEmpty(info.descText))
+        if (info.isDeniedByServerCurationRule)
+        {
+            nameLabel.TextColor = new SleekColor(ESleekTint.FONT, 0.5f);
+        }
+        if (string.IsNullOrEmpty(info.descText) && string.IsNullOrEmpty(info.serverCurationLabels))
         {
             nameLabel.SizeOffset_Y = 40f;
         }
         else
         {
             nameLabel.SizeOffset_Y = 30f;
-            descLabel = Glazier.Get().CreateLabel();
-            descLabel.PositionOffset_X = 45f;
-            descLabel.PositionOffset_Y = 15f;
-            descLabel.SizeScale_X = 1f;
-            descLabel.SizeOffset_X = -45f;
-            descLabel.SizeOffset_Y = 30f;
-            descLabel.FontSize = ESleekFontSize.Small;
-            descLabel.AllowRichText = true;
-            descLabel.TextColor = ESleekTint.RICH_TEXT_DEFAULT;
-            descLabel.TextContrastContext = ETextContrastContext.InconspicuousBackdrop;
-            descLabel.TextAlignment = TextAnchor.MiddleLeft;
-            descLabel.Text = info.descText;
-            button.AddChild(descLabel);
+        }
+        if (!string.IsNullOrEmpty(info.descText))
+        {
+            ISleekLabel sleekLabel = Glazier.Get().CreateLabel();
+            sleekLabel.PositionOffset_X = 45f;
+            sleekLabel.PositionOffset_Y = 15f;
+            sleekLabel.SizeScale_X = 1f;
+            sleekLabel.SizeOffset_X = -50f;
+            sleekLabel.SizeOffset_Y = 30f;
+            sleekLabel.FontSize = ESleekFontSize.Small;
+            sleekLabel.AllowRichText = true;
+            if (info.isDeniedByServerCurationRule)
+            {
+                sleekLabel.TextColor = new SleekColor(ESleekTint.RICH_TEXT_DEFAULT, 0.5f);
+            }
+            else
+            {
+                sleekLabel.TextColor = ESleekTint.RICH_TEXT_DEFAULT;
+            }
+            sleekLabel.TextContrastContext = ETextContrastContext.InconspicuousBackdrop;
+            sleekLabel.TextAlignment = TextAnchor.MiddleLeft;
+            sleekLabel.Text = info.descText;
+            button.AddChild(sleekLabel);
+        }
+        if (!string.IsNullOrEmpty(info.serverCurationLabels))
+        {
+            ISleekLabel sleekLabel2 = Glazier.Get().CreateLabel();
+            sleekLabel2.PositionOffset_X = 45f;
+            sleekLabel2.PositionOffset_Y = 15f;
+            sleekLabel2.SizeScale_X = 1f;
+            sleekLabel2.SizeOffset_X = -50f;
+            sleekLabel2.SizeOffset_Y = 30f;
+            sleekLabel2.FontSize = ESleekFontSize.Small;
+            sleekLabel2.AllowRichText = true;
+            sleekLabel2.TextColor = ESleekTint.RICH_TEXT_DEFAULT;
+            sleekLabel2.TextContrastContext = ETextContrastContext.InconspicuousBackdrop;
+            sleekLabel2.TextAlignment = TextAnchor.MiddleRight;
+            sleekLabel2.Text = info.serverCurationLabels;
+            button.AddChild(sleekLabel2);
         }
         mapBox = Glazier.Get().CreateBox();
         mapBox.PositionScale_X = 1f;
@@ -307,13 +343,13 @@ public class SleekServer : SleekWrapper
             sleekImage.SizeOffset_X = 143f;
             sleekImage.SizeOffset_Y = 30f;
             mapBox.AddChild(sleekImage);
-            ISleekLabel sleekLabel = Glazier.Get().CreateLabel();
-            sleekLabel.SizeScale_X = 1f;
-            sleekLabel.SizeScale_Y = 1f;
-            sleekLabel.TextAlignment = TextAnchor.MiddleCenter;
-            sleekLabel.TextContrastContext = ETextContrastContext.ColorfulBackdrop;
-            sleekLabel.Text = info.map;
-            mapBox.AddChild(sleekLabel);
+            ISleekLabel sleekLabel3 = Glazier.Get().CreateLabel();
+            sleekLabel3.SizeScale_X = 1f;
+            sleekLabel3.SizeScale_Y = 1f;
+            sleekLabel3.TextAlignment = TextAnchor.MiddleCenter;
+            sleekLabel3.TextContrastContext = ETextContrastContext.ColorfulBackdrop;
+            sleekLabel3.Text = info.map;
+            mapBox.AddChild(sleekLabel3);
         }
         else
         {
@@ -617,12 +653,19 @@ public class SleekServer : SleekWrapper
             thumbnail.SizeOffset_X = 32f;
             thumbnail.SizeOffset_Y = 32f;
             thumbnail.Refresh(info.thumbnailURL);
+            if (info.isDeniedByServerCurationRule)
+            {
+                thumbnail.color = new Color(1f, 1f, 1f, 0.5f);
+            }
             button.AddChild(thumbnail);
         }
         if (info.isPro && !Provider.isPro)
         {
-            button.TextColor = Palette.PRO;
-            button.TooltipText = MenuPlayUI.serverListUI.localization.format("Gold_Column_Yes_Tooltip");
+            if (!info.isDeniedByServerCurationRule)
+            {
+                button.TextColor = Palette.PRO;
+                button.TooltipText = MenuPlayUI.serverListUI.localization.format("Gold_Column_Yes_Tooltip");
+            }
             ISleekImage sleekImage12 = Glazier.Get().CreateImage();
             sleekImage12.PositionOffset_X = 10f;
             sleekImage12.PositionOffset_Y = 10f;

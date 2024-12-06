@@ -139,3 +139,4 @@ PreviewFieldNotification_Empty Cannot be empty.
 PreviewFieldNotification_MissingFile Specified file does not exist.
 PreviewFieldNotification_Extension Image must be a .png or a .jpg.
 PreviewFieldNotification_FileSize Image file size is too large.
+PreviewFieldNotification_FileSize_V2 Image file size ({0}) is larger than limit ({1}).

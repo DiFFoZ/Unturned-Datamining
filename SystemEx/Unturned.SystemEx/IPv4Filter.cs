@@ -18,6 +18,13 @@ public struct IPv4Filter
         this.maxPort = maxPort;
     }
 
+    public void GetAddressRange(out IPv4Address minAddress, out IPv4Address maxAddress)
+    {
+        minAddress = address;
+        uint num = IPv4SubnetMask.SingleAddress.value ^ subnetMask.value;
+        maxAddress = new IPv4Address(address.value + num);
+    }
+
     public bool Matches(IPv4Address hostAddress, ushort port)
     {
         if (subnetMask.ContainsHost(address, hostAddress) && port >= minPort)

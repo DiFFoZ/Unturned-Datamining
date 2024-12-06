@@ -184,7 +184,7 @@ public class PlayerNPCVendorUI
         ItemCurrencyAsset itemCurrencyAsset = vendor.currency.Find();
         if (itemCurrencyAsset == null)
         {
-            Assets.reportError(vendor, "unable to find currency");
+            Assets.ReportError(vendor, "unable to find currency");
             currencyLabel.Text = "Invalid";
             return;
         }
@@ -197,7 +197,7 @@ public class PlayerNPCVendorUI
             ItemAsset itemAsset = item.Find();
             if (itemAsset == null)
             {
-                Assets.reportError(vendor, "unable to find entry item {0}", entry.item);
+                Assets.ReportError(vendor, "unable to find entry item {0}", entry.item);
             }
             else if (entry.isVisibleInVendorMenu)
             {

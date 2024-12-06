@@ -1,8 +1,10 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SDG.Unturned;
 
-public class InteractableObjectRubble : MonoBehaviour
+public class InteractableObjectRubble : MonoBehaviour, IExplosionDamageable, IEquatable<IExplosionDamageable>
 {
     internal RubbleInfo[] rubbleInfos;
 
@@ -14,7 +16,68 @@ public class InteractableObjectRubble : MonoBehaviour
 
     private Transform dropTransform;
 
+    internal LevelObject owningLevelObject;
+
+    private static List<byte> tempIndices = new List<byte>(8);
+
     public ObjectAsset asset { get; protected set; }
+
+    public bool IsEligibleForExplosionDamage
+    {
+        get
+        {
+            if (asset != null && !asset.rubbleProofExplosion)
+            {
+                return !isAllDead();
+            }
+            return false;
+        }
+    }
+
+    public bool Equals(IExplosionDamageable obj)
+    {
+        return this == obj;
+    }
+
+    public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
+    {
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+    }
+
+    public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        if (!damageParameters.shouldAffectObjects)
+        {
+            return;
+        }
+        for (byte b = 0; b < getSectionCount(); b++)
+        {
+            RubbleInfo sectionInfo = getSectionInfo(b);
+            if (!sectionInfo.isDead)
+            {
+                Vector3 vector = sectionInfo.section.position;
+                if (sectionInfo.aliveGameObject != null)
+                {
+                    vector = CollisionUtil.ClosestPoint(sectionInfo.section.gameObject, explosionParameters.point, includeInactive: false);
+                }
+                Vector3 vector2 = vector - explosionParameters.point;
+                float magnitude = vector2.magnitude;
+                if (!(magnitude > explosionParameters.damageRadius))
+                {
+                    Vector3 direction = vector2 / magnitude;
+                    if (!damageParameters.LineOfSightTest(explosionParameters.point, direction, magnitude, out var hit) || !(hit.transform != null) || hit.transform.IsChildOf(base.transform))
+                    {
+                        ObjectManager.damage(base.transform, direction, b, explosionParameters.objectDamage, 1f - magnitude / explosionParameters.damageRadius, out var kill, out var xp, explosionParameters.killer, explosionParameters.damageOrigin);
+                        if (kill != 0)
+                        {
+                            damageParameters.kills.Add(kill);
+                        }
+                        damageParameters.xp += xp;
+                    }
+                }
+            }
+        }
+    }
 
     public byte getSectionCount()
     {
@@ -52,6 +115,30 @@ public class InteractableObjectRubble : MonoBehaviour
                 return false;
             }
         }
+        return true;
+    }
+
+    public bool TryGetRandomAliveSectionIndex(out byte sectionIndex)
+    {
+        if (rubbleInfos == null || rubbleInfos.Length < 1)
+        {
+            sectionIndex = 0;
+            return false;
+        }
+        tempIndices.Clear();
+        for (byte b = 0; b < rubbleInfos.Length; b++)
+        {
+            if (!rubbleInfos[b].isDead)
+            {
+                tempIndices.Add(b);
+            }
+        }
+        if (tempIndices.IsEmpty())
+        {
+            sectionIndex = 0;
+            return false;
+        }
+        sectionIndex = tempIndices.RandomOrDefault();
         return true;
     }
 
@@ -158,17 +245,17 @@ public class InteractableObjectRubble : MonoBehaviour
                         if (rubbleRagdollInfo.forceTransform != null)
                         {
                             force = rubbleRagdollInfo.forceTransform.forward * force.magnitude * rubbleRagdollInfo.forceTransform.localScale.z;
-                            force += rubbleRagdollInfo.forceTransform.right * Random.Range(-16f, 16f) * rubbleRagdollInfo.forceTransform.localScale.x;
-                            force += rubbleRagdollInfo.forceTransform.up * Random.Range(-16f, 16f) * rubbleRagdollInfo.forceTransform.localScale.y;
+                            force += rubbleRagdollInfo.forceTransform.right * UnityEngine.Random.Range(-16f, 16f) * rubbleRagdollInfo.forceTransform.localScale.x;
+                            force += rubbleRagdollInfo.forceTransform.up * UnityEngine.Random.Range(-16f, 16f) * rubbleRagdollInfo.forceTransform.localScale.y;
                         }
                         else
                         {
                             force.y += 8f;
-                            force.x += Random.Range(-16f, 16f);
-                            force.z += Random.Range(-16f, 16f);
+                            force.x += UnityEngine.Random.Range(-16f, 16f);
+                            force.z += UnityEngine.Random.Range(-16f, 16f);
                         }
                         force *= (float)((Player.player != null && Player.player.skills.boost == EPlayerBoost.FLIGHT) ? 4 : 2);
-                        GameObject obj = Object.Instantiate(rubbleRagdollInfo.ragdollGameObject, rubbleRagdollInfo.ragdollGameObject.transform.position, rubbleRagdollInfo.ragdollGameObject.transform.rotation);
+                        GameObject obj = UnityEngine.Object.Instantiate(rubbleRagdollInfo.ragdollGameObject, rubbleRagdollInfo.ragdollGameObject.transform.position, rubbleRagdollInfo.ragdollGameObject.transform.rotation);
                         obj.name = "Ragdoll";
                         EffectManager.RegisterDebris(obj);
                         obj.transform.localScale = base.transform.localScale;
@@ -179,7 +266,7 @@ public class InteractableObjectRubble : MonoBehaviour
                         obj.GetComponent<Rigidbody>().AddForce(force);
                         obj.GetComponent<Rigidbody>().drag = 0.5f;
                         obj.GetComponent<Rigidbody>().angularDrag = 0.1f;
-                        Object.Destroy(obj, 8f);
+                        UnityEngine.Object.Destroy(obj, 8f);
                     }
                 }
             }
@@ -214,19 +301,22 @@ public class InteractableObjectRubble : MonoBehaviour
                 }
             }
         }
-        if (!(Provider.isServer && dropTransform != null && asset.rubbleRewardID != 0 && playEffect && flag) || (asset.holidayRestriction != 0 && !Provider.modeConfigData.Objects.Allow_Holiday_Drops) || !(Random.value <= asset.rubbleRewardProbability))
+        if (Provider.isServer && dropTransform != null && asset.rubbleRewardID != 0 && playEffect && flag && (asset.holidayRestriction == ENPCHoliday.NONE || Provider.modeConfigData.Objects.Allow_Holiday_Drops) && UnityEngine.Random.value <= asset.rubbleRewardProbability)
         {
-            return;
-        }
-        int value = Random.Range(asset.rubbleRewardsMin, asset.rubbleRewardsMax + 1);
-        value = Mathf.Clamp(value, 0, 100);
-        for (int j = 0; j < value; j++)
-        {
-            ushort num = SpawnTableTool.ResolveLegacyId(asset.rubbleRewardID, EAssetType.ITEM, OnGetSpawnTableErrorContext);
-            if (num != 0)
+            int value = UnityEngine.Random.Range(asset.rubbleRewardsMin, asset.rubbleRewardsMax + 1);
+            value = Mathf.Clamp(value, 0, 100);
+            for (int j = 0; j < value; j++)
             {
-                ItemManager.dropItem(new Item(num, EItemOrigin.NATURE), dropTransform.position, playEffect: false, Dedicator.IsDedicatedServer, wideSpread: false);
+                ushort num = SpawnTableTool.ResolveLegacyId(asset.rubbleRewardID, EAssetType.ITEM, OnGetSpawnTableErrorContext);
+                if (num != 0)
+                {
+                    ItemManager.dropItem(new Item(num, EItemOrigin.NATURE), dropTransform.position, playEffect: false, Dedicator.IsDedicatedServer, wideSpread: false);
+                }
             }
+        }
+        if (asset.RubbleNavMode == EObjectRubbleNavMode.DeactivateIfAllDead)
+        {
+            owningLevelObject?.SetRubbleWantsNavActive(!flag);
         }
     }
 
@@ -318,5 +408,10 @@ public class InteractableObjectRubble : MonoBehaviour
     private string OnGetSpawnTableErrorContext()
     {
         return asset?.FriendlyName + " rubble reward";
+    }
+
+    void IExplosionDamageable.ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
+    {
+        ApplyExplosionDamage(in explosionParameters, ref damageParameters);
     }
 }

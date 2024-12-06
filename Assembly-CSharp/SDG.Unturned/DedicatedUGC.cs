@@ -279,8 +279,12 @@ public static class DedicatedUGC
                 flag = false;
                 CommandWindow.Log("Workshop query yielded " + callback.m_unNumResultsReturned + " result(s)");
                 SteamGameServer.GetPublicIP().TryGetIPv4Address(out var address);
-                string iPFromUInt = Parser.getIPFromUInt32(address);
-                CommandWindow.Log("This server's allowed IP for Workshop downloads: " + iPFromUInt);
+                string text = Parser.getIPFromUInt32(address);
+                if (Logs.ShouldRedactLogs)
+                {
+                    text = Logs.RedactionReplacement;
+                }
+                CommandWindow.Log("This server's allowed IP for Workshop downloads: " + text);
                 for (uint num = 0u; num < callback.m_unNumResultsReturned; num++)
                 {
                     if (!SteamGameServerUGC.GetQueryUGCResult(queryHandle, num, out var pDetails))
@@ -289,21 +293,21 @@ public static class DedicatedUGC
                         continue;
                     }
                     PublishedFileId_t nPublishedFileId = pDetails.m_nPublishedFileId;
-                    string text = nPublishedFileId.ToString() + " '" + pDetails.m_rgchTitle + "'";
+                    string text2 = nPublishedFileId.ToString() + " '" + pDetails.m_rgchTitle + "'";
                     if (pDetails.m_eResult != EResult.k_EResultOK)
                     {
-                        CommandWindow.LogWarning($"Error {pDetails.m_eResult} querying workshop file {text}");
+                        CommandWindow.LogWarning($"Error {pDetails.m_eResult} querying workshop file {text2}");
                     }
                     else
                     {
-                        if (!testDownloadRestrictions(queryHandle, num, address, text))
+                        if (!testDownloadRestrictions(queryHandle, num, address, text2))
                         {
                             continue;
                         }
                         TempSteamworksWorkshop.cacheDetails(queryHandle, num, out var _);
                         if (pDetails.m_eFileType != EWorkshopFileType.k_EWorkshopFileTypeCollection)
                         {
-                            CommandWindow.Log(text + " queued for download");
+                            CommandWindow.Log(text2 + " queued for download");
                             enqueueItemToDownload(pDetails.m_nPublishedFileId);
                         }
                         uint unNumChildren = pDetails.m_unNumChildren;
@@ -313,10 +317,10 @@ public static class DedicatedUGC
                         }
                         if (WorkshopDownloadConfig.get().Ignore_Children_File_IDs.Contains(pDetails.m_nPublishedFileId.m_PublishedFileId))
                         {
-                            CommandWindow.LogFormat("Ignoring {0} children of {1}", unNumChildren, text);
+                            CommandWindow.LogFormat("Ignoring {0} children of {1}", unNumChildren, text2);
                             continue;
                         }
-                        CommandWindow.Log(text + " has " + unNumChildren + " children");
+                        CommandWindow.Log(text2 + " has " + unNumChildren + " children");
                         PublishedFileId_t[] array = new PublishedFileId_t[unNumChildren];
                         if (SteamGameServerUGC.GetQueryUGCChildren(queryHandle, num, array, unNumChildren))
                         {

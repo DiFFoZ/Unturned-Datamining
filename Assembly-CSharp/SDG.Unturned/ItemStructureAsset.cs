@@ -163,7 +163,7 @@ public class ItemStructureAsset : ItemPlaceableAsset
             if (structure == null)
             {
                 flag = true;
-                Assets.reportError(this, "missing \"Clip\" GameObject, loading \"Structure\" GameObject instead");
+                Assets.ReportError(this, "missing \"Clip\" GameObject, loading \"Structure\" GameObject instead");
             }
             else
             {
@@ -180,7 +180,7 @@ public class ItemStructureAsset : ItemPlaceableAsset
             _structure = bundle.load<GameObject>("Structure");
             if (structure == null)
             {
-                Assets.reportError(this, "missing \"Structure\" GameObject");
+                Assets.ReportError(this, "missing \"Structure\" GameObject");
             }
             else
             {

@@ -15,7 +15,7 @@ public class ItemVehiclePaintToolAsset : ItemToolAsset
         }
         else
         {
-            Assets.reportError(this, "missing PaintColor");
+            Assets.ReportError(this, "missing PaintColor");
         }
     }
 }

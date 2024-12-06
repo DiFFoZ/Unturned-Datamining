@@ -510,6 +510,24 @@ public class SteamPlayer : SteamConnectedClientBase
         return playerID.GetHashCode();
     }
 
+    public override string ToString()
+    {
+        string text = string.Empty;
+        if ((object)playerID != null)
+        {
+            text = playerID.ToString();
+        }
+        if (base.transportConnection != null)
+        {
+            text = ((!string.IsNullOrEmpty(text)) ? (text + " Connection: " + base.transportConnection.ToString()) : base.transportConnection.ToString());
+        }
+        if (string.IsNullOrEmpty(text))
+        {
+            text = "[invalid client]";
+        }
+        return text;
+    }
+
     /// <summary>
     /// Players can set a "nickname" which is only shown to the members in their group.
     /// </summary>

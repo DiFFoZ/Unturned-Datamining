@@ -77,6 +77,8 @@ public class LandscapeTile : IFormattedFileReadable, IFormattedFileWritable, IFo
 
     public TerrainCollider collider { get; protected set; }
 
+    public bool IsValidFoliageSurface => true;
+
     public void SetHeightsDelayLOD()
     {
         data.SetHeightsDelayLOD(0, 0, heightmap);

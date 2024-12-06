@@ -98,6 +98,11 @@ public class ObjectAsset : Asset
 
     internal AssetReference<DialogueAsset> interactabilityDialogueRef;
 
+    /// <summary>
+    /// Same as interactabilityDialogueRef, not public because it really needs to be cleaned up. :(
+    /// </summary>
+    internal string interactabilityChildPathOverride;
+
     public INPCCondition[] interactabilityConditions;
 
     protected NPCRewardsList interactabilityRewards;
@@ -206,6 +211,35 @@ public class ObjectAsset : Asset
     public bool ShouldExcludeFromSatelliteCapture { get; private set; }
 
     /// <summary>
+    /// If true, Nav game object will be instantiated in singleplayer and on dedicated server. Useful for objects
+    /// which need to affect navmesh baking without colliding with zombies during gameplay.
+    /// Defaults to true for "medium" and "large" objects.
+    /// </summary>
+    public bool ShouldLoadNavOnServer { get; private set; }
+
+    /// <summary>
+    /// If true, Nav game object will be instantiated in the level editor. Useful for objects which need collision
+    /// with zombies during gameplay without affecting navmesh baking.
+    /// Defaults to true for "medium" and "large" objects.
+    /// </summary>
+    public bool ShouldLoadNavInEditor { get; private set; }
+
+    /// <summary>
+    /// If true, zombies can attack this object if it's blocking them. Defaults to false.
+    /// </summary>
+    public bool RubbleCanZombiesDamage { get; protected set; }
+
+    /// <summary>
+    /// Multiplier for damage from zombies if RubbleCanZombiesDamage is true.
+    /// </summary>
+    public float RubbleZombieDamageMultiplier { get; protected set; }
+
+    /// <summary>
+    /// Controls how rubble affects Nav game object.
+    /// </summary>
+    public EObjectRubbleNavMode RubbleNavMode { get; protected set; }
+
+    /// <summary>
     /// Only activated during this holiday.
     /// </summary>
     public ENPCHoliday holidayRestriction { get; protected set; }
@@ -238,7 +272,7 @@ public class ObjectAsset : Asset
         if (Mathf.Abs(asset.transform.localScale.x - 1f) > 0.01f || Mathf.Abs(asset.transform.localScale.y - 1f) > 0.01f || Mathf.Abs(asset.transform.localScale.z - 1f) > 0.01f)
         {
             useScale = false;
-            Assets.reportError(this, "should have a scale of one");
+            Assets.ReportError(this, "should have a scale of one");
         }
         else
         {
@@ -247,7 +281,7 @@ public class ObjectAsset : Asset
         Transform transform = asset.transform.Find("Block");
         if (transform != null && transform.GetComponent<Collider>() != null && transform.GetComponent<Collider>().sharedMaterial == null)
         {
-            Assets.reportError(this, "has a 'Block' collider but no physics material");
+            Assets.ReportError(this, "has a 'Block' collider but no physics material");
         }
         Transform transform2 = asset.transform.Find("Model_0");
         string expectedTag = string.Empty;
@@ -269,7 +303,7 @@ public class ObjectAsset : Asset
         }
         if (num == -1)
         {
-            Assets.reportError(this, "has an unknown tag/layer because it has an unhandled EObjectType");
+            Assets.ReportError(this, "has an unknown tag/layer because it has an unhandled EObjectType");
         }
         else
         {
@@ -298,7 +332,7 @@ public class ObjectAsset : Asset
             Transform transform3 = asset.transform.Find("Sections");
             if (transform3 != null && transform3.childCount > 8)
             {
-                Assets.reportError(this, $"destructible has {transform3.childCount} sections, but the maximum supported is 8");
+                Assets.ReportError(this, $"destructible has {transform3.childCount} sections, but the maximum supported is 8");
             }
         }
     }
@@ -310,7 +344,7 @@ public class ObjectAsset : Asset
     {
         if (asset == null && type != EObjectType.SMALL)
         {
-            Assets.reportError(this, "missing \"Clip\" GameObject, loading \"Object\" GameObject instead");
+            Assets.ReportError(this, "missing \"Clip\" GameObject, loading \"Object\" GameObject instead");
         }
         if (asset != null)
         {
@@ -325,7 +359,7 @@ public class ObjectAsset : Asset
     {
         if (asset == null)
         {
-            Assets.reportError(this, "missing \"Object\" GameObject");
+            Assets.ReportError(this, "missing \"Object\" GameObject");
             return;
         }
         validateModel(asset);
@@ -339,7 +373,7 @@ public class ObjectAsset : Asset
     {
         if (asset == null && type == EObjectType.LARGE)
         {
-            Assets.reportError(this, "missing Nav GameObject. Highly recommended to fix.");
+            Assets.ReportError(this, "missing Nav GameObject. Highly recommended to fix.");
         }
         if (asset != null)
         {
@@ -520,7 +554,7 @@ public class ObjectAsset : Asset
             }
             return true;
         }
-        Assets.reportError(this, "unable to automatically fix tag for " + objectName + "'s " + parentGameObject.name + "! Trying to convert tag " + oldTag + " to " + newTag);
+        Assets.ReportError(this, "unable to automatically fix tag for " + objectName + "'s " + parentGameObject.name + "! Trying to convert tag " + oldTag + " to " + newTag);
         return false;
     }
 
@@ -545,7 +579,7 @@ public class ObjectAsset : Asset
             }
             return true;
         }
-        Assets.reportError(this, "Unable to automatically fix layer for " + objectName + "'s " + parentGameObject.name + "! Trying to convert layer " + oldLayer + " to " + newLayer);
+        Assets.ReportError(this, "Unable to automatically fix layer for " + objectName + "'s " + parentGameObject.name + "! Trying to convert layer " + oldLayer + " to " + newLayer);
         return false;
     }
 
@@ -575,11 +609,11 @@ public class ObjectAsset : Asset
         {
             if (navMC.sharedMesh == null)
             {
-                Assets.reportError(this, "missing mesh for MeshCollider '" + navMC.name + "'");
+                Assets.ReportError(this, "missing mesh for MeshCollider '" + navMC.name + "'");
             }
             else if (!navMC.sharedMesh.isReadable)
             {
-                Assets.reportError(this, "mesh must have read/write enabled for MeshCollider '" + navMC.name + "'");
+                Assets.ReportError(this, "mesh must have read/write enabled for MeshCollider '" + navMC.name + "'");
             }
         }
     }
@@ -616,7 +650,7 @@ public class ObjectAsset : Asset
             Texture2D texture2D = bundle.load<Texture2D>("Decal");
             if (texture2D == null)
             {
-                Assets.reportError(this, "missing 'Decal' Texture2D. It will show as pure white without one.");
+                Assets.ReportError(this, "missing 'Decal' Texture2D. It will show as pure white without one.");
             }
             bool flag = data.ContainsKey("Decal_Alpha");
             hasLoadedModel = true;
@@ -675,7 +709,7 @@ public class ObjectAsset : Asset
                     {
                         if (interactability == EObjectInteractability.QUEST)
                         {
-                            Assets.reportError(this, "Interact text empty");
+                            Assets.ReportError(this, "Interact text empty");
                         }
                     }
                     else
@@ -719,6 +753,10 @@ public class ObjectAsset : Asset
                 {
                     interactabilityDialogueRef = data.readAssetReference<DialogueAsset>("Interactability_Dialogue");
                 }
+                if (interactability == EObjectInteractability.BINARY_STATE)
+                {
+                    interactabilityChildPathOverride = data.GetString("Interactability_Animation_Component_Path");
+                }
                 interactabilityConditions = new INPCCondition[data.ParseUInt8("Interactability_Conditions", 0)];
                 NPCTool.readConditions(data, localization, "Interactability_Condition_", interactabilityConditions, this);
                 interactabilityRewards.Parse(data, localization, this, "Interactability_Rewards", "Interactability_Reward_");
@@ -746,6 +784,9 @@ public class ObjectAsset : Asset
                 rubbleRewardXP = data.ParseUInt32("Interactability_Reward_XP");
                 rubbleIsVulnerable = !data.ContainsKey("Interactability_Invulnerable");
                 rubbleProofExplosion = data.ContainsKey("Interactability_Proof_Explosion");
+                RubbleCanZombiesDamage = false;
+                RubbleZombieDamageMultiplier = 1f;
+                RubbleNavMode = EObjectRubbleNavMode.Unaffected;
             }
             else if (data.ContainsKey("Rubble"))
             {
@@ -762,6 +803,9 @@ public class ObjectAsset : Asset
                 rubbleRewardXP = data.ParseUInt32("Rubble_Reward_XP");
                 rubbleIsVulnerable = !data.ContainsKey("Rubble_Invulnerable");
                 rubbleProofExplosion = data.ContainsKey("Rubble_Proof_Explosion");
+                RubbleCanZombiesDamage = data.ParseBool("Rubble_Can_Zombies_Damage");
+                RubbleZombieDamageMultiplier = data.ParseFloat("Rubble_Zombie_Damage_Multiplier", 1f);
+                RubbleNavMode = data.ParseEnum("Rubble_Nav_Mode", EObjectRubbleNavMode.Unaffected);
                 if (data.ContainsKey("Rubble_Editor"))
                 {
                     rubbleEditor = (EObjectRubbleEditor)Enum.Parse(typeof(EObjectRubbleEditor), data.GetString("Rubble_Editor"), ignoreCase: true);
@@ -800,7 +844,7 @@ public class ObjectAsset : Asset
             shouldExcludeFromCullingVolumes = data.ParseBool("Exclude_From_Culling_Volumes");
             if (isFuel || isRefill)
             {
-                Assets.reportError(this, "is using the legacy fuel/water system");
+                Assets.ReportError(this, "is using the legacy fuel/water system");
             }
             if (data.ContainsKey("LOD"))
             {
@@ -843,7 +887,7 @@ public class ObjectAsset : Asset
             holidayRestriction = (ENPCHoliday)Enum.Parse(typeof(ENPCHoliday), data.GetString("Holiday_Restriction"), ignoreCase: true);
             if (holidayRestriction == ENPCHoliday.NONE)
             {
-                Assets.reportError(this, "has no holiday restriction, so value is ignored");
+                Assets.ReportError(this, "has no holiday restriction, so value is ignored");
             }
         }
         else
@@ -857,6 +901,9 @@ public class ObjectAsset : Asset
         shouldExcludeFromLevelBatching |= type == EObjectType.NPC || type == EObjectType.DECAL;
         bool defaultValue = holidayRestriction != ENPCHoliday.NONE;
         ShouldExcludeFromSatelliteCapture = data.ParseBool("Exclude_From_Satellite_Capture", defaultValue);
+        bool defaultValue2 = type == EObjectType.MEDIUM || type == EObjectType.LARGE;
+        ShouldLoadNavOnServer = data.ParseBool("Load_Nav_On_Server", defaultValue2);
+        ShouldLoadNavInEditor = data.ParseBool("Load_Nav_In_Editor", defaultValue2);
         conditions = new INPCCondition[data.ParseUInt8("Conditions", 0)];
         NPCTool.readConditions(data, localization, "Condition_", conditions, this);
     }

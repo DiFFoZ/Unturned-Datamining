@@ -46,6 +46,8 @@ public class Rocket : MonoBehaviour
 
     private Vector3 lastPos;
 
+    private Vector3 secondLastPos;
+
     private void OnTriggerEnter(Collider other)
     {
         if (isExploded || other.isTrigger || (ignoreTransform != null && (other.transform == ignoreTransform || other.transform.IsChildOf(ignoreTransform))))
@@ -55,7 +57,7 @@ public class Rocket : MonoBehaviour
         isExploded = true;
         if (Provider.isServer)
         {
-            ExplosionParameters parameters = new ExplosionParameters(lastPos, range, EDeathCause.MISSILE, killer);
+            ExplosionParameters parameters = new ExplosionParameters(secondLastPos, range, EDeathCause.MISSILE, killer);
             parameters.playerDamage = playerDamage;
             parameters.zombieDamage = zombieDamage;
             parameters.animalDamage = animalDamage;
@@ -70,7 +72,7 @@ public class Rocket : MonoBehaviour
             parameters.launchSpeed = explosionLaunchSpeed;
             DamageTool.explode(parameters, out var kills);
             TriggerEffectParameters parameters2 = new TriggerEffectParameters(Assets.FindEffectAssetByGuidOrLegacyId(explosionEffectGuid, explosion));
-            parameters2.position = lastPos;
+            parameters2.position = secondLastPos;
             parameters2.relevantDistance = EffectManager.LARGE;
             parameters2.wasInstigatedByPlayer = true;
             EffectManager.triggerEffect(parameters2);
@@ -88,11 +90,13 @@ public class Rocket : MonoBehaviour
 
     private void FixedUpdate()
     {
+        secondLastPos = lastPos;
         lastPos = base.transform.position;
     }
 
     private void Awake()
     {
         lastPos = base.transform.position;
+        secondLastPos = base.transform.position;
     }
 }

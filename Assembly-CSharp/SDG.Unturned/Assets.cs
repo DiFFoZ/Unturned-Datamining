@@ -135,6 +135,8 @@ public class Assets : MonoBehaviour
     /// </summary>
     private static MasterBundleConfig coreMasterBundle;
 
+    internal static Asset currentAsset;
+
     internal static List<AssetOrigin> assetOrigins;
 
     internal static AssetOrigin coreOrigin;
@@ -248,34 +250,33 @@ public class Assets : MonoBehaviour
         UnturnedLog.warn(error);
     }
 
-    public static void reportError(Asset offendingAsset, string error)
+    public static void ReportError(IAssetErrorContext context, string error)
     {
-        error = offendingAsset.getTypeNameAndIdDisplayString() + ": " + error;
-        reportError(error);
+        reportError(context.AssetErrorPrefix + ": " + error);
     }
 
-    public static void reportError(Asset offendingAsset, string format, params object[] args)
+    public static void ReportError(IAssetErrorContext context, string format, params object[] args)
     {
         string error = string.Format(format, args);
-        reportError(offendingAsset, error);
+        ReportError(context, error);
     }
 
-    public static void reportError(Asset offendingAsset, string format, object arg0)
+    public static void ReportError(IAssetErrorContext context, string format, object arg0)
     {
         string error = string.Format(format, arg0);
-        reportError(offendingAsset, error);
+        ReportError(context, error);
     }
 
-    public static void reportError(Asset offendingAsset, string format, object arg0, object arg1)
+    public static void ReportError(IAssetErrorContext context, string format, object arg0, object arg1)
     {
         string error = string.Format(format, arg0, arg1);
-        reportError(offendingAsset, error);
+        ReportError(context, error);
     }
 
-    public static void reportError(Asset offendingAsset, string format, object arg0, object arg1, object arg2)
+    public static void ReportError(IAssetErrorContext context, string format, object arg0, object arg1, object arg2)
     {
         string error = string.Format(format, arg0, arg1, arg2);
-        reportError(offendingAsset, error);
+        ReportError(context, error);
     }
 
     public static List<string> getReportedErrorsList()
@@ -658,7 +659,7 @@ public class Assets : MonoBehaviour
                 else if (assetMapping.legacyAssetsTable[assetCategory].ContainsKey(asset.id))
                 {
                     assetMapping.legacyAssetsTable[assetCategory].TryGetValue(asset.id, out var value2);
-                    reportError(asset, "short ID is already taken by " + value2.getTypeNameAndIdDisplayString() + "!");
+                    ReportError(asset, "short ID is already taken by " + value2.getTypeNameAndIdDisplayString() + "!");
                     return;
                 }
                 assetMapping.legacyAssetsTable[assetCategory].Add(asset.id, asset);
@@ -683,7 +684,7 @@ public class Assets : MonoBehaviour
                 }
                 if (flag2)
                 {
-                    reportError(asset, "needs a non-zero ID");
+                    ReportError(asset, "needs a non-zero ID");
                 }
             }
             break;
@@ -705,7 +706,7 @@ public class Assets : MonoBehaviour
             else if (assetMapping.assetDictionary.ContainsKey(asset.GUID))
             {
                 assetMapping.assetDictionary.TryGetValue(asset.GUID, out var value5);
-                reportError(asset, "long GUID " + asset.GUID.ToString("N") + " is already taken by " + value5.getTypeNameAndIdDisplayString() + "!");
+                ReportError(asset, "long GUID " + asset.GUID.ToString("N") + " is already taken by " + value5.getTypeNameAndIdDisplayString() + "!");
                 return;
             }
             assetMapping.assetDictionary.Add(asset.GUID, asset);
@@ -882,6 +883,10 @@ public class Assets : MonoBehaviour
         string path = file.path;
         DatDictionary assetData = file.assetData;
         byte[] array = file.hash;
+        if (path.Length > 260)
+        {
+            reportError("Asset path exceeds 260 characters and might not load properly on Windows: \"" + path + "\"");
+        }
         if (!string.IsNullOrEmpty(file.assetError))
         {
             reportError("Error parsing \"" + path + "\": \"" + file.assetError + "\"");
@@ -1031,6 +1036,7 @@ public class Assets : MonoBehaviour
             UnturnedLog.exception(e2);
             bundle.unload();
             currentMasterBundle = null;
+            currentAsset = null;
             return;
         }
         if (asset == null)
@@ -1038,8 +1044,10 @@ public class Assets : MonoBehaviour
             reportError($"Failed to construct {type} in \"{path}\"");
             bundle.unload();
             currentMasterBundle = null;
+            currentAsset = null;
             return;
         }
+        currentAsset = asset;
         try
         {
             asset.id = id;
@@ -1060,6 +1068,7 @@ public class Assets : MonoBehaviour
             bundle.unload();
         }
         currentMasterBundle = null;
+        currentAsset = null;
     }
 
     /// <summary>
@@ -1080,6 +1089,11 @@ public class Assets : MonoBehaviour
             loadingStats.Reset();
             RequestAddSearchLocation(absolutePath, reloadOrigin);
         }
+    }
+
+    public static void ReloadAsset(Asset asset)
+    {
+        reload(Path.GetDirectoryName(asset.absoluteOriginFilePath));
     }
 
     public static void linkSpawnsIfDirty()
@@ -1126,7 +1140,7 @@ public class Assets : MonoBehaviour
                     spawnAsset = find(EAssetType.SPAWN, insertRoot.legacySpawnId) as SpawnAsset;
                     if (spawnAsset == null)
                     {
-                        reportError(item, "unable to find root {0} during link", insertRoot.legacySpawnId);
+                        ReportError(item, "unable to find root {0} during link", insertRoot.legacySpawnId);
                         continue;
                     }
                 }
@@ -1139,13 +1153,13 @@ public class Assets : MonoBehaviour
                     Asset asset = find(insertRoot.targetGuid);
                     if (asset == null)
                     {
-                        reportError(item, "unable to find root {0} during link", insertRoot.targetGuid);
+                        ReportError(item, "unable to find root {0} during link", insertRoot.targetGuid);
                         continue;
                     }
                     spawnAsset = asset as SpawnAsset;
                     if (spawnAsset == null)
                     {
-                        reportError(item, $"root {insertRoot.targetGuid} found as {asset.GetTypeFriendlyName()} {asset.FriendlyName} (not a spawn table)");
+                        ReportError(item, $"root {insertRoot.targetGuid} found as {asset.GetTypeFriendlyName()} {asset.FriendlyName} (not a spawn table)");
                         continue;
                     }
                 }
@@ -1196,7 +1210,7 @@ public class Assets : MonoBehaviour
                     spawnAsset2 = find(EAssetType.SPAWN, table.legacySpawnId) as SpawnAsset;
                     if (spawnAsset2 == null)
                     {
-                        reportError(item3, "unable to find child table {0} during link", table.legacySpawnId);
+                        ReportError(item3, "unable to find child table {0} during link", table.legacySpawnId);
                         continue;
                     }
                 }
@@ -1209,7 +1223,7 @@ public class Assets : MonoBehaviour
                     Asset asset2 = find(table.targetGuid);
                     if (asset2 == null)
                     {
-                        reportError(item3, "unable to find child {0} during link", table.targetGuid);
+                        ReportError(item3, "unable to find child {0} during link", table.targetGuid);
                         continue;
                     }
                     spawnAsset2 = asset2 as SpawnAsset;
@@ -1322,7 +1336,7 @@ public class Assets : MonoBehaviour
                         Blueprint arg = itemAsset.blueprints[b2];
                         if (func(blueprint, arg))
                         {
-                            reportError(itemAsset, "has an identical blueprint: " + blueprint);
+                            ReportError(itemAsset, "has an identical blueprint: " + blueprint);
                         }
                     }
                 }
@@ -1342,7 +1356,7 @@ public class Assets : MonoBehaviour
                         Blueprint arg2 = itemAsset2.blueprints[b4];
                         if (func(blueprint2, arg2))
                         {
-                            reportError(itemAsset, "shares an identical blueprint with " + itemAsset2.itemName + ": " + blueprint2);
+                            ReportError(itemAsset, "shares an identical blueprint with " + itemAsset2.itemName + ": " + blueprint2);
                         }
                     }
                 }
@@ -1366,11 +1380,11 @@ public class Assets : MonoBehaviour
                 DialogueResponse dialogueResponse = item.responses[i];
                 if (!dialogueResponse.IsDialogueRefNull() && dialogueResponse.FindDialogueAsset() == null)
                 {
-                    reportError(item, "unable to find dialogue asset for response " + i);
+                    ReportError(item, "unable to find dialogue asset for response " + i);
                 }
                 if (!dialogueResponse.IsVendorRefNull() && dialogueResponse.FindVendorAsset() == null)
                 {
-                    reportError(item, "unable to find vendor asset for response " + i);
+                    ReportError(item, "unable to find vendor asset for response " + i);
                 }
             }
         }
@@ -1445,14 +1459,15 @@ public class Assets : MonoBehaviour
         if (Directory.Exists(path))
         {
             string[] folders = ReadWrite.getFolders(path, usePath: false);
-            foreach (string text in folders)
+            foreach (string path2 in folders)
             {
-                UnturnedLog.info("Sandbox: {0}", text);
+                string fileName = Path.GetFileName(path2);
+                UnturnedLog.info("Sandbox: {0}", fileName);
                 AssetOrigin assetOrigin = new AssetOrigin();
-                assetOrigin.name = "Sandbox Folder \"" + text + "\"";
+                assetOrigin.name = "Sandbox Folder \"" + fileName + "\"";
                 assetOrigin.shouldAssetsOverrideExistingIds = true;
                 assetOrigins.Add(assetOrigin);
-                AddSearchLocation(text, assetOrigin);
+                AddSearchLocation(path2, assetOrigin);
             }
         }
         else
@@ -1981,5 +1996,39 @@ public class Assets : MonoBehaviour
             }
         }
         }
+    }
+
+    [Obsolete("Renamed to ReportError with an IAssetErrorContext parameter")]
+    public static void reportError(Asset offendingAsset, string error)
+    {
+        reportError(offendingAsset, error);
+    }
+
+    [Obsolete("Renamed to ReportError with an IAssetErrorContext parameter")]
+    public static void reportError(Asset offendingAsset, string format, params object[] args)
+    {
+        string error = string.Format(format, args);
+        reportError(offendingAsset, error);
+    }
+
+    [Obsolete("Renamed to ReportError with an IAssetErrorContext parameter")]
+    public static void reportError(Asset offendingAsset, string format, object arg0)
+    {
+        string error = string.Format(format, arg0);
+        reportError(offendingAsset, error);
+    }
+
+    [Obsolete("Renamed to ReportError with an IAssetErrorContext parameter")]
+    public static void reportError(Asset offendingAsset, string format, object arg0, object arg1)
+    {
+        string error = string.Format(format, arg0, arg1);
+        reportError(offendingAsset, error);
+    }
+
+    [Obsolete("Renamed to ReportError with an IAssetErrorContext parameter")]
+    public static void reportError(Asset offendingAsset, string format, object arg0, object arg1, object arg2)
+    {
+        string error = string.Format(format, arg0, arg1, arg2);
+        reportError(offendingAsset, error);
     }
 }
