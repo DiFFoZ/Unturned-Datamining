@@ -964,6 +964,7 @@ public class MenuSurvivorsClothingUI
         itemstoreButton.tooltip = localization.format("Itemstore_Tooltip");
         itemstoreButton.onClickedButton += onClickedItemstoreButton;
         itemstoreButton.fontSize = ESleekFontSize.Medium;
+        itemstoreButton.iconColor = ESleekTint.FOREGROUND;
         container.AddChild(itemstoreButton);
         if (!Provider.provider.economyService.doesCountryAllowRandomItems && Provider.provider.economyService.hasCountryDetails)
         {

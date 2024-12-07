@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -413,9 +414,16 @@ internal class ItemStoreMenu : SleekFullscreenBox
     {
         filteredListings.Sort(delegate(ItemStore.Listing lhs, ItemStore.Listing rhs)
         {
-            string inventoryName = Provider.provider.economyService.getInventoryName(lhs.itemdefid);
-            string inventoryName2 = Provider.provider.economyService.getInventoryName(rhs.itemdefid);
-            return inventoryName.CompareTo(inventoryName2);
+            DateTime creationTime = Provider.provider.economyService.GetCreationTime(lhs.itemdefid);
+            DateTime creationTime2 = Provider.provider.economyService.GetCreationTime(rhs.itemdefid);
+            int num = -creationTime.CompareTo(creationTime2);
+            if (num == 0)
+            {
+                string inventoryName = Provider.provider.economyService.getInventoryName(lhs.itemdefid);
+                string inventoryName2 = Provider.provider.economyService.getInventoryName(rhs.itemdefid);
+                num = inventoryName.CompareTo(inventoryName2);
+            }
+            return num;
         });
     }
 

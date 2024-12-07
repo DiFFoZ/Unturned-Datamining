@@ -214,11 +214,15 @@ public class Wheel
             return;
         }
         Collider component = model.GetComponent<Collider>();
-        if (!(component == null))
+        if (component == null)
+        {
+            return;
+        }
+        component.enabled = true;
+        if (config.canExplode)
         {
             EffectManager.RegisterDebris(model.gameObject);
             model.transform.parent = null;
-            component.enabled = true;
             Rigidbody orAddComponent = model.gameObject.GetOrAddComponent<Rigidbody>();
             orAddComponent.interpolation = RigidbodyInterpolation.Interpolate;
             orAddComponent.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -369,16 +373,29 @@ public class Wheel
                 }
                 if (currentGroundEffect.particleSystem != null)
                 {
-                    Vector3 up = _wheel.transform.up;
-                    Vector3 b = _wheel.transform.forward * (0f - Mathf.Sign(vehicle.AnimatedForwardVelocity));
-                    float t = vehicle.GetAnimatedForwardSpeedPercentageOfTargetSpeed() * 0.5f;
-                    Quaternion rotation = Quaternion.LookRotation(Vector3.Lerp(up, b, t));
-                    currentGroundEffect.transform.SetPositionAndRotation(groundHitPosition, rotation);
-                    if (currentGroundEffect.isReadyToPlay && !currentGroundEffect.particleSystem.isPlaying)
+                    float num = Mathf.Sign(vehicle.AnimatedForwardVelocity);
+                    if (config.motionEffectsMode switch
                     {
-                        currentGroundEffect.particleSystem.Play();
+                        EWheelMotionEffectsMode.ForwardOnly => num >= 0f, 
+                        EWheelMotionEffectsMode.BackwardOnly => num <= 0f, 
+                        _ => true, 
+                    })
+                    {
+                        Vector3 up = _wheel.transform.up;
+                        Vector3 b = _wheel.transform.forward * (0f - num);
+                        float t = vehicle.GetAnimatedForwardSpeedPercentageOfTargetSpeed() * 0.5f;
+                        Quaternion rotation = Quaternion.LookRotation(Vector3.Lerp(up, b, t));
+                        currentGroundEffect.transform.SetPositionAndRotation(groundHitPosition, rotation);
+                        if (currentGroundEffect.isReadyToPlay && !currentGroundEffect.particleSystem.isPlaying)
+                        {
+                            currentGroundEffect.particleSystem.Play();
+                        }
+                        currentGroundEffect.isReadyToPlay = true;
                     }
-                    currentGroundEffect.isReadyToPlay = true;
+                    else
+                    {
+                        currentGroundEffect.StopParticleSystem();
+                    }
                 }
             }
             else
@@ -386,13 +403,13 @@ public class Wheel
                 currentGroundEffect.StopParticleSystem();
             }
         }
-        for (int num = motionEffectInstances.Count - 1; num >= 0; num--)
+        for (int num2 = motionEffectInstances.Count - 1; num2 >= 0; num2--)
         {
-            TireMotionEffectInstance tireMotionEffectInstance2 = motionEffectInstances[num];
+            TireMotionEffectInstance tireMotionEffectInstance2 = motionEffectInstances[num2];
             if (tireMotionEffectInstance2 != currentGroundEffect && (tireMotionEffectInstance2.particleSystem == null || !tireMotionEffectInstance2.particleSystem.IsAlive()))
             {
                 tireMotionEffectInstance2.DestroyEffect();
-                motionEffectInstances.RemoveAtFast(num);
+                motionEffectInstances.RemoveAtFast(num2);
                 motionEffectInstancesPool.Add(tireMotionEffectInstance2);
             }
         }
@@ -725,7 +742,7 @@ public class Wheel
             replicatedSuspensionState = wheel.suspensionSpring.targetPosition;
             animatedSuspensionState = replicatedSuspensionState;
             animatedModelSuspension = wheel.suspensionSpring.targetPosition * wheel.suspensionDistance;
-            if (config.modelUseColliderPose)
+            if (config.motionEffectsMode != 0)
             {
                 motionEffectInstances = new List<TireMotionEffectInstance>();
             }

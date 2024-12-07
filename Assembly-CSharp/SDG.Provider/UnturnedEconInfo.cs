@@ -64,6 +64,11 @@ public class UnturnedEconInfo
     /// </summary>
     public int econ_type;
 
+    /// <summary>
+    /// Nelson 2024-12-06: This was added 2023-06-19, so unfortunately it will be inaccurate for older items.
+    /// </summary>
+    public DateTime creationTimeUtc;
+
     public UnturnedEconInfo()
     {
         name = "";

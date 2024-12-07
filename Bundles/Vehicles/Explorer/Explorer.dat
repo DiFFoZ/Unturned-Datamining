@@ -57,6 +57,18 @@ DefaultPaintColors
     #e58834
 ]
 
+ExplosionBurnMaterialSections
+[
+    {
+        Path Model_0
+		AllMaterials true
+    }
+    {
+        Path Model_1
+		AllMaterials true
+    }
+]
+
 CrawlerTrackTilingMaterials
 [
 	{
@@ -97,6 +109,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects BackwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_1
@@ -106,6 +120,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects BackwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_2
@@ -115,6 +131,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects ForwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_3
@@ -124,6 +142,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects ForwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_4
@@ -133,6 +153,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_5
@@ -142,6 +164,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_6
@@ -151,6 +175,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_7
@@ -160,6 +186,8 @@ WheelConfigurations
 		ModelUseColliderPose true
 		ModelSuspensionOffset 0.1
 		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 ]
 

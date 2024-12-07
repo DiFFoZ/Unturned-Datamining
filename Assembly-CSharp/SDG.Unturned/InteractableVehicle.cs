@@ -1855,7 +1855,7 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
         {
             if (asset.ShouldExplosionBurnMaterials)
             {
-                HighlighterTool.color(base.transform, new Color(0.25f, 0.25f, 0.25f));
+                ApplyExplosionBurnMaterials();
             }
             updateFires();
             if (_wheels != null)
@@ -1881,21 +1881,6 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             if (exhaustParticleSystems != null && !isExhaustRateOverTimeZero)
             {
                 SetExhaustParticleSystemsRateOverTimeToZero();
-            }
-            if (asset.ShouldExplosionBurnMaterials)
-            {
-                if (frontModelTransform != null)
-                {
-                    HighlighterTool.color(frontModelTransform, new Color(0.25f, 0.25f, 0.25f));
-                }
-                if (turrets != null)
-                {
-                    for (int j = 0; j < turrets.Length; j++)
-                    {
-                        HighlighterTool.color(turrets[j].turretYaw, new Color(0.25f, 0.25f, 0.25f));
-                        HighlighterTool.color(turrets[j].turretPitch, new Color(0.25f, 0.25f, 0.25f));
-                    }
-                }
             }
         }
         if (eventHook != null)
@@ -4293,7 +4278,7 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             }
             waterSortHandles.Clear();
         }
-        if (isExploded && !Dedicator.IsDedicatedServer)
+        if (isExploded && !Dedicator.IsDedicatedServer && asset.ShouldExplosionBurnMaterials && asset.explosionBurnMaterialSections == null)
         {
             HighlighterTool.destroyMaterials(base.transform);
             if (turrets != null)
@@ -4564,6 +4549,67 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
         }
     }
 
+    private void ApplyExplosionBurnMaterials()
+    {
+        if (asset.explosionBurnMaterialSections == null)
+        {
+            HighlighterTool.color(base.transform, new Color(0.25f, 0.25f, 0.25f));
+            if (frontModelTransform != null)
+            {
+                HighlighterTool.color(frontModelTransform, new Color(0.25f, 0.25f, 0.25f));
+            }
+            if (turrets != null)
+            {
+                for (int i = 0; i < turrets.Length; i++)
+                {
+                    HighlighterTool.color(turrets[i].turretYaw, new Color(0.25f, 0.25f, 0.25f));
+                    HighlighterTool.color(turrets[i].turretPitch, new Color(0.25f, 0.25f, 0.25f));
+                }
+            }
+            return;
+        }
+        PaintableVehicleSection[] explosionBurnMaterialSections = asset.explosionBurnMaterialSections;
+        for (int j = 0; j < explosionBurnMaterialSections.Length; j++)
+        {
+            PaintableVehicleSection paintableVehicleSection = explosionBurnMaterialSections[j];
+            Transform transform = base.transform.Find(paintableVehicleSection.path);
+            if (transform == null)
+            {
+                Assets.ReportError(asset, "explosion burn section missing transform \"" + paintableVehicleSection.path + "\"");
+                continue;
+            }
+            Renderer component = transform.GetComponent<Renderer>();
+            if (component == null)
+            {
+                Assets.ReportError(asset, "explosion burn section missing renderer \"" + paintableVehicleSection.path + "\"");
+                continue;
+            }
+            tempMaterialsList.Clear();
+            component.GetMaterials(tempMaterialsList);
+            if (paintableVehicleSection.allMaterials)
+            {
+                foreach (Material tempMaterials in tempMaterialsList)
+                {
+                    materialsToDestroy.Add(tempMaterials);
+                    tempMaterials.color = new Color(0.25f, 0.25f, 0.25f);
+                }
+                continue;
+            }
+            foreach (Material tempMaterials2 in tempMaterialsList)
+            {
+                materialsToDestroy.Add(tempMaterials2);
+            }
+            if (paintableVehicleSection.materialIndex < 0 || paintableVehicleSection.materialIndex >= tempMaterialsList.Count)
+            {
+                Assets.ReportError(asset, $"explosion burn section \"{paintableVehicleSection.path}\" material index out of range (index: {paintableVehicleSection.materialIndex} length: {tempMaterialsList.Count})");
+            }
+            else
+            {
+                tempMaterialsList[paintableVehicleSection.materialIndex].color = new Color(0.25f, 0.25f, 0.25f);
+            }
+        }
+    }
+
     private void InitializePaintableSections()
     {
         if (!asset.SupportsPaintColor)
@@ -4593,7 +4639,11 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             {
                 materialsToDestroy.Add(tempMaterials);
             }
-            if (paintableVehicleSection.materialIndex < 0 || paintableVehicleSection.materialIndex >= tempMaterialsList.Count)
+            if (paintableVehicleSection.allMaterials)
+            {
+                paintableMaterials.AddRange(tempMaterialsList);
+            }
+            else if (paintableVehicleSection.materialIndex < 0 || paintableVehicleSection.materialIndex >= tempMaterialsList.Count)
             {
                 Assets.ReportError(asset, $"paintable section \"{paintableVehicleSection.path}\" material index out of range (index: {paintableVehicleSection.materialIndex} length: {tempMaterialsList.Count})");
             }

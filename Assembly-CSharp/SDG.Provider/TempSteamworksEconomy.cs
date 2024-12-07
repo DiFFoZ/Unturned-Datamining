@@ -260,6 +260,11 @@ public class TempSteamworksEconomy
         return unturnedEconInfo.name;
     }
 
+    internal DateTime GetCreationTime(int itemdefid)
+    {
+        return FindEconInfo(itemdefid)?.creationTimeUtc ?? DateTime.MinValue;
+    }
+
     public string getInventoryType(int item)
     {
         UnturnedEconInfo unturnedEconInfo = FindEconInfo(item);
@@ -1037,45 +1042,56 @@ public class TempSteamworksEconomy
             using SHA1Stream sHA1Stream = new SHA1Stream(fileStream);
             using (BinaryReader binaryReader = new BinaryReader(fileStream))
             {
-                binaryReader.ReadInt32();
                 int num = binaryReader.ReadInt32();
-                for (int i = 0; i < num; i++)
+                if (num <= 2)
                 {
-                    UnturnedEconInfo unturnedEconInfo = new UnturnedEconInfo
+                    int num2 = binaryReader.ReadInt32();
+                    for (int i = 0; i < num2; i++)
                     {
-                        name = binaryReader.ReadString(),
-                        display_type = binaryReader.ReadString(),
-                        description = binaryReader.ReadString(),
-                        name_color = binaryReader.ReadString(),
-                        itemdefid = binaryReader.ReadInt32(),
-                        marketable = binaryReader.ReadBoolean(),
-                        scraps = binaryReader.ReadInt32(),
-                        target_game_asset_guid = new Guid(binaryReader.ReadBytes(16)),
-                        item_skin = binaryReader.ReadInt32(),
-                        item_effect = binaryReader.ReadInt32(),
-                        quality = (UnturnedEconInfo.EQuality)binaryReader.ReadInt32(),
-                        econ_type = binaryReader.ReadInt32()
-                    };
-                    if (!econInfo.TryAdd(unturnedEconInfo.itemdefid, unturnedEconInfo))
+                        UnturnedEconInfo unturnedEconInfo = new UnturnedEconInfo
+                        {
+                            name = binaryReader.ReadString(),
+                            display_type = binaryReader.ReadString(),
+                            description = binaryReader.ReadString(),
+                            name_color = binaryReader.ReadString(),
+                            itemdefid = binaryReader.ReadInt32(),
+                            marketable = binaryReader.ReadBoolean(),
+                            scraps = binaryReader.ReadInt32(),
+                            target_game_asset_guid = new Guid(binaryReader.ReadBytes(16)),
+                            item_skin = binaryReader.ReadInt32(),
+                            item_effect = binaryReader.ReadInt32(),
+                            quality = (UnturnedEconInfo.EQuality)binaryReader.ReadInt32(),
+                            econ_type = binaryReader.ReadInt32()
+                        };
+                        if (num >= 2)
+                        {
+                            unturnedEconInfo.creationTimeUtc = DateTime.FromBinary(binaryReader.ReadInt64());
+                        }
+                        if (!econInfo.TryAdd(unturnedEconInfo.itemdefid, unturnedEconInfo))
+                        {
+                            UnturnedLog.error($"Duplicate itemdefid {unturnedEconInfo.itemdefid} name: \"{unturnedEconInfo.name}\"");
+                        }
+                    }
+                    int num3 = binaryReader.ReadInt32();
+                    for (int j = 0; j < num3; j++)
                     {
-                        UnturnedLog.error($"Duplicate itemdefid {unturnedEconInfo.itemdefid} name: \"{unturnedEconInfo.name}\"");
+                        int num4 = binaryReader.ReadInt32();
+                        int num5 = binaryReader.ReadInt32();
+                        List<int> list = new List<int>(num5);
+                        for (int k = 0; k < num5; k++)
+                        {
+                            int item = binaryReader.ReadInt32();
+                            list.Add(item);
+                        }
+                        if (!bundleContents.TryAdd(num4, list))
+                        {
+                            UnturnedLog.error($"Duplicate bundle contents itemdefid {num4}");
+                        }
                     }
                 }
-                int num2 = binaryReader.ReadInt32();
-                for (int j = 0; j < num2; j++)
+                else
                 {
-                    int num3 = binaryReader.ReadInt32();
-                    int num4 = binaryReader.ReadInt32();
-                    List<int> list = new List<int>(num4);
-                    for (int k = 0; k < num4; k++)
-                    {
-                        int item = binaryReader.ReadInt32();
-                        list.Add(item);
-                    }
-                    if (!bundleContents.TryAdd(num3, list))
-                    {
-                        UnturnedLog.error($"Duplicate bundle contents itemdefid {num3}");
-                    }
+                    UnturnedLog.warn($"Unable to load future EconInfo.bin version ({num})");
                 }
             }
             econInfoHash = sHA1Stream.Hash;

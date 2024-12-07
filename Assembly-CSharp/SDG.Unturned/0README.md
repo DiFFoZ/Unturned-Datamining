@@ -571,6 +571,7 @@
 - [EVotingMessage_NetEnum.cs](EVotingMessage_NetEnum.cs)
 - [EVotingMessage.cs](EVotingMessage.cs)
 - [EWeatherStatusChange.cs](EWeatherStatusChange.cs)
+- [EWheelMotionEffectsMode.cs](EWheelMotionEffectsMode.cs)
 - [EWheelSteeringMode.cs](EWheelSteeringMode.cs)
 - [EWorkshop.cs](EWorkshop.cs)
 - [EWorkshopDownloadRestrictionResult.cs](EWorkshopDownloadRestrictionResult.cs)

@@ -66,6 +66,19 @@ internal class VehicleWheelConfiguration : IDatParseable
     /// </summary>
     public float modelSuspensionSpeed;
 
+    /// <summary>
+    /// Nelson 2024-12-06: Initially implemented as a minimum and maximum percentage of normalized forward velocity,
+    /// but think this is more practical. I can't think of why we would use values other than -1, 0, +1 for that,
+    /// and if we did we'd probably want some tuning for the angle particles are emitted at.
+    /// </summary>
+    public EWheelMotionEffectsMode motionEffectsMode;
+
+    /// <summary>
+    /// If true, wheel should fly off when vehicle explodes. Defaults to true.
+    /// Used to simplify destroying vehicles with crawler tracks.
+    /// </summary>
+    public bool canExplode;
+
     public EWheelSteeringMode steeringMode;
 
     public ECrawlerTrackForwardMode crawlerTrackForwardMode;
@@ -84,6 +97,9 @@ internal class VehicleWheelConfiguration : IDatParseable
             steeringAngleMultiplier = datDictionary.ParseFloat("SteeringAngleMultiplier", 1f);
             modelSuspensionOffset = datDictionary.ParseFloat("ModelSuspensionOffset");
             modelSuspensionSpeed = datDictionary.ParseFloat("ModelSuspensionSpeed", -1f);
+            EWheelMotionEffectsMode defaultValue = (modelUseColliderPose ? EWheelMotionEffectsMode.BothDirections : EWheelMotionEffectsMode.None);
+            motionEffectsMode = datDictionary.ParseEnum("MotionEffects", defaultValue);
+            canExplode = datDictionary.ParseBool("CanExplode", defaultValue: true);
             if (datDictionary.ParseBool("IsColliderSteered"))
             {
                 steeringMode = EWheelSteeringMode.SteeringAngle;

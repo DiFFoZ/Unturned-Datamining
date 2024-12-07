@@ -88,6 +88,11 @@ public class VehicleAsset : Asset, ISkinableAsset
 
     protected ushort _explosion;
 
+    /// <summary>
+    /// Only used if ShouldExplosionBurnMaterials. Optional. Allows specifying which renderers to burn.
+    /// </summary>
+    internal PaintableVehicleSection[] explosionBurnMaterialSections;
+
     protected bool _hasHeadlights;
 
     protected bool _hasSirens;
@@ -1273,6 +1278,10 @@ public class VehicleAsset : Asset, ISkinableAsset
         bool defaultValue3 = !IsExplosionEffectRefNull();
         ShouldExplosionCauseDamage = data.ParseBool("ShouldExplosionCauseDamage", defaultValue3);
         ShouldExplosionBurnMaterials = data.ParseBool("ShouldExplosionBurnMaterials", defaultValue3);
+        if (ShouldExplosionBurnMaterials)
+        {
+            explosionBurnMaterialSections = data.ParseArrayOfStructs<PaintableVehicleSection>("ExplosionBurnMaterialSections");
+        }
         float num = data.ParseFloat("Explosion_Force_Multiplier", 1f);
         if (data.TryParseVector3("Explosion_Min_Force", out var value))
         {
