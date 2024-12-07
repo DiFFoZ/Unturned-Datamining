@@ -628,10 +628,11 @@ public class LevelObject
         }
         if (flag)
         {
-            navGameObject = asset.navGameObject?.getOrLoad();
-            if (navGameObject != null)
+            GameObject gameObject5 = asset.navGameObject?.getOrLoad();
+            if (gameObject5 != null)
             {
-                Transform transform2 = UnityEngine.Object.Instantiate(navGameObject).transform;
+                navGameObject = UnityEngine.Object.Instantiate(gameObject5);
+                Transform transform2 = navGameObject.transform;
                 transform2.name = "Nav";
                 transform2.parent = this.transform;
                 transform2.localPosition = Vector3.zero;
@@ -656,11 +657,11 @@ public class LevelObject
         }
         if (Provider.isServer)
         {
-            GameObject gameObject5 = asset.triggersGameObject?.getOrLoad();
+            GameObject gameObject6 = asset.triggersGameObject?.getOrLoad();
             Transform transform3;
-            if (gameObject5 != null)
+            if (gameObject6 != null)
             {
-                Transform obj = UnityEngine.Object.Instantiate(gameObject5).transform;
+                Transform obj = UnityEngine.Object.Instantiate(gameObject6).transform;
                 obj.name = "Triggers";
                 obj.parent = this.transform;
                 obj.localPosition = Vector3.zero;
@@ -703,10 +704,10 @@ public class LevelObject
             }
             else if (Provider.isClient)
             {
-                GameObject gameObject6 = asset.slotsGameObject?.getOrLoad();
-                if (gameObject6 != null)
+                GameObject gameObject7 = asset.slotsGameObject?.getOrLoad();
+                if (gameObject7 != null)
                 {
-                    Transform obj2 = UnityEngine.Object.Instantiate(gameObject6).transform;
+                    Transform obj2 = UnityEngine.Object.Instantiate(gameObject7).transform;
                     obj2.name = "Slots";
                     obj2.parent = this.transform;
                     obj2.localPosition = Vector3.zero;

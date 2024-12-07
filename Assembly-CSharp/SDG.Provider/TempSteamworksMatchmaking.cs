@@ -532,6 +532,7 @@ public class TempSteamworksMatchmaking
             ServerListCurationInput input = new ServerListCurationInput(steamServerAdvertisement);
             ServerListCurationOutput output = default(ServerListCurationOutput);
             serverListCuration.EvaluateMergedRules(in input, ref output);
+            serverCurationLabels = output.labels;
             if (!output.allowed)
             {
                 if (curationDenyMode == EServerListCurationDenyMode.Hide)
