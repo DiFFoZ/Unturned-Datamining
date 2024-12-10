@@ -1719,8 +1719,8 @@ public class VehicleAsset : Asset, ISkinableAsset
         {
             CargoDeclaration cargoDeclaration2 = builder.AddDeclaration("Vehicle_TurretInfo");
             cargoDeclaration2.AppendGuid("GUID", GUID);
-            cargoDeclaration2.AppendToString("turretIndex", b2);
-            cargoDeclaration2.AppendBool("Ignore_Aim_Camera", !turrets[b2].useAimCamera);
+            cargoDeclaration2.AppendByte("turretIndex", b2);
+            cargoDeclaration2.AppendBool("useAimCamera", turrets[b2].useAimCamera);
             cargoDeclaration2.AppendUShort("Item_ID", turrets[b2].itemID);
             cargoDeclaration2.AppendFloat("Pitch_Max", turrets[b2].pitchMax);
             cargoDeclaration2.AppendFloat("Pitch_Min", turrets[b2].pitchMin);

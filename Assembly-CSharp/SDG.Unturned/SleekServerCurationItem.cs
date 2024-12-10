@@ -30,11 +30,27 @@ public class SleekServerCurationItem : SleekWrapper
 
     private ISleekLabel originLabel;
 
+    private ISleekLabel blockCountLabel;
+
     internal event Action<ServerCurationItem> OnClickedItem;
 
     internal event Action<ServerCurationItem> OnDeletedItem;
 
     internal event Action<ServerCurationItem, int> OnMovedItem;
+
+    public void SynchronizeBlockCount()
+    {
+        int latestBlockedServerCount = item.LatestBlockedServerCount;
+        if (latestBlockedServerCount > 0)
+        {
+            blockCountLabel.Text = localization.format("BlockCount", latestBlockedServerCount);
+            blockCountLabel.IsVisible = true;
+        }
+        else
+        {
+            blockCountLabel.IsVisible = false;
+        }
+    }
 
     private void OnActiveToggled(ISleekToggle toggle, bool value)
     {
@@ -197,6 +213,15 @@ public class SleekServerCurationItem : SleekWrapper
         webIcon.SizeOffset_Y = 32f;
         webIcon.IsVisible = false;
         button.AddChild(webIcon);
+        blockCountLabel = Glazier.Get().CreateLabel();
+        blockCountLabel.PositionOffset_X = 5f;
+        blockCountLabel.PositionOffset_Y = 15f;
+        blockCountLabel.SizeScale_X = 1f;
+        blockCountLabel.SizeOffset_X = -10f;
+        blockCountLabel.SizeOffset_Y = 30f;
+        blockCountLabel.FontSize = ESleekFontSize.Small;
+        blockCountLabel.TextAlignment = TextAnchor.MiddleRight;
+        button.AddChild(blockCountLabel);
         if (item.IsDeletable)
         {
             button.SizeOffset_X = -160f;
@@ -235,6 +260,7 @@ public class SleekServerCurationItem : SleekWrapper
         moveDownButton.onClickedButton += OnClickedMoveDownButton;
         moveDownButton.tooltip = localization.format("MoveDown_Tooltip");
         AddChild(moveDownButton);
+        SynchronizeBlockCount();
         SynchronizeSortOrder();
         SynchronizeDetails();
         RefreshIsActive();

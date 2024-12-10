@@ -53,6 +53,10 @@ public class MenuPlayServerCurationUI : SleekFullscreenBox
         list.NotifyDataChanged();
         tutorialBox.IsVisible = serverListCuration.GetItems().Count < 1;
         RefreshRulesTester();
+        list.ForEachElement(delegate(SleekServerCurationItem element)
+        {
+            element.SynchronizeBlockCount();
+        });
     }
 
     private void OnUrlSubmitted(ISleekField field)

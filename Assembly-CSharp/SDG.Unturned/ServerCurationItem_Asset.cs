@@ -17,6 +17,8 @@ internal class ServerCurationItem_Asset : ServerCurationItem
 
     public override bool IsDeletable => false;
 
+    public override int LatestBlockedServerCount => asset.curationFile.latestBlockedServerCount;
+
     public override void Reload()
     {
         Assets.ReloadAsset(asset);
@@ -29,6 +31,19 @@ internal class ServerCurationItem_Asset : ServerCurationItem
     public override List<ServerListCurationRule> GetRules()
     {
         return asset.curationFile.rules;
+    }
+
+    public override void ResetBlockedServerCounts()
+    {
+        asset.curationFile.latestBlockedServerCount = 0;
+        if (asset.curationFile.rules == null)
+        {
+            return;
+        }
+        foreach (ServerListCurationRule rule in asset.curationFile.rules)
+        {
+            rule.latestBlockedServerCount = 0;
+        }
     }
 
     protected override void SaveActive()

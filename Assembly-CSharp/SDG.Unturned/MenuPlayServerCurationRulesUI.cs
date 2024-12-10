@@ -201,8 +201,11 @@ internal class MenuPlayServerCurationRulesUI : SleekFullscreenBox
             webIcon.IsVisible = false;
         }
         list.SetData(item.GetRules());
-        list.NotifyDataChanged();
         RefreshRulesTester();
+        list.ForEachElement(delegate(SleekServerCurationRule element)
+        {
+            element.SynchronizeBlockCount();
+        });
     }
 
     private void RefreshRulesTester()

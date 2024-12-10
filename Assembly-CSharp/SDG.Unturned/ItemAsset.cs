@@ -942,13 +942,10 @@ public class ItemAsset : Asset, ISkinableAsset
         orAddDeclaration2.AppendBool("Destroy_Item_Colliders", shouldDestroyItemColliders);
         orAddDeclaration2.AppendFloat("Equipable_Movement_Speed_Multiplier", equipableMovementSpeedMultiplier);
         orAddDeclaration2.AppendToString("EquipableModelParent", EquipableModelParent);
-        orAddDeclaration2.AppendToString("EquipablePrefab", equipablePrefab);
         orAddDeclaration2.AppendToString("EquipAudioClip", equip);
         orAddDeclaration2.AppendString("Instantiated_Item_Name_Override", instantiatedItemName);
-        orAddDeclaration2.AppendToString("InventoryAudio", inventoryAudio);
         orAddDeclaration2.AppendBool("Left_Handed_Characters_Mirror_Equipable", shouldLeftHandedCharactersMirrorEquippedItem);
         orAddDeclaration2.AppendBool("Pro", isPro);
-        orAddDeclaration2.AppendBool("Procedurally_Animate_Inertia", shouldProcedurallyAnimateInertia);
         orAddDeclaration2.AppendByte("Quality_Max", qualityMax);
         orAddDeclaration2.AppendByte("Quality_Min", qualityMin);
         orAddDeclaration2.AppendUShort("Shared_Skin_Lookup_ID", sharedSkinLookupID);

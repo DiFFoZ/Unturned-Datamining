@@ -41,6 +41,8 @@ internal abstract class ServerCurationItem
 
     public abstract bool IsDeletable { get; }
 
+    public abstract int LatestBlockedServerCount { get; }
+
     public bool IsAtFrontOfList => _sortOrder == 0;
 
     public bool IsAtBackOfList => _sortOrder == curation.GetItems().Count - 1;
@@ -74,6 +76,8 @@ internal abstract class ServerCurationItem
     public abstract void Delete();
 
     public abstract List<ServerListCurationRule> GetRules();
+
+    public abstract void ResetBlockedServerCounts();
 
     protected abstract void SaveActive();
 

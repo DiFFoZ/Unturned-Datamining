@@ -4724,13 +4724,17 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             foreach (int num in wheelIndices)
             {
                 Wheel wheelAtIndex = GetWheelAtIndex(num);
-                if (wheelAtIndex != null && wheelAtIndex.wheel != null)
+                if (wheelAtIndex == null)
                 {
-                    tempWheels.Add(wheelAtIndex);
+                    Assets.ReportError(asset, $"crawler track tiling material \"{crawlerTrackTilingMaterial.path}\" invalid wheel index: {num}");
+                }
+                else if (wheelAtIndex.wheel == null)
+                {
+                    Assets.ReportError(asset, $"crawler track tiling material \"{crawlerTrackTilingMaterial.path}\" wheel index {num} should have a collider (this wheel is visual-only)");
                 }
                 else
                 {
-                    UnturnedLog.error($"\"{asset.FriendlyName}\" missing wheel for tiling material \"{crawlerTrackTilingMaterial.path}\" index: {num}");
+                    tempWheels.Add(wheelAtIndex);
                 }
             }
             if (tempWheels.Count < 1)

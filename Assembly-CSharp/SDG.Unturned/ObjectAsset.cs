@@ -784,9 +784,9 @@ public class ObjectAsset : Asset
                 rubbleRewardXP = data.ParseUInt32("Interactability_Reward_XP");
                 rubbleIsVulnerable = !data.ContainsKey("Interactability_Invulnerable");
                 rubbleProofExplosion = data.ContainsKey("Interactability_Proof_Explosion");
-                RubbleCanZombiesDamage = false;
-                RubbleZombieDamageMultiplier = 1f;
-                RubbleNavMode = EObjectRubbleNavMode.Unaffected;
+                RubbleCanZombiesDamage = data.ParseBool("Interactability_Can_Zombies_Damage");
+                RubbleZombieDamageMultiplier = data.ParseFloat("Interactability_Zombie_Damage_Multiplier", 1f);
+                RubbleNavMode = data.ParseEnum("Interactability_Nav_Mode", EObjectRubbleNavMode.Unaffected);
             }
             else if (data.ContainsKey("Rubble"))
             {

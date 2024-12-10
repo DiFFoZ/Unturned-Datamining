@@ -191,6 +191,7 @@ Monetization_Filter_NonGameplay_Tooltip Only show servers that either sell conte
 
 No_Servers No version {0} servers found on the master server.
 No_Servers_Hint Perhaps your filters are too specific?
+No_Servers_CuratorsHint Curators blocked {0} servers. Perhaps one is blocking too many?
 Reset_Filters Reset Filters
 Reset_Filters_Tooltip Changes filtering settings to their default values.
 

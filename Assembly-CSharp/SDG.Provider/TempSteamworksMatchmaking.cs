@@ -99,6 +99,11 @@ public class TempSteamworksMatchmaking
 
     public List<SteamServerAdvertisement> serverList => _serverList;
 
+    /// <summary>
+    /// Used to show a warning when a lot of servers are blocked by curation list.
+    /// </summary>
+    public int CuratorBlockedServerCount { get; private set; }
+
     public bool isAttemptingServerQuery { get; private set; }
 
     public IComparer<SteamServerAdvertisement> serverInfoComparer => _serverInfoComparer;
@@ -214,6 +219,7 @@ public class TempSteamworksMatchmaking
         }
         currentMaxPingFilter = inputFilters.maxPing;
         _serverList.Clear();
+        CuratorBlockedServerCount = 0;
         onMasterServerRemoved?.Invoke();
         cleanupServerListRequest();
         if (inputFilters.listSource == ESteamServerList.LAN)
@@ -412,8 +418,10 @@ public class TempSteamworksMatchmaking
         }
         else if (inputFilters.listSource == ESteamServerList.INTERNET)
         {
-            ServerListCuration.Get().RefreshIfDirty();
-            ServerListCuration.Get().MergeRulesIfDirty();
+            ServerListCuration serverListCuration = ServerListCuration.Get();
+            serverListCuration.RefreshIfDirty();
+            serverListCuration.MergeRulesIfDirty();
+            serverListCuration.ResetBlockedServerCounts();
             serverListRequest = SteamMatchmakingServers.RequestInternetServerList(SDG.Unturned.Provider.APP_ID, filters.ToArray(), (uint)filters.Count, serverListResponse);
         }
         else if (inputFilters.listSource == ESteamServerList.FRIENDS)
@@ -535,6 +543,13 @@ public class TempSteamworksMatchmaking
             serverCurationLabels = output.labels;
             if (!output.allowed)
             {
+                int curatorBlockedServerCount = CuratorBlockedServerCount + 1;
+                CuratorBlockedServerCount = curatorBlockedServerCount;
+                if (output.allowOrDenyRule != null)
+                {
+                    output.allowOrDenyRule.latestBlockedServerCount++;
+                    output.allowOrDenyRule.owner.latestBlockedServerCount++;
+                }
                 if (curationDenyMode == EServerListCurationDenyMode.Hide)
                 {
                     return;

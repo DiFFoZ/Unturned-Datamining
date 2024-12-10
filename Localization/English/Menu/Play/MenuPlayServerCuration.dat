@@ -41,6 +41,7 @@ Rule_NotInverted_Format {0} {1} {2}
 Rule_Inverted_Format {0} {1} Not {2}
 
 Rule_ApplyLabel Applies label: {0}
+BlockCount Latest refresh blocked servers: {0}
 
 Test_Visible_Label Show testing tool
 Test_Visible_Tooltip Tool for checking an imaginary server.

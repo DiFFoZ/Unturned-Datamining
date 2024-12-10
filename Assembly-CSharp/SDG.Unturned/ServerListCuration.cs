@@ -199,6 +199,14 @@ internal class ServerListCuration
         }
     }
 
+    public void ResetBlockedServerCounts()
+    {
+        foreach (ServerCurationItem item in items)
+        {
+            item.ResetBlockedServerCounts();
+        }
+    }
+
     public List<ServerCurationItem> GetItems()
     {
         return items;

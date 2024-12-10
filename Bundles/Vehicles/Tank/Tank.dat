@@ -5,9 +5,9 @@ Rarity Legendary
 Speed_Min -4
 Speed_Max 8
 
-CrawlerTrackSteering_Torque 10
+CrawlerTrackSteering_Torque 6
 CrawlerTrackSteering_SidewaysFrictionMultiplier 1.0
-CrawlerTrackSteering_MaxSpeedScale 0.3
+CrawlerTrackSteering_MaxSpeedScale 0.6
 
 Brake 24
 
@@ -56,10 +56,6 @@ PaintableSections
         MaterialIndex 0
     }
     {
-        Path Model_1
-        MaterialIndex 0
-    }
-    {
         Path Turrets/Turret_1/Yaw/Pitch/Model_0
         MaterialIndex 0
     }
@@ -81,47 +77,153 @@ DefaultPaintColors
 	"#495631" // Russia
 ]
 
+ExplosionBurnMaterialSections
+[
+    {
+        Path Model_0
+        MaterialIndex 0
+    }
+    {
+        Path Model_1
+        MaterialIndex 0
+    }
+    {
+        Path Turrets/Turret_1/Yaw/Pitch/Model_0
+        MaterialIndex 0
+    }
+    {
+        Path Turrets/Turret_1/Yaw/Model_0
+        MaterialIndex 0
+    }
+    {
+        Path Turrets/Turret_1/Yaw/Model_1
+        MaterialIndex 0
+    }
+    {
+        Path Model_2
+		AllMaterials true
+    }
+]
+
+CrawlerTrackTilingMaterials
+[
+	{
+		Path Model_2
+		MaterialIndex 0
+		WheelIndices
+		[
+			0
+			2
+			4
+			6
+		]
+		RepeatDistance 1.5
+		UV_Direction (-1, 0)
+	}
+	{
+		Path Model_2
+		MaterialIndex 1
+		WheelIndices
+		[
+			1
+			3
+			5
+			7
+		]
+		RepeatDistance 1.5
+		UV_Direction (-1, 0)
+	}
+]
+
 WheelConfigurations
 [
 	{
 		WheelColliderPath Tires/Tire_0
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_0
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects BackwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_1
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_1
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects BackwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_2
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_2
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects ForwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_3
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_3
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects ForwardOnly
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_4
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_4
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_5
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_5
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_6
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_6
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 	{
 		WheelColliderPath Tires/Tire_7
 		SteeringMode CrawlerTrack
 		IsColliderPowered true
+		ModelPath Wheels/Wheel_7
+		ModelUseColliderPose true
+		ModelSuspensionOffset 0.2
+		ModelSuspensionSpeed 1
+		MotionEffects None
+		CanExplode false
 	}
 ]
 

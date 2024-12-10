@@ -29,4 +29,9 @@ internal class ServerListCurationRule
     public CSteamID[] steamIds;
 
     public ServerListCurationFile owner;
+
+    /// <summary>
+    /// Incremented during server list refresh for each server blocked by this rule.
+    /// </summary>
+    public int latestBlockedServerCount;
 }

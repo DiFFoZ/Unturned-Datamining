@@ -14,6 +14,11 @@ internal class ServerListCurationFile
 
     internal Dictionary<string, string> labels;
 
+    /// <summary>
+    /// Incremented during server list refresh for each server blocked by this rule.
+    /// </summary>
+    public int latestBlockedServerCount;
+
     public string Name { get; set; }
 
     /// <summary>

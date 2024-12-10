@@ -81,7 +81,7 @@ CrawlerTrackTilingMaterials
 			4
 			6
 		]
-		RepeatDistance 1.177
+		RepeatDistance 1.285
 		UV_Direction (-1, 0)
 	}
 	{
@@ -94,7 +94,7 @@ CrawlerTrackTilingMaterials
 			5
 			7
 		]
-		RepeatDistance 1.177
+		RepeatDistance 1.285
 		UV_Direction (-1, 0)
 	}
 ]

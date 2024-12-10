@@ -26,7 +26,7 @@ public class SleekBoomboxSong : SleekWrapper
         }
         else
         {
-            sleekButton.Text = "Sorry, I broke some song names. :( -Nelson";
+            sleekButton.Text = songAsset.name;
         }
         if (!string.IsNullOrEmpty(songAsset.linkURL) && WebUtils.CanParseThirdPartyUrl(songAsset.linkURL))
         {

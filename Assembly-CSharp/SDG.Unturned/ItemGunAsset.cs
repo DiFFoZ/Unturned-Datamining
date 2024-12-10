@@ -844,6 +844,108 @@ public class ItemGunAsset : ItemWeaponAsset
         shouldScaleAimAnimations = data.ParseBool("Scale_Aim_Animation_Speed", defaultValue: true);
     }
 
+    internal override void BuildCargoData(CargoBuilder builder)
+    {
+        base.BuildCargoData(builder);
+        CargoDeclaration orAddDeclaration = builder.GetOrAddDeclaration("Gun");
+        orAddDeclaration.AppendGuid("GUID", GUID);
+        orAddDeclaration.AppendFloat("Aim_In_Duration", aimInDuration);
+        orAddDeclaration.AppendFloat("Aiming_Movement_Speed_Multiplier", aimingMovementSpeedMultiplier);
+        orAddDeclaration.AppendFloat("Alert_Radius", alertRadius);
+        orAddDeclaration.AppendBool("Can_Aim_During_Sprint", canAimDuringSprint);
+        orAddDeclaration.AppendFloat("Range_Rangefinder", rangeRangefinder);
+        orAddDeclaration.AppendInt("Attachment_Calibers", attachmentCalibers.Length);
+        for (byte b = 0; b < attachmentCalibers.Length; b++)
+        {
+            CargoDeclaration cargoDeclaration = builder.AddDeclaration("Gun_AttachmentCaliber");
+            cargoDeclaration.AppendGuid("GUID", GUID);
+            cargoDeclaration.AppendUShort("Caliber", attachmentCalibers[b]);
+        }
+        orAddDeclaration.AppendInt("Magazine_Calibers", magazineCalibers.Length);
+        for (byte b2 = 0; b2 < magazineCalibers.Length; b2++)
+        {
+            CargoDeclaration cargoDeclaration2 = builder.AddDeclaration("Gun_MagazineCaliber");
+            cargoDeclaration2.AppendGuid("GUID", GUID);
+            cargoDeclaration2.AppendUShort("Caliber", magazineCalibers[b2]);
+        }
+        orAddDeclaration.AppendToString("Requires_NonZero_Attachment_Caliber", requiresNonZeroAttachmentCaliber);
+        orAddDeclaration.AppendFloat("Damage_Falloff_Max_Range", damageFalloffMaxRange);
+        orAddDeclaration.AppendFloat("Damage_Falloff_Multiplier", damageFalloffMultiplier);
+        orAddDeclaration.AppendFloat("Damage_Falloff_Range", damageFalloffRange);
+        orAddDeclaration.AppendBool("Instakill_Headshots", instakillHeadshots);
+        orAddDeclaration.AppendToString("Action", action);
+        orAddDeclaration.AppendBool("Auto", hasAuto);
+        orAddDeclaration.AppendBool("hasBurst", hasBurst);
+        orAddDeclaration.AppendInt("Bursts", bursts);
+        orAddDeclaration.AppendInt("fireDelay", fireDelay);
+        orAddDeclaration.AppendByte("Firerate", firerate);
+        orAddDeclaration.AppendBool("Safety", hasSafety);
+        orAddDeclaration.AppendBool("Semi", hasSemi);
+        orAddDeclaration.AppendUShort("Barrel", barrelID);
+        orAddDeclaration.AppendUShort("Grip", gripID);
+        orAddDeclaration.AppendUShort("Sight", sightID);
+        orAddDeclaration.AppendUShort("Tactical", tacticalID);
+        orAddDeclaration.AppendBool("Hook_Barrel", hasBarrel);
+        orAddDeclaration.AppendBool("Hook_Grip", hasGrip);
+        orAddDeclaration.AppendBool("Hook_Sight", hasSight);
+        orAddDeclaration.AppendBool("Hook_Tactical", hasTactical);
+        orAddDeclaration.AppendBool("Can_Ever_Jam", canEverJam);
+        orAddDeclaration.AppendFloat("Jam_Quality_Threshold", jamQualityThreshold);
+        orAddDeclaration.AppendFloat("Jam_Max_Chance", jamMaxChance);
+        orAddDeclaration.AppendBool("Allow_Magazine_Change", allowMagazineChange);
+        orAddDeclaration.AppendByte("Ammo_Max", ammoMax);
+        orAddDeclaration.AppendByte("Ammo_Min", ammoMin);
+        orAddDeclaration.AppendByte("Ammo_Per_Shot", ammoPerShot);
+        orAddDeclaration.AppendFloat("Hammer_Time", hammerTime);
+        orAddDeclaration.AppendBool("Infinite_Ammo", infiniteAmmo);
+        orAddDeclaration.AppendUShort("Magazine", magazineID);
+        orAddDeclaration.AppendInt("Magazine_Replacements", magazineReplacements.Length);
+        for (int i = 0; i < magazineReplacements.Length; i++)
+        {
+            CargoDeclaration cargoDeclaration3 = builder.AddDeclaration("Gun_MagazineReplacement");
+            cargoDeclaration3.AppendGuid("GUID", GUID);
+            cargoDeclaration3.AppendInt("magazineReplacementIndex", i);
+            cargoDeclaration3.AppendUShort("ID", magazineReplacements[i].id);
+            cargoDeclaration3.AppendString("Map", magazineReplacements[i].map);
+        }
+        orAddDeclaration.AppendFloat("Reload_Time", reloadTime);
+        orAddDeclaration.AppendFloat("Replace", replace);
+        orAddDeclaration.AppendBool("Should_Delete_Empty_Magazines", shouldDeleteEmptyMagazines);
+        orAddDeclaration.AppendFloat("Unplace", unplace);
+        orAddDeclaration.AppendByte("Ballistic_Steps", ballisticSteps);
+        orAddDeclaration.AppendFloat("Ballistic_Travel", ballisticTravel);
+        orAddDeclaration.AppendFloat("Bullet_Gravity_Multiplier", bulletGravityMultiplier);
+        orAddDeclaration.AppendFloat("Ballistic_Force", ballisticForce);
+        orAddDeclaration.AppendFloat("Projectile_Explosion_Launch_Speed", projectileExplosionLaunchSpeed);
+        orAddDeclaration.AppendFloat("Projectile_Lifespan", projectileLifespan);
+        orAddDeclaration.AppendBool("Projectile_Penetrate_Buildables", projectilePenetrateBuildables);
+        orAddDeclaration.AppendFloat("Aiming_Recoil_Multiplier", aimingRecoilMultiplier);
+        orAddDeclaration.AppendFloat("Recoil_Crouch", recoilCrouch);
+        orAddDeclaration.AppendFloat("Recoil_Max_X", recoilMax_x);
+        orAddDeclaration.AppendFloat("Recoil_Max_Y", recoilMax_y);
+        orAddDeclaration.AppendFloat("Recoil_Min_X", recoilMin_x);
+        orAddDeclaration.AppendFloat("Recoil_Min_Y", recoilMin_y);
+        orAddDeclaration.AppendFloat("Recoil_Midair", recoilMidair);
+        orAddDeclaration.AppendFloat("Recoil_Prone", recoilProne);
+        orAddDeclaration.AppendFloat("Recoil_Sprint", recoilSprint);
+        orAddDeclaration.AppendFloat("Recoil_Swimming", recoilSwimming);
+        orAddDeclaration.AppendFloat("Recover_X", recover_x);
+        orAddDeclaration.AppendFloat("Recover_Y", recover_y);
+        orAddDeclaration.AppendFloat("Shake_Max_X", shakeMax_x);
+        orAddDeclaration.AppendFloat("Shake_Min_X", shakeMin_x);
+        orAddDeclaration.AppendFloat("Shake_Max_Y", shakeMax_y);
+        orAddDeclaration.AppendFloat("Shake_Min_Y", shakeMin_y);
+        orAddDeclaration.AppendFloat("Shake_Max_Z", shakeMax_z);
+        orAddDeclaration.AppendFloat("Shake_Min_Z", shakeMin_z);
+        orAddDeclaration.AppendFloat("Spread_Aim", spreadAim);
+        orAddDeclaration.AppendFloat("baseSpreadAngleRadians", baseSpreadAngleRadians);
+        orAddDeclaration.AppendFloat("Spread_Crouch", spreadCrouch);
+        orAddDeclaration.AppendFloat("Spread_Midair", spreadMidair);
+        orAddDeclaration.AppendFloat("Spread_Prone", spreadProne);
+        orAddDeclaration.AppendFloat("Spread_Sprint", spreadSprint);
+        orAddDeclaration.AppendFloat("Spread_Swimming", spreadSwimming);
+    }
+
     protected override AudioReference GetDefaultInventoryAudio()
     {
         if (name.Contains("Bow", StringComparison.InvariantCultureIgnoreCase))

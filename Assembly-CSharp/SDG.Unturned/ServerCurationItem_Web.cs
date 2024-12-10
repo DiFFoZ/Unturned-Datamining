@@ -25,6 +25,8 @@ internal class ServerCurationItem_Web : ServerCurationItem, IAssetErrorContext
 
     public override bool IsDeletable => true;
 
+    public override int LatestBlockedServerCount => file?.latestBlockedServerCount ?? 0;
+
     public string AssetErrorPrefix => "Server List Curator at \"" + url + "\"";
 
     public override void Reload()
@@ -52,6 +54,23 @@ internal class ServerCurationItem_Web : ServerCurationItem, IAssetErrorContext
     public override List<ServerListCurationRule> GetRules()
     {
         return file?.rules;
+    }
+
+    public override void ResetBlockedServerCounts()
+    {
+        if (file == null)
+        {
+            return;
+        }
+        file.latestBlockedServerCount = 0;
+        if (file.rules == null)
+        {
+            return;
+        }
+        foreach (ServerListCurationRule rule in file.rules)
+        {
+            rule.latestBlockedServerCount = 0;
+        }
     }
 
     protected override void SaveActive()

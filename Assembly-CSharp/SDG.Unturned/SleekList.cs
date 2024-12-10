@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -44,6 +45,17 @@ public class SleekList<T> : SleekWrapper where T : class
     public ISleekElement GetElement(int index)
     {
         return visibleEntries[index].element;
+    }
+
+    public void ForEachElement<TElement>(Action<TElement> action) where TElement : ISleekElement
+    {
+        foreach (VisibleEntry visibleEntry in visibleEntries)
+        {
+            if (visibleEntry.element is TElement obj)
+            {
+                action(obj);
+            }
+        }
     }
 
     public void SetData(List<T> data)

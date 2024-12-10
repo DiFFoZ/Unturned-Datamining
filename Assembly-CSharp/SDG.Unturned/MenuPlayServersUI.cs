@@ -39,6 +39,8 @@ public class MenuPlayServersUI : SleekFullscreenBox
 
     private ISleekBox infoBox;
 
+    private ISleekLabel noServersCuratorsHintLabel;
+
     private ISleekButton resetFiltersButton;
 
     private ISleekButton nameColumnButton;
@@ -221,6 +223,18 @@ public class MenuPlayServersUI : SleekFullscreenBox
         SetIsRefreshing(value: false);
         if (Provider.provider.matchmakingService.serverList.Count == 0)
         {
+            int curatorBlockedServerCount = Provider.provider.matchmakingService.CuratorBlockedServerCount;
+            if (curatorBlockedServerCount > 10)
+            {
+                noServersCuratorsHintLabel.Text = localization.format("No_Servers_CuratorsHint", curatorBlockedServerCount);
+                noServersCuratorsHintLabel.IsVisible = true;
+                infoBox.SizeOffset_Y = 70f;
+            }
+            else
+            {
+                noServersCuratorsHintLabel.IsVisible = false;
+                infoBox.SizeOffset_Y = 50f;
+            }
             infoBox.IsVisible = true;
         }
     }
@@ -2000,6 +2014,11 @@ public class MenuPlayServersUI : SleekFullscreenBox
         sleekLabel2.SizeOffset_Y = 30f;
         sleekLabel2.Text = localization.format("No_Servers_Hint");
         infoBox.AddChild(sleekLabel2);
+        noServersCuratorsHintLabel = Glazier.Get().CreateLabel();
+        noServersCuratorsHintLabel.PositionOffset_Y = 40f;
+        noServersCuratorsHintLabel.SizeScale_X = 1f;
+        noServersCuratorsHintLabel.SizeOffset_Y = 30f;
+        infoBox.AddChild(noServersCuratorsHintLabel);
         resetFiltersButton = Glazier.Get().CreateButton();
         resetFiltersButton.PositionOffset_X = -150f;
         resetFiltersButton.PositionOffset_Y = 10f;
