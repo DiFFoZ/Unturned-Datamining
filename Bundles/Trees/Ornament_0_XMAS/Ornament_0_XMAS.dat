@@ -17,4 +17,7 @@ Auto_Skybox
 Holiday_Restriction CHRISTMAS
 Bundle_Override_Path /Trees/Ornament_0
 
+Debris_Vertical_Offset 0
+Ignore_Collision_Between_Stump_And_Debris false
+
 Has_Clip_Prefab false

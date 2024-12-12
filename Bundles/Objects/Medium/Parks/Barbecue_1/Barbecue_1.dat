@@ -4,8 +4,8 @@ ID 237
 
 Snowshoe
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 50
-Interactability_Effect 36
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 50
+Rubble_Effect 36
 Has_Clip_Prefab false

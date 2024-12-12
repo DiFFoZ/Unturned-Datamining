@@ -24,6 +24,7 @@ public class ResourceAsset : Asset
 
     public uint rewardXP;
 
+    [Obsolete("Replaced by MinRandomScale and MaxRandomScale.")]
     public float scale;
 
     public float verticalOffset;
@@ -97,11 +98,35 @@ public class ResourceAsset : Asset
 
     public Material skyboxMaterial { get; private set; }
 
+    /// <summary>
+    /// Distance along tree's local up axis to offset debris spawn position. Defaults to 1.0.
+    /// </summary>
+    public float DebrisVerticalOffset { get; protected set; }
+
+    public float MinRandomAngleDeviation { get; protected set; }
+
+    /// <summary>
+    /// Before <see cref="!:FoliageResourceInfoAsset" /> had randomization properties (which trees don't currently use
+    /// as of 2024-12-11 because rotation/scale aren't saved) each tree has some random rotation and scale variation
+    /// based on its position. This property controls the rotation away from upright.
+    /// </summary>
+    public float MaxRandomAngleDeviation { get; protected set; }
+
+    public float MinRandomUniformScale { get; protected set; }
+
+    public float MaxRandomUniformScale { get; protected set; }
+
     public Guid explosionGuid => _explosionGuid;
 
     public bool vulnerableToFists { get; protected set; }
 
     public bool vulnerableToAllMeleeWeapons { get; protected set; }
+
+    /// <summary>
+    /// If true, prevent collisions between falling tree and the stump. (i.e., debris can fall through stump)
+    /// Defaults to true.
+    /// </summary>
+    public bool ShouldIgnoreCollisionBetweenStumpAndDebris { get; protected set; }
 
     public override EAssetType assetCategory => EAssetType.RESOURCE;
 
@@ -278,8 +303,22 @@ public class ResourceAsset : Asset
             _skyboxGameObject.SetTagIfUntaggedRecursively("Resource");
         }
         health = data.ParseUInt16("Health", 0);
-        scale = Mathf.Abs(data.ParseFloat("Scale"));
+        MinRandomAngleDeviation = data.ParseFloat("RandomAngleDeviation_Min", -5f);
+        MaxRandomAngleDeviation = data.ParseFloat("RandomAngleDeviation_Max", 5f);
+        if (data.TryParseFloat("Scale", out var value))
+        {
+            scale = value;
+            MinRandomUniformScale = 1.1f;
+            MaxRandomUniformScale = 1.1f + value * 2f;
+        }
+        else
+        {
+            MinRandomUniformScale = data.ParseFloat("RandomUniformScale_Min", 1.1f);
+            MaxRandomUniformScale = data.ParseFloat("RandomUniformScale_Max", 1.1f);
+            scale = (MaxRandomUniformScale - MinRandomUniformScale) * 0.5f;
+        }
         verticalOffset = data.ParseFloat("Vertical_Offset", -0.75f);
+        DebrisVerticalOffset = data.ParseFloat("Debris_Vertical_Offset", 1f);
         explosion = data.ParseGuidOrLegacyId("Explosion", out _explosionGuid);
         log = data.ParseUInt16("Log", 0);
         stick = data.ParseUInt16("Stick", 0);
@@ -304,6 +343,7 @@ public class ResourceAsset : Asset
         bladeID = data.ParseUInt8("BladeID", 0);
         vulnerableToFists = data.ParseBool("Vulnerable_To_Fists");
         vulnerableToAllMeleeWeapons = data.ParseBool("Vulnerable_To_All_Melee_Weapons");
+        ShouldIgnoreCollisionBetweenStumpAndDebris = data.ParseBool("Ignore_Collision_Between_Stump_And_Debris", defaultValue: true);
         reset = data.ParseFloat("Reset");
         isForage = data.ContainsKey("Forage");
         if (isForage && _modelGameObject != null)

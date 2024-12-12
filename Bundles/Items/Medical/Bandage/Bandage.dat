@@ -9,7 +9,7 @@ Size_Y 1
 Size_Z 0.3
 
 Aid
-Bleeding
+Bleeding_Modifier Heal
 Health 15
 
 Blueprints 1

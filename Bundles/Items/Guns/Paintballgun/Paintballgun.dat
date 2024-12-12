@@ -24,7 +24,7 @@ Firerate 3
 Unplace 0.15
 Replace 0.725
 Action Trigger
-Delete_Empty_Magazines
+Should_Delete_Empty_Magazines true
 
 Player_Damage 15
 Player_Leg_Multiplier 0.6
@@ -52,7 +52,7 @@ Object_Damage 3
 Durability 0.2
 
 Spread_Aim 0.2
-Spread_Hip 0.075
+Spread_Angle_Degrees 4.29
 
 Ballistic_Steps 40
 Ballistic_Travel 2.5

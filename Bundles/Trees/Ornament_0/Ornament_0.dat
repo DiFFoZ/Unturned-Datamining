@@ -14,4 +14,7 @@ Reset 750
 
 Auto_Skybox
 
+Debris_Vertical_Offset 0
+Ignore_Collision_Between_Stump_And_Debris false
+
 Has_Clip_Prefab false

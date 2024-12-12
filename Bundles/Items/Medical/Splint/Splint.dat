@@ -9,7 +9,7 @@ Size_Y 2
 Size_Z 0.5
 
 Aid
-Broken
+Bones_Modifier Heal
 Health 10
 
 Blueprints 1

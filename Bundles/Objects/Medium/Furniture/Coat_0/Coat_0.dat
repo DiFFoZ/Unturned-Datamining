@@ -2,8 +2,8 @@ GUID b06ca473809a47a1bb47e72bedd0e421
 Type Medium
 ID 356
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 25
-Interactability_Effect 72
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 25
+Rubble_Effect 72
 Has_Clip_Prefab false

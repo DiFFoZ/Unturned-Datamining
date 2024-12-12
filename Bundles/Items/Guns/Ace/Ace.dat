@@ -53,7 +53,7 @@ Durability 0.1
 
 Aim_In_Duration 0.15
 Spread_Aim 0.05
-Spread_Hip 0.1
+Spread_Angle_Degrees 5.71
 
 Recoil_Min_X -4
 Recoil_Min_Y 15

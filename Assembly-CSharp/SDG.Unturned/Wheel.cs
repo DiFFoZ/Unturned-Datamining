@@ -18,7 +18,9 @@ public class Wheel
 
     public bool isPowered;
 
-    private VehicleWheelConfiguration config;
+    internal VehicleWheelConfiguration config;
+
+    internal CrawlerTrackTilingMaterialInstance copyCrawlerTrack;
 
     /// <summary>
     /// Does this wheel affect brake torque?
@@ -499,8 +501,18 @@ public class Wheel
                 MoveModelSuspension(num, deltaTime);
                 Vector3 vector3 = Vector3.Project(vector2 * (animatedModelSuspension - config.modelSuspensionOffset), onNormal);
                 Vector3 position = vector + vector3;
-                float num2 = _wheel.rpm / 60f * 360f * deltaTime;
-                rollAngleDegrees += num2;
+                float num4;
+                if (copyCrawlerTrack != null)
+                {
+                    float num2 = copyCrawlerTrack.speed * deltaTime;
+                    float num3 = MathF.PI * 2f * _wheel.radius;
+                    num4 = num2 / num3 * 360f;
+                }
+                else
+                {
+                    num4 = _wheel.rpm / 60f * 360f * deltaTime;
+                }
+                rollAngleDegrees += num4;
                 rollAngleDegrees = (rollAngleDegrees % 360f + 360f) % 360f;
                 Quaternion quaternion = rest;
                 quaternion = Quaternion.AngleAxis(rollAngleDegrees, Vector3.right) * quaternion;
@@ -509,37 +521,39 @@ public class Wheel
                 model.SetPositionAndRotation(position, rotation);
                 replicatedSuspensionState = CalculateNormalizedSuspensionPosition(num);
                 animatedSuspensionState = replicatedSuspensionState;
-                return;
-            }
-            float t = 1f - Mathf.Pow(2f, -13f * Time.deltaTime);
-            animatedSuspensionState = Mathf.Lerp(animatedSuspensionState, replicatedSuspensionState, t);
-            float num3 = animatedSuspensionState * _wheel.suspensionDistance;
-            MoveModelSuspension(num3, deltaTime);
-            Vector3 vector4 = Vector3.Project(vector2 * (animatedModelSuspension - config.modelSuspensionOffset), onNormal);
-            Vector3 position2 = vector + vector4;
-            if (_wheel.radius > float.Epsilon)
-            {
-                float num4 = vehicle.AnimatedForwardVelocity * deltaTime;
-                float num5 = MathF.PI * 2f * _wheel.radius;
-                float num6 = num4 / num5 * 360f;
-                rollAngleDegrees += num6;
-                rollAngleDegrees = (rollAngleDegrees % 360f + 360f) % 360f;
-            }
-            Quaternion quaternion2 = rest;
-            quaternion2 = Quaternion.AngleAxis(rollAngleDegrees, Vector3.right) * quaternion2;
-            if (config.steeringMode == EWheelSteeringMode.SteeringAngle)
-            {
-                quaternion2 = Quaternion.AngleAxis(vehicle.AnimatedSteeringAngle * config.steeringAngleMultiplier, Vector3.up) * quaternion2;
-            }
-            Quaternion rotation2 = model.parent.TransformRotation(quaternion2);
-            model.SetPositionAndRotation(position2, rotation2);
-            if (animatedSuspensionState < 0.99f)
-            {
-                UpdateMotionEffect(vector + vector2 * (num3 + _wheel.radius), isVisualGrounded: true);
             }
             else
             {
-                UpdateMotionEffect(Vector3.zero, isVisualGrounded: false);
+                float t = 1f - Mathf.Pow(2f, -13f * Time.deltaTime);
+                animatedSuspensionState = Mathf.Lerp(animatedSuspensionState, replicatedSuspensionState, t);
+                float num5 = animatedSuspensionState * _wheel.suspensionDistance;
+                MoveModelSuspension(num5, deltaTime);
+                Vector3 vector4 = Vector3.Project(vector2 * (animatedModelSuspension - config.modelSuspensionOffset), onNormal);
+                Vector3 position2 = vector + vector4;
+                if (_wheel.radius > float.Epsilon)
+                {
+                    float num6 = vehicle.AnimatedForwardVelocity * deltaTime;
+                    float num7 = MathF.PI * 2f * _wheel.radius;
+                    float num8 = num6 / num7 * 360f;
+                    rollAngleDegrees += num8;
+                    rollAngleDegrees = (rollAngleDegrees % 360f + 360f) % 360f;
+                }
+                Quaternion quaternion2 = rest;
+                quaternion2 = Quaternion.AngleAxis(rollAngleDegrees, Vector3.right) * quaternion2;
+                if (config.steeringMode == EWheelSteeringMode.SteeringAngle)
+                {
+                    quaternion2 = Quaternion.AngleAxis(vehicle.AnimatedSteeringAngle * config.steeringAngleMultiplier, Vector3.up) * quaternion2;
+                }
+                Quaternion rotation2 = model.parent.TransformRotation(quaternion2);
+                model.SetPositionAndRotation(position2, rotation2);
+                if (animatedSuspensionState < 0.99f)
+                {
+                    UpdateMotionEffect(vector + vector2 * (num5 + _wheel.radius), isVisualGrounded: true);
+                }
+                else
+                {
+                    UpdateMotionEffect(Vector3.zero, isVisualGrounded: false);
+                }
             }
             return;
         }
@@ -550,17 +564,17 @@ public class Wheel
                 Wheel wheelAtIndex = vehicle.GetWheelAtIndex(config.copyColliderRpmIndex);
                 if (wheelAtIndex != null && wheelAtIndex.wheel != null && wheelAtIndex.wheel.radius > float.Epsilon)
                 {
-                    float num7 = wheelAtIndex.wheel.radius * wheelAtIndex.wheel.rpm / config.modelRadius / 60f * 360f * deltaTime;
-                    rollAngleDegrees += num7;
+                    float num9 = wheelAtIndex.wheel.radius * wheelAtIndex.wheel.rpm / config.modelRadius / 60f * 360f * deltaTime;
+                    rollAngleDegrees += num9;
                     rollAngleDegrees = (rollAngleDegrees % 360f + 360f) % 360f;
                 }
             }
             else
             {
-                float num8 = vehicle.AnimatedForwardVelocity * deltaTime;
-                float num9 = MathF.PI * 2f * config.modelRadius;
-                float num10 = num8 / num9 * 360f;
-                rollAngleDegrees += num10;
+                float num10 = vehicle.AnimatedForwardVelocity * deltaTime;
+                float num11 = MathF.PI * 2f * config.modelRadius;
+                float num12 = num10 / num11 * 360f;
+                rollAngleDegrees += num12;
                 rollAngleDegrees = (rollAngleDegrees % 360f + 360f) % 360f;
             }
         }
@@ -786,6 +800,11 @@ public class Wheel
     private void MoveModelSuspension(float target, float deltaTime)
     {
         if (config.modelSuspensionSpeed < -0.01f)
+        {
+            animatedModelSuspension = target;
+            return;
+        }
+        if (target < animatedModelSuspension)
         {
             animatedModelSuspension = target;
             return;

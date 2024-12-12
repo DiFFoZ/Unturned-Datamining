@@ -27,6 +27,8 @@ public class ItemGlassesAsset : ItemGearAsset
     /// </summary>
     public bool isNightvisionAllowedInThirdPerson { get; protected set; }
 
+    internal override GameObject ClothingPrefab => glasses;
+
     public override byte[] getState(EItemOrigin origin)
     {
         if (vision != 0)

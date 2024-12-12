@@ -304,6 +304,11 @@ public class ItemAsset : Asset, ISkinableAsset
     [Obsolete("Replaced by EquipableModelParent property's LeftHook option.")]
     public bool ShouldAttachEquippedModelToLeftHand => EquipableModelParent == EEquipableModelParent.LeftHook;
 
+    /// <summary>
+    /// Nelson 2024-12-11: This can now be null for cosmetic items (<see cref="F:SDG.Unturned.ItemAsset.isPro" />). For those items it wasn't
+    /// used outside of the main menu 3D item preview, in which case the clothing prefab is typically a better
+    /// visualization.
+    /// </summary>
     public GameObject item => _item;
 
     /// <summary>

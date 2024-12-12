@@ -52,7 +52,7 @@ Durability 1
 Wear 3
 
 Spread_Aim 0.001
-Spread_Hip 0.2
+Spread_Angle_Degrees 11.31
 
 Ballistic_Steps 40
 Ballistic_Travel 5

@@ -15,6 +15,7 @@
 	],
 	"Item": 21022,
 	"Use_Legacy_Ground": false,
+	"Terrain_Snow_Sparkle": true,
 	"Has_Discord_Rich_Presence": true,
 	"Allow_Holiday_Redirects": true,
 	"Category": "Official",

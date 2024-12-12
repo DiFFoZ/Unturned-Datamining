@@ -2,5 +2,6 @@
 	"Version": "3.23.1.1",
 	"Use_Legacy_Ground": false,
 	"Use_Underground_Whitelist": true,
+	"Terrain_Snow_Sparkle": true,
 	"Batching_Version": 2
 }

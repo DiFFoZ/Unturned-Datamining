@@ -2,10 +2,10 @@ GUID cb6965c6613f4d42a5dc6dcf2ef17e2d
 Type Small
 ID 129
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 1
-Interactability_Effect 59
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 1
+Rubble_Effect 59
 
 Holiday_Restriction HALLOWEEN
 Bundle_Override_Path /Objects/Small/Overgrowth/Web_0

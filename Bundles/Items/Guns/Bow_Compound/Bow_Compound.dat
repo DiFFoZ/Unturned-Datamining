@@ -50,7 +50,7 @@ Durability 1
 Wear 3
 
 Spread_Aim 0.01
-Spread_Hip 0.2
+Spread_Angle_Degrees 11.31
 
 Ballistic_Steps 40
 Ballistic_Travel 5
@@ -70,7 +70,7 @@ Shake_Max_X 0.005
 Shake_Max_Y -0.005
 Shake_Max_Z -0.1
 
-Backward
+EquipableModelParent LeftHook
 
 Blueprints 2
 Blueprint_0_Type Repair

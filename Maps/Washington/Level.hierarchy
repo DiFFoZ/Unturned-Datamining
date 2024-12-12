@@ -1,4 +1,4 @@
-"Available_Instance_ID" "36"
+"Available_Instance_ID" "66"
 "Items"
 [
 	{
@@ -116178,6 +116178,837 @@
 			"Kill_Animals" "true"
 			"Kill_Vehicles" "false"
 			"Death_Cause" "BURNING"
+		}
+	}
+	{
+		"Type" "SDG.Framework.Devkit.DeadzoneVolume, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "36"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-345.2131"
+				"Y" "38.65929"
+				"Z" "887.4045"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "137.8133"
+				"Y" "137.8133"
+				"Z" "137.8133"
+			}
+			"Shape" "Sphere"
+			"Deadzone_Type" "DefaultRadiation"
+			"UnprotectedDamagePerSecond" "0"
+			"ProtectedDamagePerSecond" "0"
+			"UnprotectedRadiationPerSecond" "6.25"
+			"MaskFilterDamagePerSecond" "0.4"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "37"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-299.7593"
+				"Y" "41.20086"
+				"Z" "-615.046"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Kent Raceway"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "38"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-304.3795"
+				"Y" "38.33067"
+				"Z" "-133.362"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Seattle"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "39"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "252.9164"
+				"Y" "66.21129"
+				"Z" "-512.9269"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Tacoma"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "40"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "754.731"
+				"Y" "38.44761"
+				"Z" "250.6356"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Everett"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "41"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-185.0668"
+				"Y" "30.95843"
+				"Z" "-321.1452"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Rainbridge Island"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "42"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "717.5475"
+				"Y" "44.49972"
+				"Z" "-823.9103"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Paradise Point"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "43"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "850.0281"
+				"Y" "43.49748"
+				"Z" "580.1987"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Scorpion-7"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "44"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "153.5291"
+				"Y" "38.40831"
+				"Z" "343.8564"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Camano Campground"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "45"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "116.5634"
+				"Y" "38.50782"
+				"Z" "854.9948"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Clearwater Campground"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "46"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-534.8075"
+				"Y" "38.32404"
+				"Z" "461.986"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Bellevue Golf Course"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "47"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-692.3475"
+				"Y" "46.72634"
+				"Z" "-393.0356"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Olympia Military Base"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "48"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "627.8792"
+				"Y" "40.36227"
+				"Z" "-62.35223"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Shelton Farm"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "49"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "246.2444"
+				"Y" "38.40078"
+				"Z" "-791.2546"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Arlington Farm"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "50"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-780.8032"
+				"Y" "72.88775"
+				"Z" "189.9636"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Kennewick Farm"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "51"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-804.3779"
+				"Y" "38.47162"
+				"Z" "-780.8766"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Heritage Valley"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "52"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "165.8601"
+				"Y" "12.21283"
+				"Z" "-155.2156"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Puget Sound"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "53"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "354.9341"
+				"Y" "38.40079"
+				"Z" "-860.1042"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "54"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "736.7805"
+				"Y" "70.13873"
+				"Z" "-473.5931"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "55"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-230.6697"
+				"Y" "38.40078"
+				"Z" "-809.3484"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "56"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-142.0918"
+				"Y" "28.949"
+				"Z" "-308.3654"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "57"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "192.535"
+				"Y" "29.42662"
+				"Z" "594.0785"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "58"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-607.9508"
+				"Y" "34.15535"
+				"Z" "691.577"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "59"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-690.5533"
+				"Y" "76.52753"
+				"Z" "323.4618"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "60"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-826.906"
+				"Y" "93.4762"
+				"Z" "56.05786"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "61"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-847.741"
+				"Y" "83.58681"
+				"Z" "-445.6571"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "62"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "887.0541"
+				"Y" "80.42981"
+				"Z" "108.6809"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "63"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "841.0157"
+				"Y" "71.11272"
+				"Z" "809.552"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "64"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-79.00507"
+				"Y" "48.83967"
+				"Z" "592.8752"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.AirdropDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "65"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-311.9167"
+				"Y" "38.40078"
+				"Z" "105.7368"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"SpawnTable_ID" "541"
 		}
 	}
 ]

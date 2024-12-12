@@ -8,6 +8,8 @@ public class ItemVestAsset : ItemBagAsset
 
     public GameObject vest => _vest;
 
+    internal override GameObject ClothingPrefab => vest;
+
     public override void PopulateAsset(Bundle bundle, DatDictionary data, Local localization)
     {
         base.PopulateAsset(bundle, data, localization);

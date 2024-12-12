@@ -4,7 +4,8 @@ ID 4
 
 Health 800
 Radius 4
-Scale 0.3
+RandomUniformScale_Min 1
+RandomUniformScale_Max 1.55
 
 Explosion 24
 Reward_ID 515
@@ -17,5 +18,8 @@ Reset 450
 Auto_Skybox
 
 Christmas_Redirect ba311a4ddbe34121acd6899fd424813b
+
+Debris_Vertical_Offset 0
+Ignore_Collision_Between_Stump_And_Debris false
 
 Has_Clip_Prefab false

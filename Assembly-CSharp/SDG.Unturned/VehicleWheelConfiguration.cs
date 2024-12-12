@@ -50,6 +50,12 @@ internal class VehicleWheelConfiguration : IDatParseable
     public int copyColliderRpmIndex;
 
     /// <summary>
+    /// If set, wheel model uses this crawler track's speed (average RPM of wheels). Prevents wheel model from
+    /// spinning out of sync with overall track.
+    /// </summary>
+    public int copyCrawlerTrackSpeedIndex;
+
+    /// <summary>
     /// Target steering angle is multiplied by this value. For example, can be set to a negative number for
     /// rear-wheel steering. Defaults to 1.
     /// </summary>
@@ -94,6 +100,7 @@ internal class VehicleWheelConfiguration : IDatParseable
             modelUseColliderPose = datDictionary.ParseBool("ModelUseColliderPose");
             modelRadius = datDictionary.ParseFloat("ModelRadius", -1f);
             copyColliderRpmIndex = datDictionary.ParseInt32("CopyColliderRpmIndex", -1);
+            copyCrawlerTrackSpeedIndex = datDictionary.ParseInt16("CopyCrawlerTrackSpeedIndex", -1);
             steeringAngleMultiplier = datDictionary.ParseFloat("SteeringAngleMultiplier", 1f);
             modelSuspensionOffset = datDictionary.ParseFloat("ModelSuspensionOffset");
             modelSuspensionSpeed = datDictionary.ParseFloat("ModelSuspensionSpeed", -1f);

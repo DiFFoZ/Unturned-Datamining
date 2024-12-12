@@ -3177,6 +3177,10 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
                 }
                 if (_wheels != null)
                 {
+                    if (crawlerTrackMaterials != null && crawlerTrackMaterials.Count > 0)
+                    {
+                        UpdateCrawlerTrackTilingMaterials();
+                    }
                     Wheel[] wheels = _wheels;
                     foreach (Wheel wheel in wheels)
                     {
@@ -3184,10 +3188,6 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
                         {
                             wheel.UpdateModel(Time.deltaTime);
                         }
-                    }
-                    if (crawlerTrackMaterials != null && crawlerTrackMaterials.Count > 0)
-                    {
-                        UpdateCrawlerTrackTilingMaterials();
                     }
                 }
                 if (frontModelTransform != null)
@@ -4751,6 +4751,30 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
                 uvDirection = crawlerTrackTilingMaterial.uvDirection
             });
         }
+        if (_wheels == null)
+        {
+            return;
+        }
+        Wheel[] wheels = _wheels;
+        foreach (Wheel wheel in wheels)
+        {
+            if (wheel.config == null)
+            {
+                continue;
+            }
+            int copyCrawlerTrackSpeedIndex = wheel.config.copyCrawlerTrackSpeedIndex;
+            if (copyCrawlerTrackSpeedIndex >= 0)
+            {
+                if (copyCrawlerTrackSpeedIndex >= crawlerTrackMaterials.Count)
+                {
+                    Assets.ReportError(asset, $"wheel CopyCrawlerTrackSpeedIndex out of bounds (index: {copyCrawlerTrackSpeedIndex} length: {crawlerTrackMaterials.Count})");
+                }
+                else
+                {
+                    wheel.copyCrawlerTrack = crawlerTrackMaterials[copyCrawlerTrackSpeedIndex];
+                }
+            }
+        }
     }
 
     private void UpdateCrawlerTrackTilingMaterials()
@@ -4776,6 +4800,7 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             {
                 num = ReplicatedForwardVelocity;
             }
+            crawlerTrackMaterial.speed = num;
             float num3 = num * Time.deltaTime;
             crawlerTrackMaterial.uvOffset = (crawlerTrackMaterial.uvOffset + num3 * crawlerTrackMaterial.repeatDistance) % 1f;
             crawlerTrackMaterial.material.mainTextureOffset = crawlerTrackMaterial.initialUvPosition + crawlerTrackMaterial.uvDirection * crawlerTrackMaterial.uvOffset;

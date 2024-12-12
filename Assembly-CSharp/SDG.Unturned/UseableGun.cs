@@ -4633,6 +4633,7 @@ public class UseableGun : Useable
         {
             float num = (1f - 1f / firstAttachments.sightAsset.zoom) * 1.25f;
             num *= 1f - base.player.skills.mastery(0, 5) * 0.5f;
+            num *= firstAttachments.sightAsset.sway;
             if (thirdAttachments != null && thirdAttachments.tacticalAsset != null && shouldEnableTacticalStats && (!thirdAttachments.tacticalAsset.ShouldOnlyAffectAimWhileProne || base.player.stance.stance == EPlayerStance.PRONE))
             {
                 num *= thirdAttachments.tacticalAsset.sway;

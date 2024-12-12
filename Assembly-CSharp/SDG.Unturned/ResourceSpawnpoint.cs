@@ -34,8 +34,6 @@ public class ResourceSpawnpoint
 
     private Transform _stump;
 
-    private Collider stumpCollider;
-
     private Transform _skybox;
 
     public ushort health;
@@ -120,10 +118,6 @@ public class ResourceSpawnpoint
                 {
                     stump.gameObject.SetActive(isEnabled);
                 }
-                if (stumpCollider != null)
-                {
-                    stumpCollider.enabled = true;
-                }
             }
         }
         if ((bool)skybox)
@@ -156,10 +150,6 @@ public class ResourceSpawnpoint
                 if (stump != null && areConditionsMet)
                 {
                     stump.gameObject.SetActive(isEnabled);
-                }
-                if (stumpCollider != null && areConditionsMet)
-                {
-                    stumpCollider.enabled = false;
                 }
             }
         }
@@ -194,10 +184,6 @@ public class ResourceSpawnpoint
                 {
                     stump.gameObject.SetActive(isEnabled);
                 }
-                if (stumpCollider != null)
-                {
-                    stumpCollider.enabled = true;
-                }
                 if (!Dedicator.IsDedicatedServer && asset.hasDebris && GraphicsSettings.debris)
                 {
                     ragdoll.y += 8f;
@@ -206,7 +192,7 @@ public class ResourceSpawnpoint
                     ragdoll *= (float)((Player.player != null && Player.player.skills.boost == EPlayerBoost.FLIGHT) ? 4 : 2);
                     if (model != null && asset.modelGameObject != null)
                     {
-                        Vector3 position = model.position + Vector3.up;
+                        Vector3 position = model.position + model.up * asset.DebrisVerticalOffset;
                         GameObject original = ((!(asset.debrisGameObject == null)) ? asset.debrisGameObject : asset.modelGameObject);
                         Transform transform = UnityEngine.Object.Instantiate(original, position, model.rotation).transform;
                         transform.name = asset.name + "_Debris";
@@ -220,7 +206,7 @@ public class ResourceSpawnpoint
                         transform.GetComponent<Rigidbody>().drag = 1f;
                         transform.GetComponent<Rigidbody>().angularDrag = 1f;
                         UnityEngine.Object.Destroy(transform.gameObject, 8f);
-                        if (stump != null && isEnabled && stumpCollider == null)
+                        if (stump != null && isEnabled && asset.ShouldIgnoreCollisionBetweenStumpAndDebris)
                         {
                             Collider component = transform.GetComponent<Collider>();
                             if (component != null)
@@ -273,10 +259,6 @@ public class ResourceSpawnpoint
         if (stump != null && areConditionsMet)
         {
             stump.gameObject.SetActive(!isAlive);
-        }
-        if (stumpCollider != null && areConditionsMet)
-        {
-            stumpCollider.enabled = !isAlive;
         }
     }
 
@@ -420,8 +402,11 @@ public class ResourceSpawnpoint
         isAlive = true;
         areConditionsMet = true;
         float num = Mathf.Sin((point.x + 4096f) * 32f + (point.z + 4096f) * 32f);
-        _angle = Quaternion.Euler(num * 5f, num * 360f, 0f);
-        _scale = new Vector3(1.1f + asset.scale + num * asset.scale, 1.1f + asset.scale + num * asset.scale, 1.1f + asset.scale + num * asset.scale);
+        float t = (num + 1f) * 0.5f;
+        float x = Mathf.Lerp(asset.MinRandomAngleDeviation, asset.MaxRandomAngleDeviation, t);
+        _angle = Quaternion.Euler(x, num * 360f, 0f);
+        float num2 = Mathf.Lerp(asset.MinRandomUniformScale, asset.MaxRandomUniformScale, t);
+        _scale = new Vector3(num2, num2, num2);
         GameObject gameObject = null;
         if (asset.modelGameObject != null)
         {

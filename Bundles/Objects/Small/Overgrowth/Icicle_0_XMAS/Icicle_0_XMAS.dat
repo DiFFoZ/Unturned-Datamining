@@ -2,10 +2,10 @@ GUID aa5713bdfae44bacbc36979248e25128
 Type Small
 ID 198
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 1
-Interactability_Effect 63
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 1
+Rubble_Effect 63
 
 Holiday_Restriction CHRISTMAS
 Bundle_Override_Path /Objects/Small/Overgrowth/Icicle_0

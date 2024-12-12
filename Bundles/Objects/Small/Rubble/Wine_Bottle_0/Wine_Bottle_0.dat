@@ -2,8 +2,8 @@ GUID fc4f60bc4b6843f8a9953a5c734640d5
 Type Small
 ID 903
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 1
-Interactability_Effect 64
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 1
+Rubble_Effect 64
 Has_Clip_Prefab false

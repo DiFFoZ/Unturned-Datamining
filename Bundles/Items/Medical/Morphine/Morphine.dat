@@ -9,6 +9,6 @@ Size_Y 2
 Size_Z 0.5
 
 Aid
-Broken
+Bones_Modifier Heal
 Virus 5
 Health 5

@@ -1,0 +1,16 @@
+GUID c33a66c76d7e447bb4d550cc2f8a611b
+Type Resource
+ID 62
+
+Health 1
+Radius 3
+Scale 0.1
+
+Explosion 43
+
+Reward_ID 969
+Forage
+
+Reset 1000
+
+Has_Clip_Prefab false

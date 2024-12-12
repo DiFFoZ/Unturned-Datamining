@@ -8,6 +8,8 @@ public class ItemHatAsset : ItemGearAsset
 
     public GameObject hat => _hat;
 
+    internal override GameObject ClothingPrefab => hat;
+
     public override void PopulateAsset(Bundle bundle, DatDictionary data, Local localization)
     {
         base.PopulateAsset(bundle, data, localization);

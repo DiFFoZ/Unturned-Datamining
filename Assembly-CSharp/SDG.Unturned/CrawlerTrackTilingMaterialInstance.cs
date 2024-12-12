@@ -15,4 +15,9 @@ internal class CrawlerTrackTilingMaterialInstance
     public float repeatDistance;
 
     public Vector2 uvDirection;
+
+    /// <summary>
+    /// Calculated speed of this track. Used by some wheels.
+    /// </summary>
+    public float speed;
 }

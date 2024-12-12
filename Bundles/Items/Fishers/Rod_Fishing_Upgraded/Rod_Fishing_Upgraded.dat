@@ -8,7 +8,7 @@ Size_X 3
 Size_Y 1
 Size_Z 0.25
 
-Backward
+EquipableModelParent LeftHook
 
 Reward_ID 675
 

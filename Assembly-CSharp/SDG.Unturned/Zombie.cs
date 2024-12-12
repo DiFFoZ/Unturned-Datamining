@@ -1876,8 +1876,7 @@ public class Zombie : MonoBehaviour, IExplosionDamageable, IEquatable<IExplosion
                 num3 = MathfEx.HorizontalDistanceSquared(targetPassengerVehicle.transform.position, base.transform.position);
                 num4 = Mathf.Abs(targetPassengerVehicle.transform.position.y - base.transform.position.y);
                 target.position = targetPassengerVehicle.transform.position;
-                seeker.canTurn = false;
-                seeker.targetDirection = targetPassengerVehicle.transform.position - base.transform.position;
+                seeker.canTurn = true;
             }
             else
             {

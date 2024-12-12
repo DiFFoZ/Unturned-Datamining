@@ -111,6 +111,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects BackwardOnly
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 0
 	}
 	{
 		WheelColliderPath Tires/Tire_1
@@ -122,6 +123,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects BackwardOnly
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 1
 	}
 	{
 		WheelColliderPath Tires/Tire_2
@@ -133,6 +135,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects ForwardOnly
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 0
 	}
 	{
 		WheelColliderPath Tires/Tire_3
@@ -144,6 +147,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects ForwardOnly
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 1
 	}
 	{
 		WheelColliderPath Tires/Tire_4
@@ -155,6 +159,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects None
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 0
 	}
 	{
 		WheelColliderPath Tires/Tire_5
@@ -166,6 +171,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects None
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 1
 	}
 	{
 		WheelColliderPath Tires/Tire_6
@@ -177,6 +183,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects None
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 0
 	}
 	{
 		WheelColliderPath Tires/Tire_7
@@ -188,6 +195,7 @@ WheelConfigurations
 		ModelSuspensionSpeed 1
 		MotionEffects None
 		CanExplode false
+		CopyCrawlerTrackSpeedIndex 1
 	}
 ]
 

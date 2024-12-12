@@ -4,9 +4,9 @@ ID 518
 
 Snowshoe
 
-Interactability Rubble
-Interactability_Reset 300
-Interactability_Health 100
-Interactability_Effect 72
+Rubble Destroy
+Rubble_Reset 300
+Rubble_Health 100
+Rubble_Effect 72
 
 Has_Clip_Prefab false

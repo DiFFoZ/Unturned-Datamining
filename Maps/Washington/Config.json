@@ -1,9 +1,10 @@
 {
 	"Use_Legacy_Ground": false,
+	"Terrain_Snow_Sparkle": true,
 	"Has_Discord_Rich_Presence": true,
 	"Category": "Official",
 	"Visible_In_Matchmaking": true,
-	"Version": "3.23.2.1",
+	"Version": "3.23.2.2",
 	"Allow_Holiday_Redirects": true,
 	"Use_Underground_Whitelist": true,
 	"Asset":

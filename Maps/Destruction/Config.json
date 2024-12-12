@@ -2,6 +2,7 @@
 	"Use_Rain_Volumes": true,
 	"Use_Snow_Volumes": true,
 	"Use_Legacy_Snow_Height": false,
+	"Terrain_Snow_Sparkle": true,
 	"Allow_Crafting": false,
 	"Allow_Skills": false,
 	"Allow_Information": false,

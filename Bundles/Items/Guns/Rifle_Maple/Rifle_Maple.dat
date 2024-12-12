@@ -53,7 +53,7 @@ Durability 1
 Wear 5
 
 Spread_Aim 0.01
-Spread_Hip 0.3
+Spread_Angle_Degrees 16.7
 
 Recoil_Min_X 5
 Recoil_Min_Y 15

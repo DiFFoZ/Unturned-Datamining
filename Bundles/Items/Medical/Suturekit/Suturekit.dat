@@ -9,5 +9,5 @@ Size_Y 2
 Size_Z 0.4
 
 Aid
-Bleeding
+Bleeding_Modifier Heal
 Health 50

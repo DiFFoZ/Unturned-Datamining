@@ -90,6 +90,7 @@ public class MenuSurvivorsClothingInspectUI
         if (model != null)
         {
             Object.Destroy(model.gameObject);
+            model = null;
         }
         Provider.provider.economyService.getInventoryTargetID(item, out var item_guid, out var vehicle_guid);
         ushort inventorySkinID = Provider.provider.economyService.getInventorySkinID(item);
@@ -118,6 +119,7 @@ public class MenuSurvivorsClothingInspectUI
         {
             return;
         }
+        bool flag = false;
         if (inventorySkinID != 0)
         {
             SkinAsset skinAsset = Assets.find(EAssetType.SKIN, inventorySkinID) as SkinAsset;
@@ -136,7 +138,19 @@ public class MenuSurvivorsClothingInspectUI
         }
         else
         {
-            model = ItemTool.getItem(itemAsset.id, 0, 100, itemAsset.getState(), viewmodel: false, itemAsset, getInspectedItemStatTrackerValue);
+            if (itemAsset.item == null && itemAsset is ItemClothingAsset { ClothingPrefab: var clothingPrefab } && clothingPrefab != null)
+            {
+                GameObject gameObject = Object.Instantiate(clothingPrefab);
+                if (gameObject != null)
+                {
+                    model = gameObject.transform;
+                    flag = true;
+                }
+            }
+            if (model == null)
+            {
+                model = ItemTool.getItem(itemAsset.id, 0, 100, itemAsset.getState(), viewmodel: false, itemAsset, getInspectedItemStatTrackerValue);
+            }
             if (num != 0)
             {
                 ItemTool.ApplyMythicalEffect(model, num, EEffectType.HOOK);
@@ -144,7 +158,11 @@ public class MenuSurvivorsClothingInspectUI
         }
         model.parent = inspect;
         model.localPosition = Vector3.zero;
-        if (vehicleAsset != null)
+        if (flag)
+        {
+            model.localRotation = Quaternion.Euler(0f, 180f, -90f);
+        }
+        else if (vehicleAsset != null)
         {
             model.localRotation = Quaternion.identity;
         }

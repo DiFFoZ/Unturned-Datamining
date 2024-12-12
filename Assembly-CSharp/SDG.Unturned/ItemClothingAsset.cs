@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace SDG.Unturned;
 
 public class ItemClothingAsset : ItemAsset
@@ -94,6 +96,12 @@ public class ItemClothingAsset : ItemAsset
             return priorityOverCosmeticOverride;
         }
     }
+
+    /// <summary>
+    /// For 3D clothes. Ideally, this wouldn't be type specific, but we have a separate prefab property for each
+    /// type of clothing at the moment.
+    /// </summary>
+    internal virtual GameObject ClothingPrefab => null;
 
     public bool shouldBeVisible(bool isRagdoll)
     {

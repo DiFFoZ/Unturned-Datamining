@@ -2,10 +2,10 @@ GUID ba109246d52c400a8f35704aef77a3ee
 Type Medium
 ID 60
 
-Interactability Rubble
-Interactability_Reset 300
-Interactability_Health 75
-Interactability_Effect 70
+Rubble Destroy
+Rubble_Reset 300
+Rubble_Health 75
+Rubble_Effect 70
 
 Causes_Fall_Damage False
 

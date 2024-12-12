@@ -19,6 +19,8 @@ public class ItemMaskAsset : ItemGearAsset
     public float FilterDegradationRateMultiplier { get; protected set; } = 1f;
 
 
+    internal override GameObject ClothingPrefab => mask;
+
     public override void BuildDescription(ItemDescriptionBuilder builder, Item itemInstance)
     {
         base.BuildDescription(builder, itemInstance);

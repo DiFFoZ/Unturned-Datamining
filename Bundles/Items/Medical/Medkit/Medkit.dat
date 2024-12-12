@@ -9,6 +9,6 @@ Size_Y 2
 Size_Z 0.4
 
 Aid
-Bleeding
-Broken
+Bleeding_Modifier Heal
+Bones_Modifier Heal
 Health 75

@@ -224,6 +224,8 @@ public class ItemGunAsset : ItemWeaponAsset
 
     protected NPCRewardsList shootQuestRewards;
 
+    private static CommandLineFlag shouldLogBallisticDropConversion = new CommandLineFlag(defaultValue: false, "-LogBallisticDropConversion");
+
     private static CommandLineFlag shouldLogSpreadConversion = new CommandLineFlag(defaultValue: false, "-LogGunSpreadConversion");
 
     public AudioClip shoot => _shoot;
@@ -767,7 +769,7 @@ public class ItemGunAsset : ItemWeaponAsset
                 float num7 = (float)(int)ballisticSteps * 0.02f;
                 float num8 = 2f * num6 / (num7 * num7);
                 bulletGravityMultiplier = num8 / -9.81f;
-                if ((bool)Assets.shouldValidateAssets)
+                if ((bool)shouldLogBallisticDropConversion)
                 {
                     UnturnedLog.info($"Converted \"{FriendlyName}\" Ballistic_Drop {value} to Bullet_Gravity_Multiplier {bulletGravityMultiplier}");
                 }
@@ -937,7 +939,7 @@ public class ItemGunAsset : ItemWeaponAsset
         orAddDeclaration.AppendFloat("Shake_Min_Y", shakeMin_y);
         orAddDeclaration.AppendFloat("Shake_Max_Z", shakeMax_z);
         orAddDeclaration.AppendFloat("Shake_Min_Z", shakeMin_z);
-        orAddDeclaration.AppendFloat("Spread_Aim", spreadAim);
+        orAddDeclaration.AppendFloat("spreadAim", baseSpreadAngleRadians * spreadAim);
         orAddDeclaration.AppendFloat("baseSpreadAngleRadians", baseSpreadAngleRadians);
         orAddDeclaration.AppendFloat("Spread_Crouch", spreadCrouch);
         orAddDeclaration.AppendFloat("Spread_Midair", spreadMidair);

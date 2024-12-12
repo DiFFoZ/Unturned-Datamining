@@ -4,7 +4,8 @@ ID 41
 
 Health 1000
 Radius 5
-Scale 0.3
+RandomUniformScale_Min 1
+RandomUniformScale_Max 1.55
 
 Explosion 105
 Reward_ID 516
@@ -15,5 +16,8 @@ Reward_Max 9
 Reset 600
 
 Auto_Skybox
+
+Debris_Vertical_Offset 0
+Ignore_Collision_Between_Stump_And_Debris false
 
 Has_Clip_Prefab false

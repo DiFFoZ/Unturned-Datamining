@@ -2,8 +2,8 @@ GUID 52d575ae564f46649523c98875130784
 Type Small
 ID 382
 
-Interactability Rubble
-Interactability_Reset 60
-Interactability_Health 1
-Interactability_Effect 58
+Rubble Destroy
+Rubble_Reset 60
+Rubble_Health 1
+Rubble_Effect 58
 Has_Clip_Prefab false

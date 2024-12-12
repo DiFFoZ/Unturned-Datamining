@@ -60,7 +60,7 @@ Wear 4
 
 Aim_In_Duration 0.25
 Spread_Aim 0.001
-Spread_Hip 0.45
+Spread_Angle_Degrees 24.23
 
 Ballistic_Steps 24
 Ballistic_Travel 12.5

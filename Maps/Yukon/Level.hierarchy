@@ -1,4 +1,4 @@
-"Available_Instance_ID" "4"
+"Available_Instance_ID" "13"
 "Items"
 [
 	{
@@ -115278,10 +115278,267 @@
 				"Y" "2048"
 				"Z" "2048"
 			}
+			"Shape" "Box"
 			"Mode" "ADDITIVE"
 			"Instanced_Meshes" "true"
 			"Resources" "true"
 			"Objects" "true"
+		}
+	}
+	{
+		"Type" "SDG.Framework.Devkit.DeadzoneVolume, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "4"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-557.3989"
+				"Y" "133.8815"
+				"Z" "100.9083"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "197.3333"
+				"Y" "197.3333"
+				"Z" "197.3333"
+			}
+			"Shape" "Sphere"
+			"Deadzone_Type" "DefaultRadiation"
+			"UnprotectedDamagePerSecond" "0"
+			"ProtectedDamagePerSecond" "0"
+			"UnprotectedRadiationPerSecond" "6.25"
+			"MaskFilterDamagePerSecond" "0.4"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "5"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "720.2241"
+				"Y" "63.99609"
+				"Z" "110.5743"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Whitehorse"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "6"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "671.9"
+				"Y" "62.1494"
+				"Z" "574.6389"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Beaufort Bay"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "7"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-770.5303"
+				"Y" "173.522"
+				"Z" "-1.684814"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Mount Logan"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "8"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-83.9704"
+				"Y" "38.17303"
+				"Z" "634.6323"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Ibex Valley"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "9"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-556.6495"
+				"Y" "107.5027"
+				"Z" "675.1339"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Kluane Lake"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "10"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "319.3201"
+				"Y" "62.59103"
+				"Z" "-542.8563"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Quill Creek"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "11"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "652.6406"
+				"Y" "64.02754"
+				"Z" "-703.5284"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Dawson Airstrip"
+			"IsVisibleOnMap" "true"
+		}
+	}
+	{
+		"Type" "SDG.Unturned.LocationDevkitNode, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+		"Instance_ID" "12"
+		"Item"
+		{
+			"Position"
+			{
+				"X" "-661.6672"
+				"Y" "103.3187"
+				"Z" "-831.727"
+			}
+			"Rotation"
+			{
+				"X" "0"
+				"Y" "0"
+				"Z" "0"
+				"W" "1"
+			}
+			"Scale"
+			{
+				"X" "1"
+				"Y" "1"
+				"Z" "1"
+			}
+			"LocationName" "Off Limits"
+			"IsVisibleOnMap" "true"
 		}
 	}
 ]
