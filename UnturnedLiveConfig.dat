@@ -39,6 +39,16 @@ ItemStore
 	SaleStart 2024-11-27 17:55:00
 	SaleEnd 2024-12-04 18:05:00
 }
+ItemCrafting
+{
+	Recipes
+	[
+		{
+			ItemDefId 19043
+			Materials 1000
+		}
+	]
+}
 LinkFiltering
 {
 	Rules
