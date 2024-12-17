@@ -34,28 +34,28 @@ Unplace 0.2
 Replace 0.8
 Action Trigger
 
-Player_Damage 32
+Player_Damage 11
 Player_Leg_Multiplier 0.6
 Player_Arm_Multiplier 0.6
 Player_Spine_Multiplier 0.8
 Player_Skull_Multiplier 1.1
 
-Zombie_Damage 99
+Zombie_Damage 33
 Zombie_Leg_Multiplier 0.3
 Zombie_Arm_Multiplier 0.3
 Zombie_Spine_Multiplier 0.6
 Zombie_Skull_Multiplier 1.1
 
-Animal_Damage 32
+Animal_Damage 11
 Animal_Leg_Multiplier 0.6
 Animal_Spine_Multiplier 0.8
 Animal_Skull_Multiplier 1.1
 
-Barricade_Damage 30
-Structure_Damage 30
-Vehicle_Damage 30
-Resource_Damage 30
-Object_Damage 30
+Barricade_Damage 10
+Structure_Damage 10
+Vehicle_Damage 10
+Resource_Damage 10
+Object_Damage 10
 
 Durability 0.15
 

@@ -196,6 +196,8 @@ ItemDescription_FuelCapacity Fuel Capacity: {0}
 ItemDescription_WaterCapacity Water Capacity: {0}
 ItemDescription_FuelBurnRate Fuel Burned: {0}/hour
 ItemDescription_FuelMaxRuntime Max Runtime: {0} hour(s)
+ItemDescription_AmmoConsumptionProbability Ammo Decrease Chance: {0}
+ItemDescription_QualityConsumptionProbability Quality Decrease Chance: {0}
 
 Equip_Button Equip
 Equip_Button_Tooltip Equip in your hands.

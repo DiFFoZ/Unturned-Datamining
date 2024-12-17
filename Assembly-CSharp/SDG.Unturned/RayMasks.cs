@@ -62,6 +62,8 @@ public class RayMasks
 
     public const int GROUND2 = int.MinValue;
 
+    public const int ALL = -1;
+
     public static readonly int REFLECTION = 1687552;
 
     public static readonly int CHART = 1687552;

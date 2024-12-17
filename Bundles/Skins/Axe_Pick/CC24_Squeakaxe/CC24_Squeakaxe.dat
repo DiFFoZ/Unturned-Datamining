@@ -1,0 +1,6 @@
+GUID 2290b8b4e47d4aeca9313ed0c0de015c
+Type Skin
+ID 316
+
+Override_Meshes 1
+SpecialAudioOverrideDef Effects/Physics/MeleeImpact/SqueakyToy/MeleeImpact_SqueakyToy.asset

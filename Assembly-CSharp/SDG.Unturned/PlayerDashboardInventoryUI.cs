@@ -470,6 +470,7 @@ public class PlayerDashboardInventoryUI
                 flag = true;
             }
         }
+        flag &= !InputEx.GetKey(ControlsSettings.other);
         PlayerDashboardCraftingUI.filteredBlueprintsOverride = array;
         if (!flag)
         {
@@ -511,7 +512,7 @@ public class PlayerDashboardInventoryUI
         }
         foreach (Blueprint blueprint2 in array)
         {
-            Player.player.crafting.sendCraft(blueprint2.sourceItem.id, blueprint2.id, InputEx.GetKey(ControlsSettings.other));
+            Player.player.crafting.sendCraft(blueprint2.sourceItem.id, blueprint2.id, force: false);
         }
         PlayerDashboardCraftingUI.filteredBlueprintsOverride = null;
         closeSelection();

@@ -915,8 +915,9 @@ public class UseableGun : Useable
             float num4 = UnityEngine.Random.Range(equippedGunAsset.shakeMin_x, equippedGunAsset.shakeMax_x);
             float num5 = UnityEngine.Random.Range(equippedGunAsset.shakeMin_y, equippedGunAsset.shakeMax_y);
             float num6 = UnityEngine.Random.Range(equippedGunAsset.shakeMin_z, equippedGunAsset.shakeMax_z);
-            num2 *= 1f - base.player.skills.mastery(0, 1) * 0.5f;
-            num3 *= 1f - base.player.skills.mastery(0, 1) * 0.5f;
+            float sharpshooterRecoilMultiplier = base.player.skills.GetSharpshooterRecoilMultiplier();
+            num2 *= sharpshooterRecoilMultiplier;
+            num3 *= sharpshooterRecoilMultiplier;
             if (isAiming)
             {
                 num2 *= equippedGunAsset.aimingRecoilMultiplier;
@@ -3847,7 +3848,7 @@ public class UseableGun : Useable
         float baseSpreadAngleRadians = equippedGunAsset.baseSpreadAngleRadians;
         baseSpreadAngleRadians *= ((quality < 0.5f) ? (1f + (1f - quality * 2f)) : 1f);
         baseSpreadAngleRadians *= Mathf.Lerp(1f, equippedGunAsset.spreadAim, aimAlpha);
-        baseSpreadAngleRadians *= 1f - base.player.skills.mastery(0, 1) * 0.5f;
+        baseSpreadAngleRadians *= base.player.skills.GetSharpshooterRecoilMultiplier();
         if (thirdAttachments.sightAsset != null && (!thirdAttachments.sightAsset.ShouldOnlyAffectAimWhileProne || base.player.stance.stance == EPlayerStance.PRONE))
         {
             baseSpreadAngleRadians *= Mathf.Lerp(1f, thirdAttachments.sightAsset.spread, aimAlpha);

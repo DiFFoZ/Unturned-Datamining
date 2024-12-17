@@ -8,6 +8,8 @@ public class SleekEconIcon : SleekWrapper
 
     private bool isExpectingIconReadyCallback;
 
+    private int currentItemDefId = int.MinValue;
+
     public SleekColor color
     {
         get
@@ -22,6 +24,11 @@ public class SleekEconIcon : SleekWrapper
 
     public void SetItemDefId(int itemdefid)
     {
+        if (currentItemDefId == itemdefid)
+        {
+            return;
+        }
+        currentItemDefId = itemdefid;
         if (itemdefid < 1)
         {
             internalImage.IsVisible = false;
@@ -50,14 +57,14 @@ public class SleekEconIcon : SleekWrapper
             }
         }
         Texture2D texture2D = Provider.provider.economyService.LoadItemIcon(itemdefid);
-        internalImage.Texture = texture2D;
+        internalImage.SetTextureAndShouldDestroy(texture2D, shouldDestroyTexture: false);
         internalImage.IsVisible = texture2D != null;
         isExpectingIconReadyCallback = false;
     }
 
     public void SetIsBoxMythicalIcon()
     {
-        internalImage.Texture = Resources.Load<Texture2D>("Economy/Mystery/Icon_Large");
+        internalImage.SetTextureAndShouldDestroy(Resources.Load<Texture2D>("Economy/Mystery/Icon_Large"), shouldDestroyTexture: false);
         internalImage.IsVisible = true;
         isExpectingIconReadyCallback = false;
     }
@@ -79,7 +86,7 @@ public class SleekEconIcon : SleekWrapper
     {
         if (internalImage != null && isExpectingIconReadyCallback)
         {
-            internalImage.Texture = texture;
+            internalImage.SetTextureAndShouldDestroy(texture, shouldDestroyTexture: true);
             internalImage.IsVisible = texture != null;
         }
     }

@@ -200,7 +200,7 @@ public class ModuleHook : MonoBehaviour
             {
                 AssemblyName key = item.Key;
                 string value2 = item.Value;
-                if (!string.Equals(key.Name, loadAssemblyName.Name) || !(key.Version >= loadAssemblyName.Version))
+                if (!string.Equals(key.Name, loadAssemblyName.Name) || (!(loadAssemblyName.Version == null) && !(key.Version >= loadAssemblyName.Version)))
                 {
                     continue;
                 }

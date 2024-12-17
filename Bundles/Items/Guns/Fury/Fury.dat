@@ -28,28 +28,28 @@ Firerate 3
 Replace 0.625
 Action Minigun
 
-Player_Damage 37
+Player_Damage 9
 Player_Leg_Multiplier 0.6
 Player_Arm_Multiplier 0.6
 Player_Spine_Multiplier 0.8
 Player_Skull_Multiplier 1.1
 
-Zombie_Damage 99
+Zombie_Damage 25
 Zombie_Leg_Multiplier 0.3
 Zombie_Arm_Multiplier 0.3
 Zombie_Spine_Multiplier 0.6
 Zombie_Skull_Multiplier 1.1
 
-Animal_Damage 37
+Animal_Damage 9
 Animal_Leg_Multiplier 0.6
 Animal_Spine_Multiplier 0.8
 Animal_Skull_Multiplier 1.1
 
-Barricade_Damage 25
-Structure_Damage 20
-Vehicle_Damage 40
-Resource_Damage 25
-Object_Damage 35
+Barricade_Damage 8
+Structure_Damage 5
+Vehicle_Damage 10
+Resource_Damage 8
+Object_Damage 10
 
 Durability 0.05
 

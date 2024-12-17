@@ -166,6 +166,15 @@ public class Bundle
         return null;
     }
 
+    public virtual string WhereLoadLookedToString(string name)
+    {
+        if (asset == null)
+        {
+            return resource + "/" + name + " in built-in resources";
+        }
+        return name + " in .unity3d asset bundle";
+    }
+
     public T[] loadAll<T>() where T : UnityEngine.Object
     {
         if (!(asset != null))

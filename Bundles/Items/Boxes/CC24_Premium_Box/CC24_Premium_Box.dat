@@ -1,0 +1,33 @@
+GUID 30fc408f93ff4b6cb6d626196ebf9e58
+Type Box
+
+Size_X 1
+Size_Y 1
+
+Generate 21074
+
+Probability_Model Equalized
+Contains_Bonus_Items True
+
+Drops 19
+Drop_0 -1
+Drop_1 "103601" // CC24_Double_Ponytail
+Drop_2 "103801" // CC24_BreacherBackpack
+Drop_3 "104001" // CC24_Sweater
+Drop_4 "104201" // CC24_PositionAxis
+Drop_5 "104401" // CC24_RustleafWreath
+Drop_6 "104601" // CC24_BushyMuttonChops
+Drop_7 "106001" // Bluntforce_CC24_DogTag
+Drop_8 "106201" // Katana_CC24_DevTex
+Drop_9 "107401" // CC24_FreshHead
+Drop_10 "106401" // Masterkey_CC24_Deco
+Drop_11 "105001" // CC24_ColorfulHat
+Drop_12 "106601" // Axe_Pick_CC24_Squeakaxe
+Drop_13 "105201" // CC24_CatBackpack
+Drop_14 "105401" // CC24_PizzaSweater
+Drop_15 "105601" // CC24_RodentEars
+Drop_16 "105801" // CC24_BucketHat
+Drop_17 "106801" // Nykorev_CC24_Powertool
+Drop_18 "107001" // Teklowvka_CC24_Yellowcake
+
+Pro

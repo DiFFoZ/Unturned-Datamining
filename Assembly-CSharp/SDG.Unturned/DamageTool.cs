@@ -32,6 +32,8 @@ public class DamageTool
 
     private static ExplosionRangeComparator explosionRangeComparator = new ExplosionRangeComparator();
 
+    internal const int EXPLOSION_CLOSEST_POINT_LAYER_MASK = -4194305;
+
     private static Collider[] explosionColliders = new Collider[256];
 
     private static HashSet<IExplosionDamageable> explosionOverlaps = new HashSet<IExplosionDamageable>();

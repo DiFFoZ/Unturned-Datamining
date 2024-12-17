@@ -45,7 +45,7 @@ public static class CargoExporter
                 {
                     foreach (CargoDeclaration item in declaration.Value)
                     {
-                        streamWriter.Write("{{CargoDeclare/");
+                        streamWriter.Write("{{Cargo/");
                         streamWriter.WriteLine(declaration.Key);
                         foreach (string line in item.lines)
                         {

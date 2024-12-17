@@ -13,6 +13,8 @@ public class InteractableSentry : InteractableStorage
 
     private static List<Animal> animalsInRadius = new List<Animal>();
 
+    private static List<InteractableVehicle> vehiclesInRadius = new List<InteractableVehicle>();
+
     public InteractablePower power;
 
     private bool hasWeapon;
@@ -56,6 +58,8 @@ public class InteractableSentry : InteractableStorage
     private Zombie targetZombie;
 
     private Animal targetAnimal;
+
+    private InteractableVehicle targetVehicle;
 
     private float targetYaw;
 
@@ -246,6 +250,7 @@ public class InteractableSentry : InteractableStorage
         targetPlayer = null;
         targetAnimal = null;
         targetZombie = null;
+        targetVehicle = null;
         base.updateState(asset, state);
     }
 
@@ -380,167 +385,7 @@ public class InteractableSentry : InteractableStorage
             if (Time.timeAsDouble - lastScan > 0.10000000149011612)
             {
                 lastScan = Time.timeAsDouble;
-                float num = sentryAsset.detectionRadius;
-                float num2 = sentryAsset.targetLossRadius;
-                if (hasWeapon)
-                {
-                    float range = ((ItemWeaponAsset)displayAsset).range;
-                    num = Mathf.Min(num, range);
-                    num2 = Mathf.Min(num2, range);
-                }
-                float num3 = num * num;
-                float num4 = num2 * num2;
-                float num5 = num3;
-                bool flag = false;
-                Player player = null;
-                Zombie zombie = null;
-                Animal animal = null;
-                if (Provider.isPvP)
-                {
-                    float sqrRadius = ((targetPlayer != null) ? num4 : num5);
-                    playersInRadius.Clear();
-                    PlayerTool.getPlayersInRadius(vector, sqrRadius, playersInRadius);
-                    for (int i = 0; i < playersInRadius.Count; i++)
-                    {
-                        Player player2 = playersInRadius[i];
-                        if (player2.channel.owner.playerID.steamID == base.owner || player2.quests.isMemberOfGroup(base.group) || player2.life.isDead || player2.animator.gesture == EPlayerGesture.ARREST_START || (player2.movement.isSafe && player2.movement.isSafeInfo.noWeapons) || !player2.movement.canAddSimulationResultsToUpdates || (player != null && player2.animator.gesture == EPlayerGesture.SURRENDER_START) || (sentryMode == ESentryMode.FRIENDLY && !(Time.realtimeSinceStartup - player2.equipment.lastPunching < 2f) && (!player2.equipment.HasValidUseable || player2.equipment.asset == null || !player2.equipment.asset.shouldFriendlySentryTargetUser)))
-                        {
-                            continue;
-                        }
-                        float sqrMagnitude = (player2.look.aim.position - vector).sqrMagnitude;
-                        if (player2 != targetPlayer && sqrMagnitude > num5)
-                        {
-                            continue;
-                        }
-                        Vector3 vector2 = player2.look.aim.position - vector;
-                        float magnitude = vector2.magnitude;
-                        Vector3 vector3 = vector2 / magnitude;
-                        if (player2 != targetPlayer && Vector3.Dot(vector3, aimTransform.forward) < 0.5f)
-                        {
-                            continue;
-                        }
-                        if (magnitude > 0.025f)
-                        {
-                            Physics.Raycast(new Ray(vector, vector3), out var hitInfo, magnitude - 0.025f, RayMasks.BLOCK_SENTRY);
-                            if (hitInfo.transform != null && hitInfo.transform != base.transform)
-                            {
-                                continue;
-                            }
-                            Physics.Raycast(new Ray(vector + vector3 * (magnitude - 0.025f), -vector3), out hitInfo, magnitude - 0.025f, RayMasks.DAMAGE_SERVER);
-                            if (hitInfo.transform != null && hitInfo.transform != base.transform)
-                            {
-                                continue;
-                            }
-                        }
-                        num5 = sqrMagnitude;
-                        player = player2;
-                        flag = true;
-                    }
-                }
-                float sqrRadius2 = ((!flag && targetZombie != null) ? num4 : num5);
-                zombiesInRadius.Clear();
-                ZombieManager.getZombiesInRadius(vector, sqrRadius2, zombiesInRadius);
-                for (int j = 0; j < zombiesInRadius.Count; j++)
-                {
-                    Zombie zombie2 = zombiesInRadius[j];
-                    if (zombie2.isDead || !zombie2.isHunting)
-                    {
-                        continue;
-                    }
-                    Vector3 position = zombie2.transform.position;
-                    switch (zombie2.speciality)
-                    {
-                    case EZombieSpeciality.CRAWLER:
-                        position += new Vector3(0f, 0.25f, 0f);
-                        break;
-                    case EZombieSpeciality.MEGA:
-                        position += new Vector3(0f, 2.625f, 0f);
-                        break;
-                    case EZombieSpeciality.NORMAL:
-                        position += new Vector3(0f, 1.75f, 0f);
-                        break;
-                    case EZombieSpeciality.SPRINTER:
-                        position += new Vector3(0f, 1f, 0f);
-                        break;
-                    }
-                    float sqrMagnitude2 = (position - vector).sqrMagnitude;
-                    if (zombie2 != targetZombie && sqrMagnitude2 > num5)
-                    {
-                        continue;
-                    }
-                    Vector3 vector4 = position - vector;
-                    float magnitude2 = vector4.magnitude;
-                    Vector3 vector5 = vector4 / magnitude2;
-                    if (zombie2 != targetZombie && Vector3.Dot(vector5, aimTransform.forward) < 0.5f)
-                    {
-                        continue;
-                    }
-                    if (magnitude2 > 0.025f)
-                    {
-                        Physics.Raycast(new Ray(vector, vector5), out var hitInfo2, magnitude2 - 0.025f, RayMasks.BLOCK_SENTRY);
-                        if (hitInfo2.transform != null && hitInfo2.transform != base.transform)
-                        {
-                            continue;
-                        }
-                        Physics.Raycast(new Ray(vector + vector5 * (magnitude2 - 0.025f), -vector5), out hitInfo2, magnitude2 - 0.025f, RayMasks.DAMAGE_SERVER);
-                        if (hitInfo2.transform != null && hitInfo2.transform != base.transform)
-                        {
-                            continue;
-                        }
-                    }
-                    num5 = sqrMagnitude2;
-                    player = null;
-                    zombie = zombie2;
-                    flag = true;
-                }
-                float sqrRadius3 = ((!flag && targetAnimal != null) ? num4 : num5);
-                animalsInRadius.Clear();
-                AnimalManager.getAnimalsInRadius(vector, sqrRadius3, animalsInRadius);
-                for (int k = 0; k < animalsInRadius.Count; k++)
-                {
-                    Animal animal2 = animalsInRadius[k];
-                    if (animal2.isDead)
-                    {
-                        continue;
-                    }
-                    Vector3 position2 = animal2.transform.position;
-                    float sqrMagnitude3 = (position2 - vector).sqrMagnitude;
-                    if (animal2 != targetAnimal && sqrMagnitude3 > num5)
-                    {
-                        continue;
-                    }
-                    Vector3 vector6 = position2 - vector;
-                    float magnitude3 = vector6.magnitude;
-                    Vector3 vector7 = vector6 / magnitude3;
-                    if (animal2 != targetAnimal && Vector3.Dot(vector7, aimTransform.forward) < 0.5f)
-                    {
-                        continue;
-                    }
-                    if (magnitude3 > 0.025f)
-                    {
-                        Physics.Raycast(new Ray(vector, vector7), out var hitInfo3, magnitude3 - 0.025f, RayMasks.BLOCK_SENTRY);
-                        if (hitInfo3.transform != null && hitInfo3.transform != base.transform)
-                        {
-                            continue;
-                        }
-                        Physics.Raycast(new Ray(vector + vector7 * (magnitude3 - 0.025f), -vector7), out hitInfo3, magnitude3 - 0.025f, RayMasks.DAMAGE_SERVER);
-                        if (hitInfo3.transform != null && hitInfo3.transform != base.transform)
-                        {
-                            continue;
-                        }
-                    }
-                    num5 = sqrMagnitude3;
-                    player = null;
-                    zombie = null;
-                    animal = animal2;
-                }
-                if (player != targetPlayer || zombie != targetZombie || animal != targetAnimal)
-                {
-                    targetPlayer = player;
-                    targetZombie = zombie;
-                    targetAnimal = animal;
-                    lastFire = Time.timeAsDouble + 0.1;
-                }
+                ScanForTargets(vector);
             }
             if (targetPlayer != null)
             {
@@ -575,6 +420,11 @@ public class InteractableSentry : InteractableStorage
                 }
                 isAiming = true;
             }
+            else if (targetVehicle != null)
+            {
+                isFiring = true;
+                isAiming = true;
+            }
             else
             {
                 isFiring = false;
@@ -584,49 +434,54 @@ public class InteractableSentry : InteractableStorage
             {
                 lastAim = Time.timeAsDouble;
                 Transform transform = null;
-                Vector3 vector8 = Vector3.zero;
+                Vector3 vector2 = Vector3.zero;
                 if (targetPlayer != null)
                 {
                     transform = targetPlayer.transform;
-                    vector8 = targetPlayer.look.aim.position;
+                    vector2 = targetPlayer.look.aim.position;
                 }
                 else if (targetZombie != null)
                 {
                     transform = targetZombie.transform;
-                    vector8 = targetZombie.transform.position;
+                    vector2 = targetZombie.transform.position;
                     switch (targetZombie.speciality)
                     {
                     case EZombieSpeciality.CRAWLER:
-                        vector8 += new Vector3(0f, 0.25f, 0f);
+                        vector2 += new Vector3(0f, 0.25f, 0f);
                         break;
                     case EZombieSpeciality.MEGA:
-                        vector8 += new Vector3(0f, 2.625f, 0f);
+                        vector2 += new Vector3(0f, 2.625f, 0f);
                         break;
                     case EZombieSpeciality.NORMAL:
-                        vector8 += new Vector3(0f, 1.75f, 0f);
+                        vector2 += new Vector3(0f, 1.75f, 0f);
                         break;
                     case EZombieSpeciality.SPRINTER:
-                        vector8 += new Vector3(0f, 1f, 0f);
+                        vector2 += new Vector3(0f, 1f, 0f);
                         break;
                     }
                 }
                 else if (targetAnimal != null)
                 {
                     transform = targetAnimal.transform;
-                    vector8 = targetAnimal.transform.position + Vector3.up;
+                    vector2 = targetAnimal.transform.position + Vector3.up;
+                }
+                else if (targetVehicle != null)
+                {
+                    transform = targetVehicle.transform;
+                    vector2 = targetVehicle.GetSentryTargetingPoint();
                 }
                 if (transform != null)
                 {
-                    float num6 = Mathf.Atan2(vector8.x - vector.x, vector8.z - vector.z) * 57.29578f;
-                    float num7 = Mathf.Sin((vector8.y - vector.y) / (vector8 - vector).magnitude) * 57.29578f;
-                    BarricadeManager.sendAlertSentry(base.transform, num6, num7);
+                    float num = Mathf.Atan2(vector2.x - vector.x, vector2.z - vector.z) * 57.29578f;
+                    float num2 = Mathf.Sin((vector2.y - vector.y) / (vector2 - vector).magnitude) * 57.29578f;
+                    BarricadeManager.sendAlertSentry(base.transform, num, num2);
                 }
             }
             if (isFiring && hasWeapon && !isOpen)
             {
-                bool flag2 = sentryAsset.infiniteAmmo || ((ItemGunAsset)displayAsset).infiniteAmmo;
-                bool flag3 = flag2 || displayItem.state[10] >= ((ItemGunAsset)displayAsset).ammoPerShot;
-                if (flag3 && Time.timeAsDouble - lastFire > (double)fireTime)
+                bool flag = sentryAsset.infiniteAmmo || ((ItemGunAsset)displayAsset).infiniteAmmo;
+                bool flag2 = flag || displayItem.state[10] >= ((ItemGunAsset)displayAsset).ammoPerShot;
+                if (flag2 && Time.timeAsDouble - lastFire > (double)fireTime)
                 {
                     lastFire += fireTime;
                     if (Time.timeAsDouble - lastFire > (double)fireTime)
@@ -638,7 +493,7 @@ public class InteractableSentry : InteractableStorage
                     {
                         return;
                     }
-                    if (!flag2)
+                    if (!flag && UnityEngine.Random.value <= sentryAsset.AmmoConsumptionProbability)
                     {
                         displayItem.state[10] -= ((ItemGunAsset)displayAsset).ammoPerShot;
                     }
@@ -646,7 +501,7 @@ public class InteractableSentry : InteractableStorage
                     {
                         AlertTool.alert(base.transform.position, 48f);
                     }
-                    if (!sentryAsset.infiniteQuality && Provider.modeConfigData.Items.ShouldWeaponTakeDamage && displayItem.quality > 0 && UnityEngine.Random.value < ((ItemWeaponAsset)displayAsset).durability)
+                    if (!sentryAsset.infiniteQuality && Provider.modeConfigData.Items.ShouldWeaponTakeDamage && displayItem.quality > 0 && UnityEngine.Random.value < ((ItemWeaponAsset)displayAsset).durability && UnityEngine.Random.value <= sentryAsset.QualityConsumptionProbability)
                     {
                         if (displayItem.quality > ((ItemWeaponAsset)displayAsset).wear)
                         {
@@ -659,7 +514,7 @@ public class InteractableSentry : InteractableStorage
                     }
                     if (((ItemGunAsset)displayAsset).projectile == null)
                     {
-                        float num8 = CalculateSpreadAngleRadians(quality);
+                        float num3 = CalculateSpreadAngleRadians(quality);
                         BarricadeManager.sendShootSentry(base.transform);
                         float bulletDamageMultiplier = GetBulletDamageMultiplier(quality);
                         byte pellets = attachments.magazineAsset.pellets;
@@ -668,7 +523,7 @@ public class InteractableSentry : InteractableStorage
                             EPlayerKill kill = EPlayerKill.NONE;
                             uint xp = 0u;
                             Transform transform2 = null;
-                            float num9 = 0f;
+                            float num4 = 0f;
                             if (targetPlayer != null)
                             {
                                 transform2 = targetPlayer.transform;
@@ -683,17 +538,17 @@ public class InteractableSentry : InteractableStorage
                             }
                             if (transform2 != null)
                             {
-                                num9 = (transform2.position - base.transform.position).magnitude;
+                                num4 = (transform2.position - base.transform.position).magnitude;
                             }
-                            float num10 = Mathf.Clamp01(num9 / ((ItemWeaponAsset)displayAsset).range);
-                            float num11 = 1f - num10;
-                            num11 *= CalculateChanceToHitSpreadMultiplier(num8);
-                            num11 *= 0.75f;
-                            if (transform2 == null || UnityEngine.Random.value > num11)
+                            float num5 = Mathf.Clamp01(num4 / ((ItemWeaponAsset)displayAsset).range);
+                            float num6 = 1f - num5;
+                            num6 *= CalculateChanceToHitSpreadMultiplier(num3);
+                            num6 *= 0.75f;
+                            if (transform2 == null || UnityEngine.Random.value > num6)
                             {
-                                Vector3 randomForwardVectorInCone = RandomEx.GetRandomForwardVectorInCone(num8);
+                                Vector3 randomForwardVectorInCone = RandomEx.GetRandomForwardVectorInCone(num3);
                                 Vector3 direction = aimTransform.TransformDirection(randomForwardVectorInCone);
-                                RaycastInfo raycastInfo = DamageTool.raycast(new Ray(aimTransform.position, direction), ((ItemWeaponAsset)displayAsset).range, RayMasks.DAMAGE_SERVER);
+                                RaycastInfo raycastInfo = DamageTool.raycast(new Ray(aimTransform.position, direction), mask: RayMasks.DAMAGE_SERVER | 0x4000000, range: ((ItemWeaponAsset)displayAsset).range);
                                 if (!(raycastInfo.transform == null))
                                 {
                                     DamageTool.ServerSpawnBulletImpact(raycastInfo.point, raycastInfo.normal, raycastInfo.materialName, raycastInfo.collider?.transform, null, Provider.GatherClientConnectionsWithinSphere(raycastInfo.point, EffectManager.SMALL));
@@ -749,42 +604,42 @@ public class InteractableSentry : InteractableStorage
                                     }
                                     if (attachments.magazineAsset != null && attachments.magazineAsset.isExplosive)
                                     {
-                                        Vector3 position3 = raycastInfo.point + raycastInfo.normal * 0.25f;
-                                        UseableGun.DetonateExplosiveMagazine(attachments.magazineAsset, position3, null, ERagdollEffect.NONE);
+                                        Vector3 position = raycastInfo.point + raycastInfo.normal * 0.25f;
+                                        UseableGun.DetonateExplosiveMagazine(attachments.magazineAsset, position, null, ERagdollEffect.NONE);
                                     }
                                 }
                             }
                             else
                             {
-                                Vector3 vector9 = Vector3.zero;
+                                Vector3 vector3 = Vector3.zero;
                                 if (targetPlayer != null)
                                 {
-                                    vector9 = targetPlayer.look.aim.position;
+                                    vector3 = targetPlayer.look.aim.position;
                                 }
                                 else if (targetZombie != null)
                                 {
-                                    vector9 = targetZombie.transform.position;
+                                    vector3 = targetZombie.transform.position;
                                     switch (targetZombie.speciality)
                                     {
                                     case EZombieSpeciality.CRAWLER:
-                                        vector9 += new Vector3(0f, 0.25f, 0f);
+                                        vector3 += new Vector3(0f, 0.25f, 0f);
                                         break;
                                     case EZombieSpeciality.MEGA:
-                                        vector9 += new Vector3(0f, 2.625f, 0f);
+                                        vector3 += new Vector3(0f, 2.625f, 0f);
                                         break;
                                     case EZombieSpeciality.NORMAL:
-                                        vector9 += new Vector3(0f, 1.75f, 0f);
+                                        vector3 += new Vector3(0f, 1.75f, 0f);
                                         break;
                                     case EZombieSpeciality.SPRINTER:
-                                        vector9 += new Vector3(0f, 1f, 0f);
+                                        vector3 += new Vector3(0f, 1f, 0f);
                                         break;
                                     }
                                 }
                                 else if (targetAnimal != null)
                                 {
-                                    vector9 = targetAnimal.transform.position + Vector3.up;
+                                    vector3 = targetAnimal.transform.position + Vector3.up;
                                 }
-                                DamageTool.ServerSpawnBulletImpact(vector9, -aimTransform.forward, "Flesh_Dynamic", null, null, Provider.GatherClientConnectionsWithinSphere(vector9, EffectManager.SMALL));
+                                DamageTool.ServerSpawnBulletImpact(vector3, -aimTransform.forward, "Flesh_Dynamic", null, null, Provider.GatherClientConnectionsWithinSphere(vector3, EffectManager.SMALL));
                                 Vector3 direction2 = aimTransform.forward * Mathf.Ceil((float)(int)attachments.magazineAsset.pellets / 2f);
                                 if (targetPlayer != null)
                                 {
@@ -810,8 +665,8 @@ public class InteractableSentry : InteractableStorage
                                 }
                                 if (attachments.magazineAsset != null && attachments.magazineAsset.isExplosive)
                                 {
-                                    Vector3 position4 = vector9 + aimTransform.forward * -0.25f;
-                                    UseableGun.DetonateExplosiveMagazine(attachments.magazineAsset, position4, null, ERagdollEffect.NONE);
+                                    Vector3 position2 = vector3 + aimTransform.forward * -0.25f;
+                                    UseableGun.DetonateExplosiveMagazine(attachments.magazineAsset, position2, null, ERagdollEffect.NONE);
                                 }
                             }
                         }
@@ -820,10 +675,10 @@ public class InteractableSentry : InteractableStorage
                 }
             }
         }
-        bool flag4 = Time.timeAsDouble - lastAlert < 1.0;
-        if (flag4 != isAlert)
+        bool flag3 = Time.timeAsDouble - lastAlert < 1.0;
+        if (flag3 != isAlert)
         {
-            isAlert = flag4;
+            isAlert = flag3;
             if (!Dedicator.IsDedicatedServer)
             {
                 if (isAlert)
@@ -1010,5 +865,215 @@ public class InteractableSentry : InteractableStorage
             return 0f;
         }
         return Mathf.Cos(spreadAngleRadians);
+    }
+
+    private void ScanForTargets(Vector3 fromPoint)
+    {
+        float num = sentryAsset.detectionRadius;
+        float num2 = sentryAsset.targetLossRadius;
+        if (hasWeapon)
+        {
+            float range = ((ItemWeaponAsset)displayAsset).range;
+            num = Mathf.Min(num, range);
+            num2 = Mathf.Min(num2, range);
+        }
+        float num3 = num * num;
+        float num4 = num2 * num2;
+        float num5 = num3;
+        bool flag = false;
+        Player player = null;
+        Zombie zombie = null;
+        Animal animal = null;
+        InteractableVehicle interactableVehicle = null;
+        if (Provider.isPvP)
+        {
+            float sqrRadius = ((targetPlayer != null) ? num4 : num5);
+            playersInRadius.Clear();
+            PlayerTool.getPlayersInRadius(fromPoint, sqrRadius, playersInRadius);
+            for (int i = 0; i < playersInRadius.Count; i++)
+            {
+                Player player2 = playersInRadius[i];
+                if (player2.channel.owner.playerID.steamID == base.owner || player2.quests.isMemberOfGroup(base.group) || player2.life.isDead || player2.animator.gesture == EPlayerGesture.ARREST_START || (player2.movement.isSafe && player2.movement.isSafeInfo.noWeapons) || !player2.movement.canAddSimulationResultsToUpdates || (player != null && player2.animator.gesture == EPlayerGesture.SURRENDER_START) || (sentryMode == ESentryMode.FRIENDLY && !(Time.realtimeSinceStartup - player2.equipment.lastPunching < 2f) && (!player2.equipment.HasValidUseable || player2.equipment.asset == null || !player2.equipment.asset.shouldFriendlySentryTargetUser)))
+                {
+                    continue;
+                }
+                float sqrMagnitude = (player2.look.aim.position - fromPoint).sqrMagnitude;
+                if (player2 != targetPlayer && sqrMagnitude > num5)
+                {
+                    continue;
+                }
+                Vector3 vector = player2.look.aim.position - fromPoint;
+                float magnitude = vector.magnitude;
+                Vector3 vector2 = vector / magnitude;
+                if (player2 != targetPlayer && Vector3.Dot(vector2, aimTransform.forward) < 0.5f)
+                {
+                    continue;
+                }
+                if (magnitude > 0.025f)
+                {
+                    Physics.Raycast(new Ray(fromPoint, vector2), out var hitInfo, magnitude - 0.025f, RayMasks.BLOCK_SENTRY);
+                    if (hitInfo.transform != null && hitInfo.transform != base.transform)
+                    {
+                        continue;
+                    }
+                    Physics.Raycast(new Ray(fromPoint + vector2 * (magnitude - 0.025f), -vector2), out hitInfo, magnitude - 0.025f, RayMasks.DAMAGE_SERVER);
+                    if (hitInfo.transform != null && hitInfo.transform != base.transform)
+                    {
+                        continue;
+                    }
+                }
+                num5 = sqrMagnitude;
+                player = player2;
+                flag = true;
+            }
+        }
+        float sqrRadius2 = ((!flag && targetZombie != null) ? num4 : num5);
+        zombiesInRadius.Clear();
+        ZombieManager.getZombiesInRadius(fromPoint, sqrRadius2, zombiesInRadius);
+        for (int j = 0; j < zombiesInRadius.Count; j++)
+        {
+            Zombie zombie2 = zombiesInRadius[j];
+            if (zombie2.isDead || !zombie2.isHunting)
+            {
+                continue;
+            }
+            Vector3 position = zombie2.transform.position;
+            switch (zombie2.speciality)
+            {
+            case EZombieSpeciality.CRAWLER:
+                position += new Vector3(0f, 0.25f, 0f);
+                break;
+            case EZombieSpeciality.MEGA:
+                position += new Vector3(0f, 2.625f, 0f);
+                break;
+            case EZombieSpeciality.NORMAL:
+                position += new Vector3(0f, 1.75f, 0f);
+                break;
+            case EZombieSpeciality.SPRINTER:
+                position += new Vector3(0f, 1f, 0f);
+                break;
+            }
+            float sqrMagnitude2 = (position - fromPoint).sqrMagnitude;
+            if (zombie2 != targetZombie && sqrMagnitude2 > num5)
+            {
+                continue;
+            }
+            Vector3 vector3 = position - fromPoint;
+            float magnitude2 = vector3.magnitude;
+            Vector3 vector4 = vector3 / magnitude2;
+            if (zombie2 != targetZombie && Vector3.Dot(vector4, aimTransform.forward) < 0.5f)
+            {
+                continue;
+            }
+            if (magnitude2 > 0.025f)
+            {
+                Physics.Raycast(new Ray(fromPoint, vector4), out var hitInfo2, magnitude2 - 0.025f, RayMasks.BLOCK_SENTRY);
+                if (hitInfo2.transform != null && hitInfo2.transform != base.transform)
+                {
+                    continue;
+                }
+                Physics.Raycast(new Ray(fromPoint + vector4 * (magnitude2 - 0.025f), -vector4), out hitInfo2, magnitude2 - 0.025f, RayMasks.DAMAGE_SERVER);
+                if (hitInfo2.transform != null && hitInfo2.transform != base.transform)
+                {
+                    continue;
+                }
+            }
+            num5 = sqrMagnitude2;
+            player = null;
+            zombie = zombie2;
+            flag = true;
+        }
+        float sqrRadius3 = ((!flag && targetAnimal != null) ? num4 : num5);
+        animalsInRadius.Clear();
+        AnimalManager.getAnimalsInRadius(fromPoint, sqrRadius3, animalsInRadius);
+        for (int k = 0; k < animalsInRadius.Count; k++)
+        {
+            Animal animal2 = animalsInRadius[k];
+            if (animal2.isDead)
+            {
+                continue;
+            }
+            Vector3 position2 = animal2.transform.position;
+            float sqrMagnitude3 = (position2 - fromPoint).sqrMagnitude;
+            if (animal2 != targetAnimal && sqrMagnitude3 > num5)
+            {
+                continue;
+            }
+            Vector3 vector5 = position2 - fromPoint;
+            float magnitude3 = vector5.magnitude;
+            Vector3 vector6 = vector5 / magnitude3;
+            if (animal2 != targetAnimal && Vector3.Dot(vector6, aimTransform.forward) < 0.5f)
+            {
+                continue;
+            }
+            if (magnitude3 > 0.025f)
+            {
+                Physics.Raycast(new Ray(fromPoint, vector6), out var hitInfo3, magnitude3 - 0.025f, RayMasks.BLOCK_SENTRY);
+                if (hitInfo3.transform != null && hitInfo3.transform != base.transform)
+                {
+                    continue;
+                }
+                Physics.Raycast(new Ray(fromPoint + vector6 * (magnitude3 - 0.025f), -vector6), out hitInfo3, magnitude3 - 0.025f, RayMasks.DAMAGE_SERVER);
+                if (hitInfo3.transform != null && hitInfo3.transform != base.transform)
+                {
+                    continue;
+                }
+            }
+            num5 = sqrMagnitude3;
+            player = null;
+            zombie = null;
+            animal = animal2;
+            flag = true;
+        }
+        if (Provider.isPvP && sentryMode == ESentryMode.HOSTILE)
+        {
+            float sqrRadius4 = ((!flag && targetVehicle != null) ? num4 : num5);
+            vehiclesInRadius.Clear();
+            VehicleManager.getVehiclesInRadius(fromPoint, sqrRadius4, vehiclesInRadius);
+            for (int l = 0; l < vehiclesInRadius.Count; l++)
+            {
+                InteractableVehicle interactableVehicle2 = vehiclesInRadius[l];
+                if (interactableVehicle2.isDead || interactableVehicle2.isInsideSafezone || interactableVehicle2.IsFriendlyToSentry(this) || !interactableVehicle2.anySeatsOccupied)
+                {
+                    continue;
+                }
+                Vector3 sentryTargetingPoint = interactableVehicle2.GetSentryTargetingPoint();
+                float sqrMagnitude4 = (sentryTargetingPoint - fromPoint).sqrMagnitude;
+                if (interactableVehicle2 != targetVehicle && sqrMagnitude4 > num5)
+                {
+                    continue;
+                }
+                Vector3 vector7 = sentryTargetingPoint - fromPoint;
+                float magnitude4 = vector7.magnitude;
+                Vector3 vector8 = vector7 / magnitude4;
+                if (interactableVehicle2 != targetVehicle && Vector3.Dot(vector8, aimTransform.forward) < 0.5f)
+                {
+                    continue;
+                }
+                if (magnitude4 > 0.025f)
+                {
+                    Physics.Raycast(new Ray(fromPoint, vector8), out var hitInfo4, magnitude4 - 0.025f, RayMasks.BLOCK_SENTRY);
+                    if (hitInfo4.transform != null && hitInfo4.transform != base.transform && !hitInfo4.transform.IsChildOf(interactableVehicle2.transform))
+                    {
+                        continue;
+                    }
+                    Physics.Raycast(new Ray(fromPoint + vector8 * (magnitude4 - 0.025f), -vector8), out hitInfo4, magnitude4 - 0.025f, RayMasks.DAMAGE_SERVER);
+                    if (hitInfo4.transform != null && hitInfo4.transform != base.transform && !hitInfo4.transform.IsChildOf(interactableVehicle2.transform))
+                    {
+                        continue;
+                    }
+                }
+                num5 = sqrMagnitude4;
+                interactableVehicle = interactableVehicle2;
+            }
+        }
+        if (player != targetPlayer || zombie != targetZombie || animal != targetAnimal || interactableVehicle != targetVehicle)
+        {
+            targetPlayer = player;
+            targetZombie = zombie;
+            targetAnimal = animal;
+            targetVehicle = interactableVehicle;
+            lastFire = Time.timeAsDouble + 0.1;
+        }
     }
 }

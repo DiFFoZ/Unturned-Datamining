@@ -13,13 +13,7 @@ Speciality_0_Skill_0_Level_6 +43% punch/melee damage
 Speciality_0_Skill_0_Level_7 +50% punch/melee damage
 Speciality_0_Skill_1 Sharpshooter
 Speciality_0_Skill_1_Tooltip Stabilizes recoil and increases accuracy.
-Speciality_0_Skill_1_Level_1 +7% stability/accuracy
-Speciality_0_Skill_1_Level_2 +14% stability/accuracy
-Speciality_0_Skill_1_Level_3 +21% stability/accuracy
-Speciality_0_Skill_1_Level_4 +29% stability/accuracy
-Speciality_0_Skill_1_Level_5 +36% stability/accuracy
-Speciality_0_Skill_1_Level_6 +43% stability/accuracy
-Speciality_0_Skill_1_Level_7 +50% stability/accuracy
+Speciality_0_Skill_1_Levels_V2 +{0} recoil control, +{0} accuracy
 Speciality_0_Skill_2 Dexterity
 Speciality_0_Skill_2_Tooltip Quicker reloading and hammering.
 Speciality_0_Skill_2_Level_1 +10% reload/hammer speed

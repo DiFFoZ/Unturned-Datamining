@@ -41,7 +41,7 @@ public class InteractableObjectRubble : MonoBehaviour, IExplosionDamageable, IEq
 
     public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
     {
-        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false, -4194305);
     }
 
     public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)
@@ -58,7 +58,7 @@ public class InteractableObjectRubble : MonoBehaviour, IExplosionDamageable, IEq
                 Vector3 vector = sectionInfo.section.position;
                 if (sectionInfo.aliveGameObject != null)
                 {
-                    vector = CollisionUtil.ClosestPoint(sectionInfo.section.gameObject, explosionParameters.point, includeInactive: false);
+                    vector = CollisionUtil.ClosestPoint(sectionInfo.section.gameObject, explosionParameters.point, includeInactive: false, -4194305);
                 }
                 Vector3 vector2 = vector - explosionParameters.point;
                 float magnitude = vector2.magnitude;

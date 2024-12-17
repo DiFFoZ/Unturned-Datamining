@@ -145,6 +145,18 @@ public class PlayerSkills : PlayerCaller
 
     public static event Action<PlayerSkills, byte, byte, byte> OnSkillUpgraded_Global;
 
+    public float GetSharpshooterRecoilMultiplierForLevel(int level)
+    {
+        Skill skill = skills[0][1];
+        return 1f - skill.NormalizeLevel(level) * 0.4f;
+    }
+
+    public float GetSharpshooterRecoilMultiplier()
+    {
+        Skill skill = skills[0][1];
+        return GetSharpshooterRecoilMultiplierForLevel(skill.level);
+    }
+
     /// <summary>
     /// Ugly hack for the awful skills enums. Eventually skills should be replaced.
     /// </summary>

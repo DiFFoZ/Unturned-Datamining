@@ -7,7 +7,7 @@ Selling 7
 Selling_0_Type Vehicle
 Selling_0_ID 500a4bf5048648a6b1bad8c78874fe13
 Selling_0_Spawnpoint Liberator_Jet
-Selling_0_Cost 13000
+Selling_0_Cost 16000
 
 // Annushka
 Selling_1_Type Vehicle
@@ -27,7 +27,7 @@ Selling_2_PaintColor #475e83
 Selling_3_Type Vehicle
 Selling_3_ID 0999953ab4b846f0990b7a4ae3a51d9e
 Selling_3_Spawnpoint Liberator_Jet
-Selling_3_Cost 13000
+Selling_3_Cost 16000
 Selling_3_PaintColor #475e83
 
 // Hummingbird

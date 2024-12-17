@@ -34,6 +34,11 @@ public class SkinAsset : Asset
 
     public Quaternion statTrackerRotation;
 
+    /// <summary>
+    /// Used by melee skins to override impact sound.
+    /// </summary>
+    internal AudioReference specialAudioOverride;
+
     public bool isPattern => _isPattern;
 
     public bool hasSight => _hasSight;
@@ -121,6 +126,7 @@ public class SkinAsset : Asset
         _hasBarrel = data.ContainsKey("Barrel");
         _hasMagazine = data.ContainsKey("Magazine");
         ragdollEffect = data.ParseEnum("Ragdoll_Effect", ERagdollEffect.NONE);
+        specialAudioOverride = data.ReadAudioReference("SpecialAudioOverrideDef", bundle);
         if (Dedicator.IsDedicatedServer)
         {
             return;

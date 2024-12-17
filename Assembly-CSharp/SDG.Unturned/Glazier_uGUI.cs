@@ -70,6 +70,8 @@ internal class Glazier_uGUI : GlazierBase, IGlazier
 
     public bool SupportsAutomaticLayout => true;
 
+    public bool SupportsTilingSprite => true;
+
     public SleekWindow Root
     {
         get

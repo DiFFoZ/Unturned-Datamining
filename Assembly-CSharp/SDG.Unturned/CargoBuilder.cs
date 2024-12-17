@@ -8,7 +8,7 @@ internal class CargoBuilder
     internal Dictionary<string, List<CargoDeclaration>> declarations = new Dictionary<string, List<CargoDeclaration>>();
 
     /// <summary>
-    /// Finds an existing "{{CargoDeclare/name" (if any), otherwise adds a new one.
+    /// Finds an existing "{{Cargo/name" (if any), otherwise adds a new one.
     /// </summary>
     public CargoDeclaration GetOrAddDeclaration(string name)
     {
@@ -22,7 +22,7 @@ internal class CargoBuilder
     }
 
     /// <summary>
-    /// Adds a new "{{CargoDeclare/name" even if one already exists.
+    /// Adds a new "{{Cargo/name" even if one already exists.
     /// </summary>
     public CargoDeclaration AddDeclaration(string name)
     {

@@ -575,6 +575,7 @@
 - [EWheelSteeringMode.cs](EWheelSteeringMode.cs)
 - [EWorkshop.cs](EWorkshop.cs)
 - [EWorkshopDownloadRestrictionResult.cs](EWorkshopDownloadRestrictionResult.cs)
+- [EWorkshopMenuSubmissionMode.cs](EWorkshopMenuSubmissionMode.cs)
 - [ExperienceUpdated.cs](ExperienceUpdated.cs)
 - [ExplosionDamageCandidate.cs](ExplosionDamageCandidate.cs)
 - [ExplosionDamageParameters.cs](ExplosionDamageParameters.cs)

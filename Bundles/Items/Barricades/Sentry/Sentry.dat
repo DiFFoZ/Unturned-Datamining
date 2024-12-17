@@ -20,6 +20,9 @@ Display
 Locked
 Mode Neutral
 
+AmmoConsumptionProbability 0.25
+QualityConsumptionProbability 0.25
+
 Explosion 36
 
 Blueprints 1

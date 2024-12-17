@@ -1,0 +1,9 @@
+GUID 5dd00afab3c14a34923fb12182f349d2
+Type Backpack
+
+Pro
+
+// Nelson 2024-12-12: Although apparently it's less of an issue nowadays, ideally we wouldn't have any non-power-of-two
+// textures in the game. I'd already requested an update on this outfit from the creator but missed it, so I feel bad
+// to ask them to significantly adjust the textures and meshes, and it's such a cool outfit!
+Ignore_NPOT

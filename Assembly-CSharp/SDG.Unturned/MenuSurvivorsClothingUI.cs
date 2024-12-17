@@ -913,7 +913,6 @@ public class MenuSurvivorsClothingUI
             new EconCraftOption("Craft_Stat_Tracker_Player_Kills", 19002, 30),
             new EconCraftOption("Craft_Ragdoll_Effect_Zero_Kelvin", 19003, 50),
             new EconCraftOption("Craft_Ragdoll_Effect_Jaded", 19013, 50),
-            new EconCraftOption("Craft_Mythical_Skin", 19043, 1000),
             new EconCraftOption("Craft_Stat_Tracker_Removal_Tool", 19004, 15),
             new EconCraftOption("Craft_Ragdoll_Effect_Removal_Tool", 19005, 15)
         };
@@ -922,16 +921,19 @@ public class MenuSurvivorsClothingUI
             econCraftOptions.Add(new EconCraftOption("Craft_ProgressPridePin", 1333, 5));
             econCraftOptions.Add(new EconCraftOption("Craft_ProgressPrideJersey", 1334, 5));
         }
-        if (LiveConfig.Get().isCandyBagAvailable && LiveConfig.Get().candyBagRequiredCraftingMaterials > 0)
+        LiveConfigItemCraftingRecipe[] recipes = LiveConfig.Get().itemCrafting.recipes;
+        for (int j = 0; j < recipes.Length; j++)
         {
-            econCraftOptions.Add(new EconCraftOption("Craft_CandyBag", 21071, (ushort)LiveConfig.Get().candyBagRequiredCraftingMaterials));
+            LiveConfigItemCraftingRecipe liveConfigItemCraftingRecipe = recipes[j];
+            string newToken = ((liveConfigItemCraftingRecipe.targetItemDefId == 19043) ? "Craft_Mythical_Skin" : $"Craft_{liveConfigItemCraftingRecipe.targetItemDefId}");
+            econCraftOptions.Add(new EconCraftOption(newToken, liveConfigItemCraftingRecipe.targetItemDefId, (ushort)liveConfigItemCraftingRecipe.craftingMaterialsRequired));
         }
         craftingButtons = new ISleekButton[econCraftOptions.Count];
-        for (int j = 0; j < craftingButtons.Length; j++)
+        for (int k = 0; k < craftingButtons.Length; k++)
         {
-            EconCraftOption econCraftOption = econCraftOptions[j];
+            EconCraftOption econCraftOption = econCraftOptions[k];
             ISleekButton sleekButton = Glazier.Get().CreateButton();
-            sleekButton.PositionOffset_Y = j * 30;
+            sleekButton.PositionOffset_Y = k * 30;
             sleekButton.SizeScale_X = 1f;
             sleekButton.SizeOffset_Y = 30f;
             sleekButton.AllowRichText = true;
@@ -940,7 +942,7 @@ public class MenuSurvivorsClothingUI
             sleekButton.Text = ItemTool.filterRarityRichText(localization.format("Craft_Entry", localization.format(econCraftOption.token), econCraftOption.scrapsNeeded));
             sleekButton.OnClicked += onClickedCraftButton;
             craftingScrollBox.AddChild(sleekButton);
-            craftingButtons[j] = sleekButton;
+            craftingButtons[k] = sleekButton;
         }
         craftingScrollBox.ScaleContentToWidth = true;
         craftingScrollBox.ContentSizeOffset = new Vector2(0f, econCraftOptions.Count * 30);

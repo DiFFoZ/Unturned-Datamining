@@ -1344,6 +1344,37 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
         return checkEnter(steamID, groupID);
     }
 
+    /// <summary>
+    /// If true, sentry ignores this vehicle early in target scanning.
+    /// Friendly if locked by owner/group of sentry, or driven by owner/group of sentry.
+    /// </summary>
+    public bool IsFriendlyToSentry(InteractableSentry sentry)
+    {
+        if (checkEnter(sentry.owner, sentry.group))
+        {
+            return true;
+        }
+        Player driverPlayer = GetDriverPlayer();
+        if (driverPlayer != null)
+        {
+            if (!(driverPlayer.channel.owner.playerID.steamID == sentry.owner))
+            {
+                return driverPlayer.quests.isMemberOfGroup(sentry.group);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public Vector3 GetSentryTargetingPoint()
+    {
+        if (!(center != null))
+        {
+            return base.transform.position;
+        }
+        return center.position;
+    }
+
     public override bool checkUseable()
     {
         if (Player.player == null || (base.transform.position - Player.player.transform.position).sqrMagnitude > 100f)
@@ -1958,6 +1989,20 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
             return passengers[0].player.playerID.steamID == steamID;
         }
         return false;
+    }
+
+    public SteamPlayer GetDriverClient()
+    {
+        if (passengers != null && passengers.Length != 0)
+        {
+            return passengers[0].player;
+        }
+        return null;
+    }
+
+    public Player GetDriverPlayer()
+    {
+        return GetDriverClient()?.player;
     }
 
     public void grantTrunkAccess(Player player)

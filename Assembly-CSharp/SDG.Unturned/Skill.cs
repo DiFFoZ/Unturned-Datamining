@@ -56,6 +56,19 @@ public class Skill
         return Mathf.Min(max, maxUnlockableLevel);
     }
 
+    public float NormalizeLevel(int inputLevel)
+    {
+        if (inputLevel <= 0)
+        {
+            return 0f;
+        }
+        if (inputLevel >= max)
+        {
+            return 1f;
+        }
+        return (float)inputLevel / (float)(int)max;
+    }
+
     public void setLevelToMax()
     {
         level = max;

@@ -57,13 +57,13 @@ public class MenuWorkshopSubmitUI
 
     private static List<ISleekButton> publishedButtons;
 
-    private static string tag => (ESteamUGCType)typeState.state switch
+    private static string ExtraTag => (EWorkshopMenuSubmissionMode)typeState.state switch
     {
-        ESteamUGCType.MAP => mapTypeState.states[mapTypeState.state].text, 
-        ESteamUGCType.ITEM => itemTypeState.states[itemTypeState.state].text, 
-        ESteamUGCType.VEHICLE => vehicleTypeState.states[vehicleTypeState.state].text, 
-        ESteamUGCType.SKIN => skinTypeState.states[skinTypeState.state].text, 
-        ESteamUGCType.OBJECT => objectTypeState.states[objectTypeState.state].text, 
+        EWorkshopMenuSubmissionMode.Map => mapTypeState.states[mapTypeState.state].text, 
+        EWorkshopMenuSubmissionMode.Item => itemTypeState.states[itemTypeState.state].text, 
+        EWorkshopMenuSubmissionMode.Vehicle => vehicleTypeState.states[vehicleTypeState.state].text, 
+        EWorkshopMenuSubmissionMode.Skin => skinTypeState.states[skinTypeState.state].text, 
+        EWorkshopMenuSubmissionMode.Object => objectTypeState.states[objectTypeState.state].text, 
         _ => "", 
     };
 
@@ -103,7 +103,7 @@ public class MenuWorkshopSubmitUI
         }
         else
         {
-            switch ((ESteamUGCType)typeState.state)
+            switch (ConvertSubmissionTypeToUgcType())
             {
             case ESteamUGCType.MAP:
                 if (!WorkshopTool.checkMapValid(text, usePath: false))
@@ -180,7 +180,7 @@ public class MenuWorkshopSubmitUI
     {
         if (checkEntered() && checkValid())
         {
-            Provider.provider.workshopService.prepareUGC(nameField.Text, descriptionField.Text, pathField.Text, previewField.Text, changeField.Text, (ESteamUGCType)typeState.state, tag, allowedIPsField.Text, (ESteamUGCVisibility)visibilityState.state);
+            Provider.provider.workshopService.prepareUGC(nameField.Text, descriptionField.Text, pathField.Text, previewField.Text, changeField.Text, ConvertSubmissionTypeToUgcType(), GetSubmissionTags(), allowedIPsField.Text, (ESteamUGCVisibility)visibilityState.state);
             Provider.provider.workshopService.createUGC(forState.state == 1);
             resetFields();
         }
@@ -203,7 +203,7 @@ public class MenuWorkshopSubmitUI
         int index = Mathf.FloorToInt(button.PositionOffset_Y / 40f);
         if (checkValid())
         {
-            Provider.provider.workshopService.prepareUGC(nameField.Text, descriptionField.Text, pathField.Text, previewField.Text, changeField.Text, (ESteamUGCType)typeState.state, tag, allowedIPsField.Text, (ESteamUGCVisibility)visibilityState.state);
+            Provider.provider.workshopService.prepareUGC(nameField.Text, descriptionField.Text, pathField.Text, previewField.Text, changeField.Text, ConvertSubmissionTypeToUgcType(), GetSubmissionTags(), allowedIPsField.Text, (ESteamUGCVisibility)visibilityState.state);
             Provider.provider.workshopService.prepareUGC(Provider.provider.workshopService.published[index].id);
             Provider.provider.workshopService.updateUGC();
             resetFields();
@@ -255,22 +255,22 @@ public class MenuWorkshopSubmitUI
             MenuUI.alert(localization.format("Alert_Path"));
             return false;
         }
-        ESteamUGCType state = (ESteamUGCType)typeState.state;
+        ESteamUGCType eSteamUGCType = ConvertSubmissionTypeToUgcType();
         if (forState.state == 1)
         {
-            if (state != ESteamUGCType.ITEM && state != ESteamUGCType.SKIN)
+            if (eSteamUGCType != ESteamUGCType.ITEM && eSteamUGCType != ESteamUGCType.SKIN)
             {
                 MenuUI.alert(localization.format("Alert_Curated"));
                 return false;
             }
         }
-        else if (state == ESteamUGCType.SKIN)
+        else if (eSteamUGCType == ESteamUGCType.SKIN)
         {
             MenuUI.alert(localization.format("Alert_Curated"));
             return false;
         }
         bool flag = false;
-        switch (state)
+        switch (eSteamUGCType)
         {
         case ESteamUGCType.MAP:
             flag = WorkshopTool.checkMapValid(pathField.Text, usePath: false);
@@ -314,12 +314,61 @@ public class MenuWorkshopSubmitUI
 
     private static void onSwappedTypeState(SleekButtonState button, int state)
     {
-        mapTypeState.IsVisible = state == 0;
-        itemTypeState.IsVisible = state == 3;
-        vehicleTypeState.IsVisible = state == 4;
-        skinTypeState.IsVisible = state == 5;
-        objectTypeState.IsVisible = state == 2;
+        EWorkshopMenuSubmissionMode state2 = (EWorkshopMenuSubmissionMode)typeState.state;
+        mapTypeState.IsVisible = state2 == EWorkshopMenuSubmissionMode.Map;
+        itemTypeState.IsVisible = state2 == EWorkshopMenuSubmissionMode.Item;
+        vehicleTypeState.IsVisible = state2 == EWorkshopMenuSubmissionMode.Vehicle;
+        skinTypeState.IsVisible = state2 == EWorkshopMenuSubmissionMode.Skin;
+        objectTypeState.IsVisible = state2 == EWorkshopMenuSubmissionMode.Object;
         refreshPathFieldNotification();
+    }
+
+    private static ESteamUGCType ConvertSubmissionTypeToUgcType()
+    {
+        return (EWorkshopMenuSubmissionMode)typeState.state switch
+        {
+            EWorkshopMenuSubmissionMode.Map => ESteamUGCType.MAP, 
+            EWorkshopMenuSubmissionMode.Localization => ESteamUGCType.LOCALIZATION, 
+            EWorkshopMenuSubmissionMode.Item => ESteamUGCType.ITEM, 
+            EWorkshopMenuSubmissionMode.Vehicle => ESteamUGCType.VEHICLE, 
+            EWorkshopMenuSubmissionMode.Skin => ESteamUGCType.SKIN, 
+            _ => ESteamUGCType.OBJECT, 
+        };
+    }
+
+    private static List<string> GetSubmissionTags()
+    {
+        List<string> list = new List<string>();
+        switch ((EWorkshopMenuSubmissionMode)typeState.state)
+        {
+        case EWorkshopMenuSubmissionMode.Map:
+            list.Add("Map");
+            break;
+        case EWorkshopMenuSubmissionMode.Localization:
+            list.Add("Localization");
+            break;
+        case EWorkshopMenuSubmissionMode.Object:
+            list.Add("Object");
+            break;
+        case EWorkshopMenuSubmissionMode.Item:
+            list.Add("Item");
+            break;
+        case EWorkshopMenuSubmissionMode.Vehicle:
+            list.Add("Vehicle");
+            break;
+        case EWorkshopMenuSubmissionMode.Skin:
+            list.Add("Skin");
+            break;
+        case EWorkshopMenuSubmissionMode.ServerCuration:
+            list.Add("Server Curation");
+            break;
+        }
+        string extraTag = ExtraTag;
+        if (!string.IsNullOrEmpty(extraTag))
+        {
+            list.Add(extraTag);
+        }
+        return list;
     }
 
     private static void onClickedBackButton(ISleekElement button)
@@ -422,7 +471,7 @@ public class MenuWorkshopSubmitUI
         changeField.MaxLength = 128;
         changeField.AddLabel(localization.format("Change_Field_Label"), ESleekSide.RIGHT);
         container.AddChild(changeField);
-        typeState = new SleekButtonState(new GUIContent(localization.format("Map")), new GUIContent(localization.format("Localization")), new GUIContent(localization.format("Object")), new GUIContent(localization.format("Item")), new GUIContent(localization.format("Vehicle")), new GUIContent(localization.format("Skin")));
+        typeState = new SleekButtonState(new GUIContent(localization.format("Map")), new GUIContent(localization.format("Localization")), new GUIContent(localization.format("Object")), new GUIContent(localization.format("Item")), new GUIContent(localization.format("Vehicle")), new GUIContent(localization.format("Skin")), new GUIContent(localization.format("ServerCuration")));
         typeState.PositionOffset_X = -200f;
         typeState.PositionOffset_Y = 300f;
         typeState.PositionScale_X = 0.5f;

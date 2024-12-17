@@ -83,6 +83,7 @@ public class CosmeticPreviewCapture : MonoBehaviour
             string filePath200 = Path.Combine(dirPath200, item.GUID.ToString("N") + ".png");
             if (!File.Exists(text) || !File.Exists(filePath201) || !File.Exists(filePath200))
             {
+                UnturnedLog.info($"Capture cosmetic {item.FriendlyName} ({item.GUID:N})");
                 ResetOutfit();
                 ApplyItemToOutfit(item);
                 clothes.apply();

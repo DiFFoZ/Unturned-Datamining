@@ -8,15 +8,13 @@ public class LiveConfigData
 
     public ItemStoreLiveConfig itemStore = new ItemStoreLiveConfig();
 
+    public ItemCraftingLiveConfigRecipe itemCrafting = new ItemCraftingLiveConfigRecipe();
+
     public LinkFilteringLiveConfig linkFiltering = new LinkFilteringLiveConfig();
 
     public bool shouldAllowJoiningInternetServersWithoutGslt;
 
     public bool shouldServersWithoutMonetizationTagBeVisibleInInternetServerList;
-
-    public bool isCandyBagAvailable;
-
-    public int candyBagRequiredCraftingMaterials;
 
     public int playtimeGeneratorItemDefId;
 
@@ -38,14 +36,16 @@ public class LiveConfigData
         {
             itemStore.Parse(node3);
         }
-        if (data.TryGetDictionary("LinkFiltering", out var node4))
+        if (data.TryGetDictionary("ItemCrafting", out var node4))
         {
-            linkFiltering.Parse(node4);
+            itemCrafting.Parse(node4);
+        }
+        if (data.TryGetDictionary("LinkFiltering", out var node5))
+        {
+            linkFiltering.Parse(node5);
         }
         shouldAllowJoiningInternetServersWithoutGslt = data.ParseBool("ShouldAllowJoiningInternetServersWithoutGslt");
         shouldServersWithoutMonetizationTagBeVisibleInInternetServerList = data.ParseBool("ShouldServersWithoutMonetizationTagBeVisibleInInternetServerList");
-        isCandyBagAvailable = data.ParseBool("IsCandyBagAvailable");
-        candyBagRequiredCraftingMaterials = data.ParseInt32("CandyBagRequiredCraftingMaterials");
         playtimeGeneratorItemDefId = data.ParseInt32("PlaytimeGeneratorItemDefId");
         queryPingWarningOffsetMs = data.ParseInt32("QueryPingWarningOffsetMs", 200);
         craftingPromotionId = data.ParseInt64("CraftingPromotionId", -1L);

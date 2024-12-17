@@ -65,6 +65,8 @@ internal class Glazier_UIToolkit : GlazierBase, IGlazier
 
     public bool SupportsAutomaticLayout => true;
 
+    public bool SupportsTilingSprite => false;
+
     public SleekWindow Root
     {
         get

@@ -15,6 +15,7 @@ Magazine 6
 
 Hook_Sight
 Hook_Tactical
+Hook_Grip
 Hook_Barrel
 
 Ammo_Min 10
@@ -60,9 +61,9 @@ Spread_Aim 0.05
 Spread_Angle_Degrees 5.71
 
 Recoil_Min_X -0.5
-Recoil_Min_Y 3
+Recoil_Min_Y 4
 Recoil_Max_X 0.5
-Recoil_Max_Y 4
+Recoil_Max_Y 5
 
 Recover_X 0.6
 Recover_Y 0.6

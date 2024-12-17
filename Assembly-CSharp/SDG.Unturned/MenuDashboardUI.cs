@@ -330,7 +330,7 @@ public class MenuDashboardUI
                 sleekBox.UseManualLayout = false;
                 sleekBox.UseChildAutoLayout = ESleekChildLayout.Vertical;
                 sleekBox.ChildAutoLayoutPadding = 5f;
-                if (newsItem.Title.StartsWith("Community Blog"))
+                if (newsItem.Title.StartsWith("Community Blog") && Glazier.Get().SupportsTilingSprite)
                 {
                     ISleekSprite sleekSprite = Glazier.Get().CreateSprite(icons.load<Sprite>("CommunityBlogBackground"));
                     sleekSprite.IgnoreLayout = true;

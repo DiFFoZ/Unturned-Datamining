@@ -1,0 +1,33 @@
+GUID 59c77d90ba614f6b9e96c272a5d95ad8
+Type Box
+
+Size_X 1
+Size_Y 1
+
+Generate 21078
+
+Probability_Model Equalized
+Contains_Bonus_Items True
+
+Drops 19
+Drop_0 -1
+Drop_1 "103701" // CC24_Lotus_Hair
+Drop_2 "103901" // CC24_BlackApron
+Drop_3 "104101" // CC24_FlannelShirt
+Drop_4 "104301" // CC24_RotationAxis
+Drop_5 "104501" // CC24_DeerHorns
+Drop_6 "104701" // CC24_VintageBikerHelmet
+Drop_7 "106101" // Desert_Falcon_CC24_Kitty
+Drop_8 "106301" // Viper_CC24_DevTex
+Drop_9 "107501" // CC24_MetalFace
+Drop_10 "106501" // Determinator_CC24_Deco
+Drop_11 "105101" // CC24_OnOffSwitch
+Drop_12 "106701" // CC24_SantaBag
+Drop_13 "105301" // CC24_Scorpion
+Drop_14 "105501" // CC24_StrawberrySweater
+Drop_15 "105701" // CC24_CheeseScarf
+Drop_16 "105901" // CC24_Padlock
+Drop_17 "106901" // Fury_CC24_Powertool
+Drop_18 "107101" // Shadowstalker_CC24_Yellowcake
+
+Pro

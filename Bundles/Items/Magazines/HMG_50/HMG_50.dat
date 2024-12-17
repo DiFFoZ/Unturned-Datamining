@@ -17,23 +17,27 @@ Caliber_0 37
 Tracer 55
 
 Range 5
-Player_Damage 20
-Zombie_Damage 40
-Animal_Damage 40
-Barricade_Damage 20
-Structure_Damage 20
-Vehicle_Damage 20
-Resource_Damage 50
-Object_Damage 20
+Player_Damage 30
+Zombie_Damage 50
+Animal_Damage 50
+Barricade_Damage 30
+Structure_Damage 30
+Vehicle_Damage 40
+Resource_Damage 60
+Object_Damage 40
 Explosion 53
 Explosive
 
-Blueprints 2
+Blueprints 3
 Blueprint_0_Type Ammo
 Blueprint_0_Supplies 1
-Blueprint_0_Supply_0_ID 43
+Blueprint_0_Supply_0_ID 1193
 Blueprint_0_Build 30
 Blueprint_1_Type Ammo
 Blueprint_1_Supplies 1
 Blueprint_1_Supply_0_ID 1395
 Blueprint_1_Build 30
+Blueprint_2_Type Ammo
+Blueprint_2_Supplies 1
+Blueprint_2_Supply_0_ID 1192
+Blueprint_2_Build 30

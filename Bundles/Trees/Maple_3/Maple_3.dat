@@ -1,0 +1,25 @@
+GUID 011d1369cd56497488827b44509b0b4b
+Type Resource
+ID 64
+
+Health 1000
+Radius 5
+RandomUniformScale_Min 1
+RandomUniformScale_Max 1.55
+
+Explosion 170
+Reward_ID 516
+Reward_XP 5
+Reward_Min 6
+Reward_Max 9
+
+Reset 600
+
+Auto_Skybox
+
+Debris_Vertical_Offset 0
+Ignore_Collision_Between_Stump_And_Debris false
+
+Christmas_Redirect ba311a4ddbe34121acd6899fd424813b
+
+Has_Clip_Prefab false

@@ -140,9 +140,14 @@ public class UseableMelee : Useable
         DamageTool.PlayMeleeImpactAudio(position, materialName);
         if (equippedMeleeAsset != null)
         {
+            AudioReference audioReference = base.player.equipment.GetUseableSpecialAudioOverride();
+            if (audioReference.IsNullOrEmpty)
+            {
+                audioReference = equippedMeleeAsset.impactAudio;
+            }
             float volumeMultiplier;
             float pitchMultiplier;
-            AudioClip audioClip = equippedMeleeAsset.impactAudio.LoadAudioClip(out volumeMultiplier, out pitchMultiplier);
+            AudioClip audioClip = audioReference.LoadAudioClip(out volumeMultiplier, out pitchMultiplier);
             if (!(audioClip == null))
             {
                 OneShotAudioParameters oneShotAudioParameters = new OneShotAudioParameters(position, audioClip);

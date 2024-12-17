@@ -262,7 +262,7 @@ public abstract class Asset : IAssetErrorContext
         T val = fromBundle.load<T>(name);
         if (val == null)
         {
-            Assets.ReportError(this, "missing '{0}' {1}", name, typeof(T).Name);
+            Assets.ReportError(this, "missing \"" + name + "\" " + typeof(T).Name + " (expected at " + fromBundle.WhereLoadLookedToString(name) + ")");
         }
         else if (typeof(T) == typeof(GameObject))
         {

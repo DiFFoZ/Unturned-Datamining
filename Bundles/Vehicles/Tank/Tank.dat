@@ -21,7 +21,7 @@ Health 1250
 
 Exit 4
 
-Cam_Follow_Distance 7.5
+Cam_Follow_Distance 8.5
 Cam_Driver_Offset -0.0625
 Bumper_Multiplier 2
 Passenger_Explosion_Armor 0.2
@@ -81,10 +81,6 @@ ExplosionBurnMaterialSections
 [
     {
         Path Model_0
-        MaterialIndex 0
-    }
-    {
-        Path Model_1
         MaterialIndex 0
     }
     {

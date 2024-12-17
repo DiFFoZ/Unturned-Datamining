@@ -19,13 +19,13 @@ Range 250
 Firerate 7
 Action Trigger
 
-Player_Damage 50
+Player_Damage 35
 Player_Leg_Multiplier 0.6
 Player_Arm_Multiplier 0.6
 Player_Spine_Multiplier 0.8
 Player_Skull_Multiplier 1.1
 
-Zombie_Damage 99
+Zombie_Damage 50
 Zombie_Leg_Multiplier 0.3
 Zombie_Arm_Multiplier 0.3
 Zombie_Spine_Multiplier 0.6
@@ -36,11 +36,11 @@ Animal_Leg_Multiplier 0.6
 Animal_Spine_Multiplier 0.8
 Animal_Skull_Multiplier 1.1
 
-Barricade_Damage 25
-Structure_Damage 25
-Vehicle_Damage 40
-Resource_Damage 50
-Object_Damage 50
+Barricade_Damage 5
+Structure_Damage 5
+Vehicle_Damage 10
+Resource_Damage 20
+Object_Damage 20
 
 Invulnerable
 

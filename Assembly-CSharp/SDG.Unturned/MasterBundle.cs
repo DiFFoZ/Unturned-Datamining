@@ -83,6 +83,15 @@ public class MasterBundle : Bundle
         return null;
     }
 
+    public override string WhereLoadLookedToString(string name)
+    {
+        if (cfg.assetBundle == null)
+        {
+            return name + " in null asset bundle";
+        }
+        return cfg.formatAssetPath(relativePath + "/" + name) + " in " + cfg.assetBundleName;
+    }
+
     public MasterBundle(MasterBundleConfig cfg, string relativePath, string name)
         : base(name)
     {

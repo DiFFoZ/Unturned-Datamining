@@ -30,21 +30,27 @@ public static class CollisionUtil
         return false;
     }
 
+    public static Vector3 ClosestPoint(GameObject gameObject, Vector3 position, bool includeInactive)
+    {
+        return ClosestPoint(gameObject, position, includeInactive, -1);
+    }
+
     /// <summary>
     /// Find colliders in gameObject and the point closest to position, otherwise use gameObject position.
     /// </summary>
-    public static Vector3 ClosestPoint(GameObject gameObject, Vector3 position, bool includeInactive)
+    /// <param name="layerMask">Collider is only included if its layer is enabled in layer mask.</param>
+    public static Vector3 ClosestPoint(GameObject gameObject, Vector3 position, bool includeInactive, int layerMask)
     {
         getBoundsWorkingList.Clear();
         gameObject.GetComponentsInChildren(includeInactive, getBoundsWorkingList);
-        if (getBoundsWorkingList.Count > 0 && ClosestPoint(getBoundsWorkingList, position, out var result))
+        if (getBoundsWorkingList.Count > 0 && ClosestPoint(getBoundsWorkingList, position, layerMask, out var result))
         {
             return result;
         }
         return gameObject.transform.position;
     }
 
-    public static bool ClosestPoint(List<Collider> colliders, Vector3 position, out Vector3 result)
+    public static bool ClosestPoint(List<Collider> colliders, Vector3 position, int layerMask, out Vector3 result)
     {
         bool flag = false;
         result = default(Vector3);
@@ -63,6 +69,11 @@ public static class CollisionUtil
                 }
             }
             else if (!(collider is BoxCollider) && !(collider is SphereCollider) && !(collider is CapsuleCollider))
+            {
+                continue;
+            }
+            int num2 = 1 << collider.gameObject.layer;
+            if ((layerMask & num2) == 0)
             {
                 continue;
             }
@@ -86,13 +97,23 @@ public static class CollisionUtil
         return flag;
     }
 
-    public static Vector3 ClosestPoint(List<Collider> colliders, Vector3 position)
+    public static bool ClosestPoint(List<Collider> colliders, Vector3 position, out Vector3 result)
     {
-        if (ClosestPoint(colliders, position, out var result))
+        return ClosestPoint(colliders, position, -1, out result);
+    }
+
+    public static Vector3 ClosestPoint(List<Collider> colliders, Vector3 position, int layerMask)
+    {
+        if (ClosestPoint(colliders, position, layerMask, out var result))
         {
             return result;
         }
         return position;
+    }
+
+    public static Vector3 ClosestPoint(List<Collider> colliders, Vector3 position)
+    {
+        return ClosestPoint(colliders, position, -1);
     }
 
     public static int OverlapBoxColliderNonAlloc(BoxCollider collider, Collider[] results, int mask, QueryTriggerInteraction queryTriggerInteraction)

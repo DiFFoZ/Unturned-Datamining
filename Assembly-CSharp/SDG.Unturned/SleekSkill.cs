@@ -88,7 +88,7 @@ public class SleekSkill : SleekWrapper
             sleekLabel3.SizeScale_X = 0.5f;
             sleekLabel3.SizeScale_Y = 0.5f;
             sleekLabel3.TextAlignment = TextAnchor.MiddleCenter;
-            sleekLabel3.Text = PlayerDashboardSkillsUI.localization.format("Bonus_Current", PlayerDashboardSkillsUI.localization.format("Speciality_" + speciality + "_Skill_" + index + "_Level_" + skill.level));
+            sleekLabel3.Text = PlayerDashboardSkillsUI.localization.format("Bonus_Current", FormatLevelString(speciality, index, skill.level));
             AddChild(sleekLabel3);
         }
         if (skill.level < skill.GetClampedMaxUnlockableLevel())
@@ -103,7 +103,7 @@ public class SleekSkill : SleekWrapper
             sleekLabel4.SizeScale_X = 0.5f;
             sleekLabel4.SizeScale_Y = 0.5f;
             sleekLabel4.TextAlignment = TextAnchor.MiddleCenter;
-            sleekLabel4.Text = PlayerDashboardSkillsUI.localization.format("Bonus_Next", PlayerDashboardSkillsUI.localization.format("Speciality_" + speciality + "_Skill_" + index + "_Level_" + (skill.level + 1)));
+            sleekLabel4.Text = PlayerDashboardSkillsUI.localization.format("Bonus_Next", FormatLevelString(speciality, index, skill.level + 1));
             AddChild(sleekLabel4);
         }
         ISleekLabel sleekLabel5 = Glazier.Get().CreateLabel();
@@ -124,6 +124,17 @@ public class SleekSkill : SleekWrapper
             sleekLabel5.Text = PlayerDashboardSkillsUI.localization.format("Full");
         }
         AddChild(sleekLabel5);
+    }
+
+    private string FormatLevelString(byte speciality, byte index, int level)
+    {
+        if (speciality == 0 && index == 1)
+        {
+            float num = 1f - Player.player.skills.GetSharpshooterRecoilMultiplierForLevel(level);
+            string text = $"{Mathf.RoundToInt(num * 100f)}%";
+            return PlayerDashboardSkillsUI.localization.format("Speciality_0_Skill_1_Levels_V2", text, text);
+        }
+        return PlayerDashboardSkillsUI.localization.format("Speciality_" + speciality + "_Skill_" + index + "_Level_" + level);
     }
 
     private void onClickedInternalButton(ISleekElement internalButton)

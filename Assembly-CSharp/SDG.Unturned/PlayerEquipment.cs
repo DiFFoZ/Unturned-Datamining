@@ -35,6 +35,11 @@ public class PlayerEquipment : PlayerCaller
 
     private ERagdollEffect skinRagdollEffect;
 
+    /// <summary>
+    /// Skin applied to the currently equipped useable.
+    /// </summary>
+    private SkinAsset useableSkin;
+
     private byte[] _state;
 
     private byte _quality;
@@ -419,6 +424,15 @@ public class PlayerEquipment : PlayerCaller
             return skinRagdollEffect;
         }
         return ERagdollEffect.NONE;
+    }
+
+    internal AudioReference GetUseableSpecialAudioOverride()
+    {
+        if (base.player.clothing.isMythic && useableSkin != null)
+        {
+            return useableSkin.specialAudioOverride;
+        }
+        return default(AudioReference);
     }
 
     /// <summary>
@@ -1182,6 +1196,7 @@ public class PlayerEquipment : PlayerCaller
         thirdEventComponent = null;
         characterEventComponent = null;
         skinRagdollEffect = ERagdollEffect.NONE;
+        useableSkin = null;
         if (firstModel != null)
         {
             UnityEngine.Object.Destroy(firstModel.gameObject);
@@ -1249,17 +1264,17 @@ public class PlayerEquipment : PlayerCaller
                 num = base.channel.owner.getParticleEffectForItemDef(value);
             }
         }
-        SkinAsset skinAsset = Assets.find(EAssetType.SKIN, id) as SkinAsset;
+        useableSkin = Assets.find(EAssetType.SKIN, id) as SkinAsset;
         skinRagdollEffect = ERagdollEffect.NONE;
-        if (!base.channel.owner.getRagdollEffect(asset.sharedSkinLookupID, out skinRagdollEffect) && skinAsset != null)
+        if (!base.channel.owner.getRagdollEffect(asset.sharedSkinLookupID, out skinRagdollEffect) && useableSkin != null)
         {
-            skinRagdollEffect = skinAsset.ragdollEffect;
+            skinRagdollEffect = useableSkin.ragdollEffect;
         }
         GameObject prefabOverride = ((asset.equipablePrefab != null) ? asset.equipablePrefab : asset.item);
         if (base.channel.IsLocalPlayer)
         {
             ClientAssetIntegrity.QueueRequest(_asset);
-            _firstModel = ItemTool.InstantiateItem(quality, state, viewmodel: true, asset, skinAsset, shouldDestroyColliders: true, tempFirstMesh, out tempFirstMaterial, getUseableStatTrackerValue, prefabOverride);
+            _firstModel = ItemTool.InstantiateItem(quality, state, viewmodel: true, asset, useableSkin, shouldDestroyColliders: true, tempFirstMesh, out tempFirstMaterial, getUseableStatTrackerValue, prefabOverride);
             fixStatTrackerHookScale(_firstModel);
             syncStatTrackTrackerVisibility(_firstModel);
             firstEventComponent = firstModel.GetComponent<UseableEventHook>();
@@ -1291,7 +1306,7 @@ public class PlayerEquipment : PlayerCaller
             {
                 firstMythic.IsMythicalEffectEnabled = base.player.clothing.isSkinned && base.player.clothing.isMythic;
             }
-            _characterModel = ItemTool.getItem(quality, state, viewmodel: false, asset, skinAsset, tempCharacterMesh, out tempCharacterMaterial, getUseableStatTrackerValue, prefabOverride);
+            _characterModel = ItemTool.getItem(quality, state, viewmodel: false, asset, useableSkin, tempCharacterMesh, out tempCharacterMaterial, getUseableStatTrackerValue, prefabOverride);
             fixStatTrackerHookScale(_characterModel);
             syncStatTrackTrackerVisibility(_characterModel);
             Transform parent2 = asset.EquipableModelParent switch
@@ -1323,7 +1338,7 @@ public class PlayerEquipment : PlayerCaller
                 characterMythic.IsMythicalEffectEnabled = base.player.clothing.isSkinned && base.player.clothing.isMythic;
             }
         }
-        _thirdModel = ItemTool.InstantiateItem(quality, state, viewmodel: false, asset, skinAsset, shouldDestroyColliders: true, tempThirdMesh, out tempThirdMaterial, getUseableStatTrackerValue, prefabOverride);
+        _thirdModel = ItemTool.InstantiateItem(quality, state, viewmodel: false, asset, useableSkin, shouldDestroyColliders: true, tempThirdMesh, out tempThirdMaterial, getUseableStatTrackerValue, prefabOverride);
         fixStatTrackerHookScale(_thirdModel);
         syncStatTrackTrackerVisibility(_thirdModel);
         thirdEventComponent = _thirdModel.GetComponent<UseableEventHook>();

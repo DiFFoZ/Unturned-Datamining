@@ -1,0 +1,11 @@
+GUID 14efc77071c74aadadbcb8392700ae9d
+Type Hat
+
+Beard
+
+Pro
+
+// Nelson 2024-12-12: Although apparently it's less of an issue nowadays, ideally we wouldn't have any non-power-of-two
+// textures in the game. I'd already requested an update on this outfit from the creator but missed it, so I feel bad
+// to ask them to significantly adjust the textures and meshes, and it's such a cool outfit!
+Ignore_NPOT

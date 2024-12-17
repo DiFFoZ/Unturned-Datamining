@@ -26,7 +26,7 @@ internal class TreeRefComponent : MonoBehaviour, IExplosionDamageable, IEquatabl
 
     public Vector3 GetClosestPointToExplosion(Vector3 explosionCenter)
     {
-        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false);
+        return CollisionUtil.ClosestPoint(base.gameObject, explosionCenter, includeInactive: false, -4194305);
     }
 
     public void ApplyExplosionDamage(in ExplosionParameters explosionParameters, ref ExplosionDamageParameters damageParameters)

@@ -28,6 +28,8 @@ internal class Glazier_IMGUI : GlazierBase, IGlazier
 
     public bool SupportsAutomaticLayout => false;
 
+    public bool SupportsTilingSprite => true;
+
     public SleekWindow Root
     {
         get

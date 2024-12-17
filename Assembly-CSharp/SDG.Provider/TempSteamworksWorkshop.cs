@@ -52,7 +52,7 @@ public class TempSteamworksWorkshop
 
     private ESteamUGCType ugcType;
 
-    private string ugcTag;
+    private List<string> ugcTags;
 
     private string ugcAllowedIPs;
 
@@ -740,13 +740,13 @@ public class TempSteamworksWorkshop
         }
     }
 
-    public void prepareUGC(string name, string description, string path, string preview, string change, ESteamUGCType type, string tag, string allowedIPs, ESteamUGCVisibility visibility)
+    public void prepareUGC(string name, string description, string path, string preview, string change, ESteamUGCType type, List<string> tags, string allowedIPs, ESteamUGCVisibility visibility)
     {
         bool verified = File.Exists(path + "/Skin.kvt");
-        prepareUGC(name, description, path, preview, change, type, tag, allowedIPs, visibility, verified);
+        prepareUGC(name, description, path, preview, change, type, tags, allowedIPs, visibility, verified);
     }
 
-    public void prepareUGC(string name, string description, string path, string preview, string change, ESteamUGCType type, string tag, string allowedIPs, ESteamUGCVisibility visibility, bool verified)
+    public void prepareUGC(string name, string description, string path, string preview, string change, ESteamUGCType type, List<string> tags, string allowedIPs, ESteamUGCVisibility visibility, bool verified)
     {
         ugcName = name;
         ugcDescription = description;
@@ -754,7 +754,7 @@ public class TempSteamworksWorkshop
         ugcPreview = preview;
         ugcChange = change;
         ugcType = type;
-        ugcTag = tag;
+        ugcTags = tags;
         ugcAllowedIPs = allowedIPs;
         ugcVisibility = visibility;
         ugcVerified = verified;
@@ -808,33 +808,15 @@ public class TempSteamworksWorkshop
             SteamUGC.SetItemPreview(uGCUpdateHandle_t, ugcPreview);
         }
         List<string> list = new List<string>();
-        if (ugcType == ESteamUGCType.MAP)
+        if (ugcTags != null)
         {
-            list.Add("Map");
-        }
-        else if (ugcType == ESteamUGCType.LOCALIZATION)
-        {
-            list.Add("Localization");
-        }
-        else if (ugcType == ESteamUGCType.OBJECT)
-        {
-            list.Add("Object");
-        }
-        else if (ugcType == ESteamUGCType.ITEM)
-        {
-            list.Add("Item");
-        }
-        else if (ugcType == ESteamUGCType.VEHICLE)
-        {
-            list.Add("Vehicle");
-        }
-        else if (ugcType == ESteamUGCType.SKIN)
-        {
-            list.Add("Skin");
-        }
-        if (ugcTag != null && ugcTag.Length > 0)
-        {
-            list.Add(ugcTag);
+            foreach (string ugcTag in ugcTags)
+            {
+                if (!string.IsNullOrWhiteSpace(ugcTag))
+                {
+                    list.Add(ugcTag);
+                }
+            }
         }
         if (ugcVerified)
         {

@@ -717,17 +717,23 @@ public class ItemAsset : Asset, ISkinableAsset
             _item = bundle.load<GameObject>("Item");
             if (item == null)
             {
-                throw new NotSupportedException("missing 'Item' GameObject");
+                if (!isPro || type == EItemType.SHIRT || type == EItemType.PANTS)
+                {
+                    throw new NotSupportedException("missing \"Item\" GameObject (expected at " + bundle.WhereLoadLookedToString("Item") + ")");
+                }
             }
-            if (item.transform.Find("Icon") != null && item.transform.Find("Icon").GetComponent<Camera>() != null)
+            else
             {
-                throw new NotSupportedException("'Icon' has a camera attached!");
+                if (item.transform.Find("Icon") != null && item.transform.Find("Icon").GetComponent<Camera>() != null)
+                {
+                    throw new NotSupportedException("'Icon' has a camera attached!");
+                }
+                if (id < 2000 && (type == EItemType.GUN || type == EItemType.MELEE) && item.transform.Find("Stat_Tracker") == null)
+                {
+                    Assets.ReportError(this, "missing 'Stat_Tracker' Transform");
+                }
+                AssetValidation.searchGameObjectForErrors(this, item);
             }
-            if (id < 2000 && (type == EItemType.GUN || type == EItemType.MELEE) && item.transform.Find("Stat_Tracker") == null)
-            {
-                Assets.ReportError(this, "missing 'Stat_Tracker' Transform");
-            }
-            AssetValidation.searchGameObjectForErrors(this, item);
         }
         byte b = data.ParseUInt8("Blueprints", 0);
         byte b2 = data.ParseUInt8("Actions", 0);

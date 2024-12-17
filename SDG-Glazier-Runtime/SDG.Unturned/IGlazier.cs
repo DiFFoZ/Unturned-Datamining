@@ -16,6 +16,8 @@ public interface IGlazier
 
     bool SupportsAutomaticLayout { get; }
 
+    bool SupportsTilingSprite { get; }
+
     ISleekBox CreateBox();
 
     ISleekButton CreateButton();
