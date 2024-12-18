@@ -921,12 +921,16 @@ public class MenuSurvivorsClothingUI
             econCraftOptions.Add(new EconCraftOption("Craft_ProgressPridePin", 1333, 5));
             econCraftOptions.Add(new EconCraftOption("Craft_ProgressPrideJersey", 1334, 5));
         }
-        LiveConfigItemCraftingRecipe[] recipes = LiveConfig.Get().itemCrafting.recipes;
-        for (int j = 0; j < recipes.Length; j++)
+        ItemCraftingLiveConfigRecipe itemCrafting = LiveConfig.Get().itemCrafting;
+        if (itemCrafting.recipes != null)
         {
-            LiveConfigItemCraftingRecipe liveConfigItemCraftingRecipe = recipes[j];
-            string newToken = ((liveConfigItemCraftingRecipe.targetItemDefId == 19043) ? "Craft_Mythical_Skin" : $"Craft_{liveConfigItemCraftingRecipe.targetItemDefId}");
-            econCraftOptions.Add(new EconCraftOption(newToken, liveConfigItemCraftingRecipe.targetItemDefId, (ushort)liveConfigItemCraftingRecipe.craftingMaterialsRequired));
+            LiveConfigItemCraftingRecipe[] recipes = itemCrafting.recipes;
+            for (int j = 0; j < recipes.Length; j++)
+            {
+                LiveConfigItemCraftingRecipe liveConfigItemCraftingRecipe = recipes[j];
+                string newToken = ((liveConfigItemCraftingRecipe.targetItemDefId == 19043) ? "Craft_Mythical_Skin" : $"Craft_{liveConfigItemCraftingRecipe.targetItemDefId}");
+                econCraftOptions.Add(new EconCraftOption(newToken, liveConfigItemCraftingRecipe.targetItemDefId, (ushort)liveConfigItemCraftingRecipe.craftingMaterialsRequired));
+            }
         }
         craftingButtons = new ISleekButton[econCraftOptions.Count];
         for (int k = 0; k < craftingButtons.Length; k++)
