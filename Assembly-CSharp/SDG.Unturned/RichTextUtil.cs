@@ -13,7 +13,11 @@ public static class RichTextUtil
     /// </summary>
     public static string replaceColorTags(string text)
     {
-        return richTextColorTagRegex.Replace(text, string.Empty);
+        if (!string.IsNullOrEmpty(text))
+        {
+            return richTextColorTagRegex.Replace(text, string.Empty);
+        }
+        return text;
     }
 
     /// <summary>

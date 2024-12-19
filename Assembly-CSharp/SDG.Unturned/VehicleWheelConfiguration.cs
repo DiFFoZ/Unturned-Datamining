@@ -41,25 +41,25 @@ internal class VehicleWheelConfiguration : IDatParseable
     /// If greater than zero, visual-only wheels (without a collider) like the extra wheels of the Snowmobile use
     /// this radius to calculate their rolling speed.
     /// </summary>
-    public float modelRadius;
+    public float modelRadius = -1f;
 
     /// <summary>
     /// If set, visual-only wheels without a collider (like the back wheels of the snowmobile) can copy RPM from
     /// a wheel that does have a collider. Requires modelRadius to also be set.
     /// </summary>
-    public int copyColliderRpmIndex;
+    public int copyColliderRpmIndex = -1;
 
     /// <summary>
     /// If set, wheel model uses this crawler track's speed (average RPM of wheels). Prevents wheel model from
     /// spinning out of sync with overall track.
     /// </summary>
-    public int copyCrawlerTrackSpeedIndex;
+    public int copyCrawlerTrackSpeedIndex = -1;
 
     /// <summary>
     /// Target steering angle is multiplied by this value. For example, can be set to a negative number for
     /// rear-wheel steering. Defaults to 1.
     /// </summary>
-    public float steeringAngleMultiplier;
+    public float steeringAngleMultiplier = 1f;
 
     /// <summary>
     /// Vertical offset of model from simulated suspension position.
@@ -70,7 +70,7 @@ internal class VehicleWheelConfiguration : IDatParseable
     /// How quickly to interpolate model toward suspension position in meters per second.
     /// If negative, position teleports immediately.
     /// </summary>
-    public float modelSuspensionSpeed;
+    public float modelSuspensionSpeed = -1f;
 
     /// <summary>
     /// Nelson 2024-12-06: Initially implemented as a minimum and maximum percentage of normalized forward velocity,
@@ -83,7 +83,7 @@ internal class VehicleWheelConfiguration : IDatParseable
     /// If true, wheel should fly off when vehicle explodes. Defaults to true.
     /// Used to simplify destroying vehicles with crawler tracks.
     /// </summary>
-    public bool canExplode;
+    public bool canExplode = true;
 
     public EWheelSteeringMode steeringMode;
 
