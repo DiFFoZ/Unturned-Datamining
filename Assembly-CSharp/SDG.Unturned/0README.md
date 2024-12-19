@@ -714,6 +714,7 @@
 - [HitmarkerInfo.cs](HitmarkerInfo.cs)
 - [HolidayUtil.cs](HolidayUtil.cs)
 - [HookInfo.cs](HookInfo.cs)
+- [HookVehicleRequestHandler.cs](HookVehicleRequestHandler.cs)
 - [HordePurchaseVolume.cs](HordePurchaseVolume.cs)
 - [HordePurchaseVolumeManager.cs](HordePurchaseVolumeManager.cs)
 - [HotkeyInfo.cs](HotkeyInfo.cs)

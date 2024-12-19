@@ -135,6 +135,12 @@ public class ItemBarricadeAsset : ItemPlaceableAsset
     public bool useWaterHeightTransparentSort { get; protected set; }
 
     /// <summary>
+    /// By default, vehicles with "hooks" (such as the Skycrane) cannot pick up vehicles with barricades attached.
+    /// If all barricades on the vehicle set this to true then the vehicle *can* be picked up. Defaults to false.
+    /// </summary>
+    public bool CanParentVehicleBePickedUp { get; protected set; }
+
+    /// <summary>
     /// Vehicle to place.
     /// Supports redirects by VehicleRedirectorAsset. If redirector's SpawnPaintColor is set, that color is used.
     /// </summary>
@@ -349,6 +355,7 @@ public class ItemBarricadeAsset : ItemPlaceableAsset
         _isSaveable = !data.ContainsKey("Unsaveable");
         allowCollisionWhileAnimating = data.ParseBool("Allow_Collision_While_Animating");
         useWaterHeightTransparentSort = data.ContainsKey("Use_Water_Height_Transparent_Sort");
+        CanParentVehicleBePickedUp = data.ParseBool("CanVehicleHookWhileAttached");
         if (data.ContainsKey("Armor_Tier"))
         {
             armorTier = (EArmorTier)Enum.Parse(typeof(EArmorTier), data.GetString("Armor_Tier"), ignoreCase: true);

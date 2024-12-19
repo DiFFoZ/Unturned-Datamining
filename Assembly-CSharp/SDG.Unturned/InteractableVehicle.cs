@@ -871,6 +871,8 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
 
     public static event Action<InteractableVehicle, int, Player> OnPassengerRemoved_Global;
 
+    public static event HookVehicleRequestHandler OnHookVehicleRequested_Global;
+
     public event System.Action OnIsDrownedChanged;
 
     /// <summary>
@@ -2776,20 +2778,49 @@ public class InteractableVehicle : Interactable, IExplosionDamageable, IEquatabl
         for (int i = 0; i < num; i++)
         {
             InteractableVehicle vehicle = DamageTool.getVehicle(tempCollidersArray[i].transform);
-            if (!(vehicle == null) && !(vehicle == this) && vehicle.isEmpty && !vehicle.isHooked && !vehicle.isExploded && vehicle.asset.engine != EEngine.TRAIN)
+            if (vehicle == null || vehicle == this || !vehicle.isEmpty || vehicle.isHooked || vehicle.isExploded || vehicle.asset.engine == EEngine.TRAIN)
             {
-                VehicleBarricadeRegion vehicleBarricadeRegion = BarricadeManager.findRegionFromVehicle(vehicle);
-                if (vehicleBarricadeRegion == null || vehicleBarricadeRegion.drops.Count <= 0)
+                continue;
+            }
+            bool shouldAllow = true;
+            VehicleBarricadeRegion vehicleBarricadeRegion = BarricadeManager.findRegionFromVehicle(vehicle);
+            if (vehicleBarricadeRegion != null)
+            {
+                bool flag = true;
+                foreach (BarricadeDrop drop in vehicleBarricadeRegion.drops)
                 {
-                    HookInfo hookInfo = new HookInfo();
-                    hookInfo.target = vehicle.transform;
-                    hookInfo.vehicle = vehicle;
-                    hookInfo.deltaPosition = hook.InverseTransformPoint(vehicle.transform.position);
-                    hookInfo.deltaRotation = Quaternion.FromToRotation(hook.forward, vehicle.transform.forward);
-                    hooked.Add(hookInfo);
-                    vehicle.isHooked = true;
-                    ignoreCollisionWithVehicle(vehicle, shouldIgnore: true);
+                    if (drop.asset != null && !drop.asset.CanParentVehicleBePickedUp)
+                    {
+                        flag = false;
+                        break;
+                    }
                 }
+                if (!flag)
+                {
+                    shouldAllow = false;
+                }
+            }
+            if (InteractableVehicle.OnHookVehicleRequested_Global != null)
+            {
+                try
+                {
+                    InteractableVehicle.OnHookVehicleRequested_Global(this, vehicle, ref shouldAllow);
+                }
+                catch (Exception e)
+                {
+                    UnturnedLog.exception(e, "Caught exception in OnHookVehicleRequested_Global:");
+                }
+            }
+            if (shouldAllow)
+            {
+                HookInfo hookInfo = new HookInfo();
+                hookInfo.target = vehicle.transform;
+                hookInfo.vehicle = vehicle;
+                hookInfo.deltaPosition = hook.InverseTransformPoint(vehicle.transform.position);
+                hookInfo.deltaRotation = Quaternion.FromToRotation(hook.forward, vehicle.transform.forward);
+                hooked.Add(hookInfo);
+                vehicle.isHooked = true;
+                ignoreCollisionWithVehicle(vehicle, shouldIgnore: true);
             }
         }
     }
