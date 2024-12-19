@@ -18,8 +18,17 @@ MainMenuWorkshop
 ItemStore
 {
 	PromotionId 5
+	NewItems
+	[
+		21073
+		1888
+		1894
+	]
 	FeaturedItems
 	[
+		21073
+		1888
+		1894
 		21065
 		21053
 		21061
@@ -35,9 +44,9 @@ ItemStore
 		1851
 		1432
 	]
-	SaleTitle Steam Autumn Sale 2024
-	SaleStart 2024-11-27 17:55:00
-	SaleEnd 2024-12-04 18:05:00
+	SaleTitle Steam Winter Sale 2024
+	SaleStart 2024-12-19 17:55:00
+	SaleEnd 2025-01-02 18:05:00
 }
 ItemCrafting
 {
@@ -45,7 +54,15 @@ ItemCrafting
 	[
 		{
 			ItemDefId 19043
-			Materials 1000
+			Materials 750
+		}
+		{
+			ItemDefId 21077
+			Materials 25
+		}
+		{
+			ItemDefId 1447
+			Materials 400
 		}
 	]
 }
@@ -165,4 +182,4 @@ LinkFiltering
 ShouldAllowJoiningInternetServersWithoutGslt false
 ShouldServersWithoutMonetizationTagBeVisibleInInternetServerList true
 QueryPingWarningOffsetMs 50
-CraftingPromotionId 7
+CraftingPromotionId 8
