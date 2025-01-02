@@ -18,12 +18,6 @@ MainMenuWorkshop
 ItemStore
 {
 	PromotionId 5
-	NewItems
-	[
-		21073
-		1888
-		1894
-	]
 	FeaturedItems
 	[
 		21073
@@ -44,9 +38,6 @@ ItemStore
 		1851
 		1432
 	]
-	SaleTitle Steam Winter Sale 2024
-	SaleStart 2024-12-19 17:55:00
-	SaleEnd 2025-01-02 18:05:00
 }
 ItemCrafting
 {
@@ -182,4 +173,3 @@ LinkFiltering
 ShouldAllowJoiningInternetServersWithoutGslt false
 ShouldServersWithoutMonetizationTagBeVisibleInInternetServerList true
 QueryPingWarningOffsetMs 50
-CraftingPromotionId 8
