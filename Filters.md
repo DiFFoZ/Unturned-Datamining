@@ -3,6 +3,7 @@
 ## IPv4 filters
 | Address         | BanFlags                     |
 | --------------- | ---------------------------- |
+| 156.236.84.205  | QueryPingWarning             |
 | 194.147.90.86   | HiddenFromInternetServerList |
 | 37.230.210.234  | HiddenFromInternetServerList |
 | 195.140.147.193 | HiddenFromInternetServerList |
