@@ -12,33 +12,15 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: linux-client-preview
 
     - name: Checkout tools branch
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: Unturned-Datamining/datamining-tool
         path: tools
-
-    - name: Cache Unturned
-      uses: actions/cache@v3
-      with:
-        path: |
-          *.blob
-          *.hierarchy
-          *.png
-          *.jpg
-          *.masterbundle
-          *.splatmap
-          *.heightmap
-          *.unity3d
-          Unturned_Data
-          Extras
-          MonoBleedingEdge
-          BattlEye
-        key: linux-unturned
 
     - name: Setup SteamCMD
       id: setup-steamcmd
@@ -47,9 +29,9 @@ jobs:
     - name: Update app
       run: steamcmd +force_install_dir $GITHUB_WORKSPACE +login ${{ secrets.STEAM_USERNAME }} ${{ secrets.STEAM_PASSWORD }} +app_update 304930 -beta preview -validate +quit
 
-    - uses: actions/setup-dotnet@v3
+    - uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '7.0.x'
+        dotnet-version: '8.0.x'
 
     - name: Install dependencies
       run: dotnet restore tools/UnturnedDatamining/
