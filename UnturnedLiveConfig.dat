@@ -1,14 +1,14 @@
 MainMenuAlert
 {
-	Id 63
-	Header Community Event: Sign up for UCL Winter Cup 25
-	Body From the organizers: "The Winter Cup is UCL's first event and is meant to show off what PeekSeek.net is capable off. It will be a 2v2 tournament (max 100 players) played out in an elimination bracket.
+	Id 64
+	Header LIVE: UCL Winter Cup 2025
+	Body From the organizers: "The UCL Winter Cup is THE Unturned event of 2025! With multiple prizes and the start of a brand new Competitive-oriented network."
 	Color #ff0000
-	Link https://discord.gg/8ktZn45TXe
+	Link https://peekseek.net/ucl/
 	IconURL https://peekseek.net/public/img/logo.png/
 	UseTimeWindow true
-	StartTime 2025-01-09
-	EndTime 2025-01-16
+	StartTime 2025-01-25 19:00:00
+	EndTime 2025-01-25 22:00:00
 }
 MainMenuWorkshop
 {
@@ -181,3 +181,4 @@ LinkFiltering
 ShouldAllowJoiningInternetServersWithoutGslt false
 ShouldServersWithoutMonetizationTagBeVisibleInInternetServerList true
 QueryPingWarningOffsetMs 50
+PingMismatchWarningThresholdMs 50
