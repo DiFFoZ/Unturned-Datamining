@@ -18,7 +18,6 @@
 | 91.197.96.0/22  | HiddenFromAllServerLists     |
 | 89.111.168.0/21 | HiddenFromAllServerLists     |
 | 46.174.51.182   | HiddenFromInternetServerList |
-| 149.56.27.203   | HiddenFromInternetServerList |
 
 ## Name filters
 | Regex                                                                                 | BanFlags                          |
@@ -41,7 +40,6 @@
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
 | (?i)(KURSK)                                                                           | HiddenFromInternetServerList      |
 | (?i)(ATOWS)                                                                           | HiddenFromInternetServerList      |
-| (?i)(Horizon.*Life RP)                                                                | HiddenFromInternetServerList      |
 
 ## Description filters
 | Regex | BanFlags |
@@ -56,7 +54,6 @@
 | (?i)(https://i.imgur.com/7pqS8L7.png)             | ![https://i.imgur.com/7pqS8L7.png](https://i.imgur.com/7pqS8L7.png)                                 | HiddenFromAllServerLists     |
 | (?i)(https://imgur.com/Bzo2gJY.png)               | ![https://imgur.com/Bzo2gJY.png](https://imgur.com/Bzo2gJY.png)                                     | HiddenFromInternetServerList |
 | (?i)(https://imgur.com/B3uiuY6)                   | ![https://imgur.com/B3uiuY6](https://imgur.com/B3uiuY6)                                             | HiddenFromInternetServerList |
-| (https://i.imgur.com/cKWpcnO.png)                 | ![https://i.imgur.com/cKWpcnO.png](https://i.imgur.com/cKWpcnO.png)                                 | HiddenFromInternetServerList |
 
 ## SteamId filters
 | SteamId           | BanFlags                     |
@@ -81,4 +78,3 @@
 | 85568392931735316 | HiddenFromInternetServerList |
 | 85568392932636661 | HiddenFromInternetServerList |
 | 85568392933086384 | HiddenFromInternetServerList |
-| 85568392925961914 | HiddenFromInternetServerList |
