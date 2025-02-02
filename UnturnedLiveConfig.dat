@@ -1,14 +1,14 @@
 MainMenuAlert
 {
-	Id 64
-	Header LIVE: UCL Winter Cup 2025
-	Body From the organizers: "The UCL Winter Cup is THE Unturned event of 2025! With multiple prizes and the start of a brand new Competitive-oriented network."
-	Color #ff0000
-	Link https://peekseek.net/ucl/
-	IconURL https://peekseek.net/public/img/logo.png/
+	Id 65
+	Header MapMania!
+	Body From the organizers: "We are calling all map makers to be a part of this year's Map Mania. Click for more info."
+	Color #f3bb43
+	Link https://forum.smartlydressedgames.com/t/mapmania-2025/25789
+	IconURL https://cdn.smartlydressedgames.com/Images/LOGO_MM.png
 	UseTimeWindow true
-	StartTime 2025-01-25 19:00:00
-	EndTime 2025-01-25 22:00:00
+	StartTime 2025-02-01 19:00:00
+	EndTime 2025-02-09 19:00:00
 }
 MainMenuWorkshop
 {
