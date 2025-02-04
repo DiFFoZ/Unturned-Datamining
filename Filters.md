@@ -38,22 +38,20 @@
 | (?i)(Беbриks)                                                                         | HiddenFromAllServerLists          |
 | (Бeбpиks)                                                                             | HiddenFromAllServerLists          |
 | (?i)(MegaNine)                                                                        | HiddenFromInternetServerList      |
-| (?i)(KURSK)                                                                           | HiddenFromInternetServerList      |
-| (?i)(ATOWS)                                                                           | HiddenFromInternetServerList      |
 
 ## Description filters
 | Regex | BanFlags |
 | ----- | -------- |
 
 ## Thumbnail filters
-| Regex                                             | IconPreview                                                                                         | BanFlags                     |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------- |
-| (https://r.resimlink.com/GXZ0gP2.jpg)             | ![https://r.resimlink.com/GXZ0gP2.jpg](https://r.resimlink.com/GXZ0gP2.jpg)                         | HiddenFromInternetServerList |
-| (https://gspics.org/images/2022/10/12/0WIOTm.png) | ![https://gspics.org/images/2022/10/12/0WIOTm.png](https://gspics.org/images/2022/10/12/0WIOTm.png) | HiddenFromInternetServerList |
-| (?i)(https://i.imgur.com/xNql2Ov.png)             | ![https://i.imgur.com/xNql2Ov.png](https://i.imgur.com/xNql2Ov.png)                                 | HiddenFromAllServerLists     |
-| (?i)(https://i.imgur.com/7pqS8L7.png)             | ![https://i.imgur.com/7pqS8L7.png](https://i.imgur.com/7pqS8L7.png)                                 | HiddenFromAllServerLists     |
-| (?i)(https://imgur.com/Bzo2gJY.png)               | ![https://imgur.com/Bzo2gJY.png](https://imgur.com/Bzo2gJY.png)                                     | HiddenFromInternetServerList |
-| (?i)(https://imgur.com/B3uiuY6)                   | ![https://imgur.com/B3uiuY6](https://imgur.com/B3uiuY6)                                             | HiddenFromInternetServerList |
+| Regex                                                   | IconPreview                                                                                             | BanFlags                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| (https://r.resimlink.com/GXZ0gP2.jpg)                   | ![https://r.resimlink.com/GXZ0gP2.jpg](https://r.resimlink.com/GXZ0gP2.jpg)                             | HiddenFromInternetServerList |
+| (https://gspics.org/images/2022/10/12/0WIOTm.png)       | ![https://gspics.org/images/2022/10/12/0WIOTm.png](https://gspics.org/images/2022/10/12/0WIOTm.png)     | HiddenFromInternetServerList |
+| (?i)(https://i.imgur.com/xNql2Ov.png)                   | ![https://i.imgur.com/xNql2Ov.png](https://i.imgur.com/xNql2Ov.png)                                     | HiddenFromAllServerLists     |
+| (?i)(https://i.imgur.com/7pqS8L7.png)                   | ![https://i.imgur.com/7pqS8L7.png](https://i.imgur.com/7pqS8L7.png)                                     | HiddenFromAllServerLists     |
+| (?i)(https://imgur.com/Bzo2gJY.png)                     | ![https://imgur.com/Bzo2gJY.png](https://imgur.com/Bzo2gJY.png)                                         | HiddenFromInternetServerList |
+| (?i)(https://pic.imge.cc/2024/07/22/669e09cfbf24f.jpeg) | ![https://pic.imge.cc/2024/07/22/669e09cfbf24f.jpeg](https://pic.imge.cc/2024/07/22/669e09cfbf24f.jpeg) | HiddenFromInternetServerList |
 
 ## SteamId filters
 | SteamId           | BanFlags                     |
@@ -76,5 +74,5 @@
 | 85568392932486552 | HiddenFromInternetServerList |
 | 85568392932492857 | HiddenFromInternetServerList |
 | 85568392931735316 | HiddenFromInternetServerList |
-| 85568392932636661 | HiddenFromInternetServerList |
 | 85568392933086384 | HiddenFromInternetServerList |
+| 85568392932085893 | HiddenFromInternetServerList |
